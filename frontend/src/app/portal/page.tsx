@@ -95,12 +95,17 @@ function PortalContent() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-0 sm:p-4">
-      {/* CRM ga qaytish navigatsiyasi */}
+      {/* CRM ga qaytish va Alohida Mini Ilova navigatsiyasi */}
       <div className="w-full max-w-md flex items-center justify-between px-3 py-2 mb-1 text-xs">
         <Link href="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl font-medium">
           ← CRM Boshqaruviga qaytish
         </Link>
-        <span className="text-[11px] text-slate-500 font-medium">O'quvchi & Ota-ona ko'rinishi</span>
+        <Link
+          href={`/app${selectedStudentId ? `?studentId=${selectedStudentId}` : ''}`}
+          className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition bg-blue-950/60 border border-blue-800 px-3 py-1.5 rounded-xl font-bold"
+        >
+          <span>📲 Alohida Mini Ilova (/app)</span>
+        </Link>
       </div>
 
       {/* Mobil Ilova Ramkasi */}

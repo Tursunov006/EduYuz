@@ -1,0 +1,21 @@
+{
+  "name": "EduYuz Student App",
+  "short_name": "EduYuz",
+  "description": "EduYuz O'quvchi va Ota-onalar uchun Mobil Mini Ilova",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0b1329",
+  "icons": [
+    {
+      "src": "/eduyuz-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/eduyuz-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

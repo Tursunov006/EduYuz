@@ -38,8 +38,8 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
 
-  // Agar login, portal yoki verify sahifasida bo'lsa sidebar ko'rinmasin
-  if (pathname === '/login' || pathname === '/portal' || pathname.startsWith('/verify')) return null;
+  // Agar login, portal, app, games/play yoki verify sahifasida bo'lsa sidebar ko'rinmasin
+  if (pathname === '/login' || pathname === '/portal' || pathname.startsWith('/app') || pathname.startsWith('/games/play') || pathname.startsWith('/verify')) return null;
 
   return (
     <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col min-h-screen border-r border-slate-800 shrink-0">

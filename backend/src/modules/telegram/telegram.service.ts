@@ -206,8 +206,8 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
               inline_keyboard: [
                 [
                   {
-                    text: '📱 Mening Kabinetim (EduYuz WebApp)',
-                    web_app: { url: `${webAppUrl}/portal?studentId=${student.id}` },
+                    text: '📱 EduYuz Mini Ilovasi (Ochish)',
+                    web_app: { url: `${webAppUrl}/app?studentId=${student.id}` },
                   },
                 ],
               ],
@@ -229,8 +229,8 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
             inline_keyboard: [
               [
                 {
-                  text: '📱 EduYuz Portalini Ochish',
-                  web_app: { url: `${webAppUrl}/portal` },
+                  text: '📱 EduYuz Mini Ilovani Ochish',
+                  web_app: { url: `${webAppUrl}/app` },
                 },
               ],
             ],
