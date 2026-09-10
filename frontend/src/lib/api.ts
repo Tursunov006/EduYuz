@@ -21,3 +21,29 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
   return res.json();
 }
+
+export const api = {
+  get: async (endpoint: string) => {
+    const data = await apiFetch(endpoint, { method: 'GET' });
+    return { data };
+  },
+  post: async (endpoint: string, body?: any) => {
+    const data = await apiFetch(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  },
+  patch: async (endpoint: string, body?: any) => {
+    const data = await apiFetch(endpoint, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return { data };
+  },
+  delete: async (endpoint: string) => {
+    const data = await apiFetch(endpoint, { method: 'DELETE' });
+    return { data };
+  },
+};
+

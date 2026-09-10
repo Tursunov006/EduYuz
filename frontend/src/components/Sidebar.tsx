@@ -14,7 +14,8 @@ import {
   Award,
   Smartphone,
   UserCheck,
-  Wallet
+  Wallet,
+  Gamepad2
 } from 'lucide-react';
 
 import Logo from './Logo';
@@ -28,6 +29,7 @@ const menuItems = [
   { name: 'To‘lovlar', href: '/payments', icon: CreditCard },
   { name: 'Moliya & Chiqim', href: '/expenses', icon: Wallet },
   { name: 'LMS Darslar', href: '/lms', icon: GraduationCap },
+  { name: 'Mavzuli O‘yinlar', href: '/games', icon: Gamepad2 },
   { name: 'Reyting & Coins', href: '/leaderboard', icon: Trophy },
   { name: 'Sertifikatlar', href: '/certificates', icon: Award },
   { name: 'O‘quvchi Portali', href: '/portal', icon: Smartphone },

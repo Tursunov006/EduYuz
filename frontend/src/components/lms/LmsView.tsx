@@ -15,8 +15,12 @@ import {
   ExternalLink,
   Award,
   Send,
-  MessageSquare
+  MessageSquare,
+  Sparkles,
+  Gamepad2
 } from 'lucide-react';
+import Link from 'next/link';
+import AiTeacherAssistantModal from '@/components/ai/AiTeacherAssistantModal';
 
 interface LmsViewProps {
   groupId: string;
@@ -40,6 +44,36 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedHomeworkForReview, setSelectedHomeworkForReview] = useState<any>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
+
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+
+  const handleApplyAiLesson = (aiData: any) => {
+    let combinedContent = `${aiData.summary || ''}\n\n`;
+    if (aiData.sections) {
+      aiData.sections.forEach((s: any) => {
+        combinedContent += `### ${s.title}\n${s.content}\n\n`;
+      });
+    }
+
+    setLessonForm({
+      title: aiData.topic || 'Yangi Dars',
+      content: combinedContent.trim(),
+      videoUrl: '',
+      fileUrl: '',
+      orderIndex: lessons.length + 1,
+    });
+
+    if (aiData.homework) {
+      setHwForm({
+        title: aiData.homework.title || 'Uyga vazifa',
+        description: aiData.homework.description || '',
+        deadline: '',
+        maxScore: aiData.homework.maxScore || 100,
+      });
+    }
+
+    setIsAddLessonOpen(true);
+  };
 
   // Dars qo'shish formasi
   const [lessonForm, setLessonForm] = useState({
@@ -249,6 +283,12 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setIsAiModalOpen(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-lg shadow-blue-600/20"
+          >
+            <Sparkles size={16} /> AI Dars & Test Generatori
+          </button>
+          <button
             onClick={() => {
               setLessonForm({ ...lessonForm, orderIndex: lessons.length + 1 });
               setIsAddLessonOpen(true);
@@ -312,6 +352,15 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                   </div>
 
                   <div className="flex items-center gap-3">
+                    <Link
+                      href={`/games/play?topic=${encodeURIComponent(lesson.title)}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-600/20 transition"
+                      title="Ushbu dars bo'yicha interaktiv o'yin o'ynash"
+                    >
+                      <Gamepad2 size={14} />
+                      <span className="hidden sm:inline">Dars O‘yini</span>
+                    </Link>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -765,6 +814,14 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
           </div>
         </div>
       )}
+
+      {/* AI O'qituvchi Yordamchi Modali */}
+      <AiTeacherAssistantModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        defaultTopic={groupName ? `${groupName} bo'yicha yangi mavzu` : ''}
+        onApplyLesson={handleApplyAiLesson}
+      />
     </div>
   );
 }

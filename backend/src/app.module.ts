@@ -16,6 +16,8 @@ import { CertificatesModule } from './modules/certificates/certificates.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { SmsModule } from './modules/sms/sms.module';
+import { AiModule } from './modules/ai/ai.module';
+import { GamesModule } from './modules/games/games.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { SmsModule } from './modules/sms/sms.module';
     CertificatesModule,
     TeachersModule,
     ExpensesModule,
+    AiModule,
+    GamesModule,
     AuthModule,
     CentersModule,
     UsersModule,
