@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { AiService } from '../ai/ai.service';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -11,6 +12,7 @@ export class TelegramService implements OnModuleInit {
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
+    private aiService: AiService,
   ) {}
 
   onModuleInit() {
@@ -186,11 +188,48 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
     if (!msg) return;
 
     const chatId = msg.chat.id;
-    const text = msg.text || '';
-
+    const text = (msg.text || '').trim();
+    const contact = msg.contact;
     const webAppUrl = this.configService.get<string>('TELEGRAM_WEBAPP_URL') || '';
 
-    // Masalan: /start student_UUID yoki telefon raqami
+    // Qulay tezkor javob tugmalari (Reply Keyboard)
+    const quickReplyKeyboard = {
+      keyboard: [
+        [{ text: '📊 Farzandim Davomati' }, { text: '💰 To‘lov & Qarz' }],
+        [{ text: '👨‍🏫 Ustozi Haqida' }, { text: '🪙 Yutuq va Ballar' }],
+        [{ text: '🏫 Markaz Kurslari' }, { text: '📱 Mini Ilova (/app)' }],
+      ],
+      resize_keyboard: true,
+    };
+
+    // 1. Ota-ona telefon raqamini ulashganda
+    if (contact && contact.phone_number) {
+      const cleanPhone = contact.phone_number.replace(/\D/g, '');
+      const student = await this.prisma.student.findFirst({
+        where: {
+          OR: [
+            { phone: { contains: cleanPhone.slice(-9) } },
+            { parentPhone: { contains: cleanPhone.slice(-9) } },
+          ],
+        },
+      });
+
+      if (student) {
+        await this.prisma.student.update({
+          where: { id: student.id },
+          data: { parentChatId: BigInt(chatId) },
+        });
+
+        await this.sendMessage(
+          chatId,
+          `✅ <b>Tabriklaymiz! Siz muvaffaqiyatli ulandingiz!</b>\n\nFarzandingiz: <b>${student.fullName}</b>\n\nEndi farzandingizning davomati, to‘lovlari, baholari yoki o‘quv markazimiz bo‘yicha istalgan savolingizni shu yerga yozishingiz mumkin! 🚀`,
+          quickReplyKeyboard,
+        );
+        return;
+      }
+    }
+
+    // 2. /start student_UUID (O'quvchi orqali maxsus ulanish)
     if (text.startsWith('/start student_')) {
       const studentId = text.replace('/start student_', '').trim();
       const student = await this.prisma.student.findUnique({ where: { id: studentId } });
@@ -201,46 +240,128 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
           data: { parentChatId: BigInt(chatId) },
         });
 
-        const replyMarkup = webAppUrl.startsWith('https://')
-          ? {
-              inline_keyboard: [
-                [
-                  {
-                    text: '📱 EduYuz Mini Ilovasi (Ochish)',
-                    web_app: { url: `${webAppUrl}/app?studentId=${student.id}` },
-                  },
-                ],
-              ],
-            }
-          : undefined;
-
         await this.sendMessage(
           chatId,
-          `✅ <b>Assalomu alaykum!</b>\nSiz muvaffaqiyatli tarzda <b>${student.fullName}</b> o'quvchisining ota-onasi sifatida ro'yxatdan o'tdingiz.\n\nEndi farzandingizning davomati, baholari va to'lovlari haqidagi barcha xabarnomalar to'g'ridan-to'g'ri shu yerga yuboriladi.`,
-          replyMarkup,
+          `✅ <b>Assalomu alaykum!</b>\nSiz muvaffaqiyatli tarzda <b>${student.fullName}</b> o'quvchisining ota-onasi sifatida ro'yxatdan o'tdingiz.\n\nFarzandingizning davomati, baholari va to'lovlari haqidagi barcha xabarlar shu yerga yetkaziladi.`,
+          quickReplyKeyboard,
         );
         return;
       }
     }
 
+    // 3. Standart /start komandasi
     if (text === '/start') {
-      const replyMarkup = webAppUrl.startsWith('https://')
+      await this.sendMessage(
+        chatId,
+        `👋 <b>Assalomu alaykum, hurmatli ota-ona!</b>\n\nBu <b>EduYuz AI</b> rasmiy ota-onalar yordamchisi botidir.\n\nMen orqali farzandingizning:\n• 📊 Davomati va yo‘qlamasi\n• 💰 Oylik to‘lov va qarzi\n• 🪙 To‘plagan EduCoin tangalari\n• 👨‍🏫 Ustozi bilan bog‘lanish\n• 🏫 O‘quv markazimiz kurslari\nhaqida istalgan vaqtda ma'lumot olishingiz mumkin!\n\nPastdagi tugmalardan foydalaning yoki savolingizni to‘g‘ridan-to‘g‘ri yozing:`,
+        quickReplyKeyboard,
+      );
+      return;
+    }
+
+    // 4. Mini Ilova (/app) so'ralganda
+    if (text.includes('Mini Ilova') || text === '/app') {
+      const inlineButtons = webAppUrl.startsWith('https://')
         ? {
             inline_keyboard: [
               [
                 {
-                  text: '📱 EduYuz Mini Ilovani Ochish',
+                  text: '🚀 EduYuz Mini Ilovasini Ochish',
                   web_app: { url: `${webAppUrl}/app` },
                 },
               ],
             ],
           }
-        : undefined;
+        : {
+            inline_keyboard: [
+              [
+                {
+                  text: '🌐 EduYuz Portalini Ochish',
+                  url: 'http://localhost:3001/app',
+                },
+              ],
+            ],
+          };
 
       await this.sendMessage(
         chatId,
-        `👋 <b>Assalomu alaykum!</b>\nBu <b>EduYuz</b> ta'lim platformasining rasmiy xabardor qilish boti.\n\nFarzandingizning darsga kelgan/kelmaganligi va to'lov hisobotlarini qabul qilish uchun o'quv markazidan taqdim etilgan havoladan kiring yoki ma'muriyatga murojaat qiling.`,
-        replyMarkup,
+        `📱 <b>EduYuz Mobil Mini Ilovasi:</b>\n\nFarzandingiz video darslarni ko‘rishi, interaktiv o‘yinlar o‘ynashi, uyga vazifalarni topshirishi va AI Repetitor bilan suhbatlashishi uchun quyidagi tugmani bosing:`,
+        inlineButtons,
+      );
+      return;
+    }
+
+    // 5. Ota-onadan kelgan har qanday erkin savol yoki tugma bosilishi (AI tahlili)
+    try {
+      // 5.1. Chat ID ga bog'langan talabani topish
+      let student = await this.prisma.student.findFirst({
+        where: { parentChatId: BigInt(chatId) },
+        include: {
+          groups: {
+            include: {
+              group: {
+                include: {
+                  course: true,
+                  teacher: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Agar hali ulanmagan bo'lsa, sinov uchun birinchi faol talabani kontekstga olish
+      if (!student) {
+        student = await this.prisma.student.findFirst({
+          where: { status: 'active' },
+          include: {
+            groups: {
+              include: {
+                group: {
+                  include: {
+                    course: true,
+                    teacher: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      // 5.2. Davomat tarixi
+      const attendances = student
+        ? await this.prisma.attendance.findMany({
+            where: { studentId: student.id },
+            orderBy: { date: 'desc' },
+            take: 10,
+          })
+        : [];
+
+      // 5.3. Kurslar ro'yxati
+      const allCourses = await this.prisma.course.findMany({
+        take: 6,
+      });
+
+      const groupInfo = student?.groups?.[0]?.group;
+      const teacher = groupInfo?.teacher;
+
+      // 5.4. EduYuz AI orqali javob tayyorlash
+      const aiResponse = await this.aiService.chatParentBot(text, {
+        student,
+        groupInfo,
+        teacher,
+        attendances,
+        allCourses,
+      });
+
+      await this.sendMessage(chatId, aiResponse, quickReplyKeyboard);
+    } catch (err: any) {
+      this.logger.error(`AI muloqot xatosi: ${err.message}`);
+      await this.sendMessage(
+        chatId,
+        `Kechirasiz, savolingizni tushunishda xatolik yuz berdi. Iltimos qayta yozib ko'ring yoki ma'muriyat bilan bog'laning.`,
+        quickReplyKeyboard,
       );
     }
   }
