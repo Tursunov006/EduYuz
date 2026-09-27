@@ -1,5 +1,5 @@
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -43,32 +43,32 @@ enum ExpenseCategory {
 }
 
 model Center {
-  id        String    @id @default(uuid()) @db.VarChar(36)
-  name      String    @db.VarChar(150)
-  phone     String    @db.VarChar(20)
-  createdAt DateTime  @default(now()) @map("created_at")
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  name      String   @db.VarChar(150)
+  phone     String   @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
 
-  users     User[]
-  courses   Course[]
-  groups    Group[]
-  students  Student[]
-  expenses  Expense[]
+  users    User[]
+  courses  Course[]
+  groups   Group[]
+  students Student[]
+  expenses Expense[]
 
   @@map("centers")
 }
 
 model User {
-  id           String    @id @default(uuid()) @db.VarChar(36)
-  centerId     String    @map("center_id") @db.VarChar(36)
-  fullName     String    @map("full_name") @db.VarChar(100)
-  phone        String    @unique @db.VarChar(20)
-  passwordHash String    @map("password_hash") @db.VarChar(255)
-  role         RoleType  @default(teacher)
-  specialty    String?   @db.VarChar(100)
-  salaryType   String    @default("percentage") @map("salary_type") @db.VarChar(20)
-  salaryRate   Decimal   @default(50.0) @map("salary_rate") @db.Decimal(12, 2)
-  isActive     Boolean   @default(true) @map("is_active")
-  createdAt    DateTime  @default(now()) @map("created_at")
+  id           String   @id @default(uuid()) @db.VarChar(36)
+  centerId     String   @map("center_id") @db.VarChar(36)
+  fullName     String   @map("full_name") @db.VarChar(100)
+  phone        String   @unique @db.VarChar(20)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  role         RoleType @default(teacher)
+  specialty    String?  @db.VarChar(100)
+  salaryType   String   @default("percentage") @map("salary_type") @db.VarChar(20)
+  salaryRate   Decimal  @default(50.0) @map("salary_rate") @db.Decimal(12, 2)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   center         Center          @relation(fields: [centerId], references: [id], onDelete: Cascade)
   groups         Group[]
@@ -86,8 +86,8 @@ model Course {
   price     Decimal  @default(0) @db.Decimal(12, 2)
   createdAt DateTime @default(now()) @map("created_at")
 
-  center    Center   @relation(fields: [centerId], references: [id], onDelete: Cascade)
-  groups    Group[]
+  center Center  @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  groups Group[]
 
   @@map("courses")
 }
@@ -100,7 +100,7 @@ model Group {
   name      String   @db.VarChar(100)
   days      Json
   startTime String   @map("start_time") @db.VarChar(5) // HH:mm format
-  endTime   String   @map("end_time") @db.VarChar(5)   // HH:mm format
+  endTime   String   @map("end_time") @db.VarChar(5) // HH:mm format
   createdAt DateTime @default(now()) @map("created_at")
 
   center      Center         @relation(fields: [centerId], references: [id], onDelete: Cascade)
@@ -121,11 +121,11 @@ model Student {
   phone        String?       @db.VarChar(20)
   parentPhone  String        @map("parent_phone") @db.VarChar(20)
   parentChatId BigInt?       @map("parent_chat_id")
-  balance          Decimal              @default(0) @db.Decimal(12, 2)
-  coins            Int                  @default(0)
-  points           Int                  @default(0)
-  status           StudentStatus        @default(active)
-  createdAt        DateTime             @default(now()) @map("created_at")
+  balance      Decimal       @default(0) @db.Decimal(12, 2)
+  coins        Int           @default(0)
+  points       Int           @default(0)
+  status       StudentStatus @default(active)
+  createdAt    DateTime      @default(now()) @map("created_at")
 
   center           Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
   groups           GroupStudent[]
@@ -144,8 +144,8 @@ model GroupStudent {
   studentId String   @map("student_id") @db.VarChar(36)
   joinedAt  DateTime @default(now()) @map("joined_at") @db.Date
 
-  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@id([groupId, studentId])
   @@map("group_students")
@@ -160,9 +160,9 @@ model Attendance {
   markedBy  String?          @map("marked_by") @db.VarChar(36)
   createdAt DateTime         @default(now()) @map("created_at")
 
-  group     Group            @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  student   Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  marker    User?            @relation(fields: [markedBy], references: [id], onDelete: SetNull)
+  group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  marker  User?   @relation(fields: [markedBy], references: [id], onDelete: SetNull)
 
   @@unique([groupId, studentId, date])
   @@index([groupId, date])
@@ -177,7 +177,7 @@ model Payment {
   paidAt        DateTime    @default(now()) @map("paid_at")
   comment       String?     @db.Text
 
-  student       Student     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Restrict)
 
   @@index([studentId])
   @@map("payments")
@@ -190,31 +190,31 @@ enum SubmissionStatus {
 }
 
 model Lesson {
-  id         String     @id @default(uuid()) @db.VarChar(36)
-  groupId    String     @map("group_id") @db.VarChar(36)
-  title      String     @db.VarChar(150)
-  content    String?    @db.Text
-  videoUrl   String?    @map("video_url") @db.VarChar(255)
-  fileUrl    String?    @map("file_url") @db.VarChar(255)
-  orderIndex Int        @default(1) @map("order_index")
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  groupId    String   @map("group_id") @db.VarChar(36)
+  title      String   @db.VarChar(150)
+  content    String?  @db.Text
+  videoUrl   String?  @map("video_url") @db.VarChar(255)
+  fileUrl    String?  @map("file_url") @db.VarChar(255)
+  orderIndex Int      @default(1) @map("order_index")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
 
-  group      Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  homeworks  Homework[]
+  group     Group      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  homeworks Homework[]
 
   @@index([groupId])
   @@map("lessons")
 }
 
 model Homework {
-  id          String               @id @default(uuid()) @db.VarChar(36)
-  lessonId    String               @map("lesson_id") @db.VarChar(36)
-  title       String               @db.VarChar(150)
-  description String               @db.Text
+  id          String    @id @default(uuid()) @db.VarChar(36)
+  lessonId    String    @map("lesson_id") @db.VarChar(36)
+  title       String    @db.VarChar(150)
+  description String    @db.Text
   deadline    DateTime?
-  maxScore    Int                  @default(100) @map("max_score")
-  createdAt   DateTime             @default(now()) @map("created_at")
+  maxScore    Int       @default(100) @map("max_score")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   lesson      Lesson               @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   submissions HomeworkSubmission[]
@@ -235,8 +235,8 @@ model HomeworkSubmission {
   submittedAt DateTime         @default(now()) @map("submitted_at")
   reviewedAt  DateTime?        @map("reviewed_at")
 
-  homework    Homework         @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
-  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  student  Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([homeworkId, studentId])
   @@index([homeworkId])
@@ -251,7 +251,7 @@ model CoinTransaction {
   reason    String   @db.VarChar(150)
   createdAt DateTime @default(now()) @map("created_at")
 
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@map("coin_transactions")
@@ -265,7 +265,7 @@ model Certificate {
   grade             String   @default("A+") @db.VarChar(10)
   issuedAt          DateTime @default(now()) @map("issued_at")
 
-  student           Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@map("certificates")
@@ -280,7 +280,7 @@ model SalaryPayment {
   paidAt        DateTime    @default(now()) @map("paid_at")
   comment       String?     @db.Text
 
-  teacher       User        @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  teacher User @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
   @@index([teacherId])
   @@map("salary_payments")
@@ -296,7 +296,7 @@ model Expense {
   paidAt        DateTime        @default(now()) @map("paid_at")
   comment       String?         @db.Text
 
-  center        Center          @relation(fields: [centerId], references: [id], onDelete: Cascade)
+  center Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
 
   @@index([centerId])
   @@index([category])
@@ -304,11 +304,11 @@ model Expense {
 }
 
 model SmsLog {
-  id        String   @id @default(uuid()) @db.VarChar(36)
-  phone     String   @db.VarChar(20)
-  message   String   @db.Text
-  status    String   @default("sent") @db.VarChar(20)
-  sentAt    DateTime @default(now()) @map("sent_at")
+  id      String   @id @default(uuid()) @db.VarChar(36)
+  phone   String   @db.VarChar(20)
+  message String   @db.Text
+  status  String   @default("sent") @db.VarChar(20)
+  sentAt  DateTime @default(now()) @map("sent_at")
 
   @@map("sms_logs")
 }
