@@ -1,0 +1,75 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { TelegramService } from '../telegram/telegram.service';
+import { SmsService } from '../sms/sms.service';
+export declare class PaymentsService {
+    private prisma;
+    private telegramService;
+    private smsService;
+    private readonly logger;
+    constructor(prisma: PrismaService, telegramService: TelegramService, smsService: SmsService);
+    create(dto: CreatePaymentDto): Promise<{
+        student: {
+            id: string;
+            phone: string | null;
+            createdAt: Date;
+            centerId: string;
+            fullName: string;
+            parentPhone: string;
+            parentChatId: bigint | null;
+            balance: import("@prisma/client/runtime/library").Decimal;
+            coins: number;
+            points: number;
+            status: import(".prisma/client").$Enums.StudentStatus;
+        };
+    } & {
+        id: string;
+        studentId: string;
+        paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
+    }>;
+    chargeMonthly(groupId?: string): Promise<{
+        success: boolean;
+        count: number;
+        totalCharged: number;
+        message: string;
+    }>;
+    findAll(studentId?: string): Promise<({
+        student: {
+            id: string;
+            phone: string;
+            fullName: string;
+        };
+    } & {
+        id: string;
+        studentId: string;
+        paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
+    })[]>;
+    findOne(id: string): Promise<{
+        student: {
+            id: string;
+            phone: string | null;
+            createdAt: Date;
+            centerId: string;
+            fullName: string;
+            parentPhone: string;
+            parentChatId: bigint | null;
+            balance: import("@prisma/client/runtime/library").Decimal;
+            coins: number;
+            points: number;
+            status: import(".prisma/client").$Enums.StudentStatus;
+        };
+    } & {
+        id: string;
+        studentId: string;
+        paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
+    }>;
+}
