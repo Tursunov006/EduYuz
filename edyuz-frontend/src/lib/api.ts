@@ -1,4 +1,21 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+import axios from 'axios';
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+
+axios.defaults.baseURL = API_URL;
+
+if (typeof window !== 'undefined') {
+  axios.interceptors.request.use((config) => {
+    if (config.url && config.url.includes('http://localhost:3000/api/v1')) {
+      config.url = config.url.replace('http://localhost:3000/api/v1', API_URL);
+    }
+    const token = localStorage.getItem('token');
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+}
 
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

@@ -1,11 +1,28 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
 import { SidebarProvider } from '@/lib/context/SidebarContext';
+
+// Global API router: Har qanday localhost:3000 so'rovlarini avtomatik jonli serverga yo'naltirish
+const LIVE_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+
+if (typeof window !== 'undefined') {
+  axios.interceptors.request.use((config) => {
+    if (config.url && config.url.includes('http://localhost:3000/api/v1')) {
+      config.url = config.url.replace('http://localhost:3000/api/v1', LIVE_API_URL);
+    }
+    const token = localStorage.getItem('token');
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+}
 
 function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

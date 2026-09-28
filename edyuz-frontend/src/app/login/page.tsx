@@ -17,7 +17,8 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch('http://localhost:3000/api/v1/auth/login', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+      const res = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, password }),
