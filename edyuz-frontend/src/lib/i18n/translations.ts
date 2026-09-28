@@ -6,6 +6,7 @@ export const translations: Record<Language, Record<string, string>> = {
   uz: {
     // Navigatsiya
     'nav.dashboard': 'Dashboard',
+    'nav.announcements': 'E‘lonlar',
     'nav.students': 'O‘quvchilar',
     'nav.groups': 'Guruhlar',
     'nav.teachers': 'O‘qituvchilar',
@@ -75,6 +76,7 @@ export const translations: Record<Language, Record<string, string>> = {
   ru: {
     // Navigatsiya
     'nav.dashboard': 'Панель управления',
+    'nav.announcements': 'Объявления',
     'nav.students': 'Студенты',
     'nav.groups': 'Группы',
     'nav.teachers': 'Преподаватели',
@@ -144,6 +146,7 @@ export const translations: Record<Language, Record<string, string>> = {
   en: {
     // Navigatsiya
     'nav.dashboard': 'Dashboard',
+    'nav.announcements': 'Announcements',
     'nav.students': 'Students',
     'nav.groups': 'Groups',
     'nav.teachers': 'Teachers',

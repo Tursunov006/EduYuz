@@ -15,7 +15,8 @@ import {
   Smartphone,
   UserCheck,
   Wallet,
-  Gamepad2
+  Gamepad2,
+  Megaphone
 } from 'lucide-react';
 
 import Logo from './Logo';
@@ -23,6 +24,7 @@ import { useTranslation } from '@/lib/i18n/LanguageContext';
 
 const menuItems = [
   { key: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { key: 'announcements', name: 'E‘lonlar', href: '/announcements', icon: Megaphone },
   { key: 'students', name: 'O‘quvchilar', href: '/students', icon: Users },
   { key: 'groups', name: 'Guruhlar', href: '/groups', icon: BookOpen },
   { key: 'teachers', name: 'O‘qituvchilar', href: '/teachers', icon: UserCheck },
