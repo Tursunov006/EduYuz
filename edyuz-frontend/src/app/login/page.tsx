@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, Phone, Sparkles } from 'lucide-react';
+import { Lock, User, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [phone, setPhone] = useState('+998901234567');
+  const [login, setLogin] = useState('admin');
   const [password, setPassword] = useState('admin123');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -26,18 +26,29 @@ export default function LoginPage() {
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+
+      // Login kiritilganda (masalan, admin yoki superadmin), tizimdagi mos hisobga yo'naltirish
+      let accountLogin = login.trim();
+      if (
+        accountLogin.toLowerCase() === 'admin' || 
+        accountLogin.toLowerCase() === 'superadmin' || 
+        accountLogin.toLowerCase() === 'admin123'
+      ) {
+        accountLogin = '+998901234567';
+      }
+
       const res = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          phone: phone.trim(), 
+          phone: accountLogin, 
           password: password.trim() 
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message || data.error || 'Telefon raqam yoki parol noto‘g‘ri');
+        throw new Error(data.message || data.error || 'Login yoki parol noto‘g‘ri');
       }
 
       localStorage.setItem('token', data.accessToken);
@@ -53,7 +64,7 @@ export default function LoginPage() {
   }
 
   function fillAdmin() {
-    setPhone('+998901234567');
+    setLogin('admin');
     setPassword('admin123');
     setError('');
   }
@@ -84,21 +95,23 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
+          {/* Login maydoni */}
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Telefon raqam</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">Login</label>
             <div className="relative">
-              <Phone className="absolute left-3.5 top-3 text-slate-500" size={18} />
+              <User className="absolute left-3.5 top-3 text-slate-500" size={18} />
               <input
                 required
                 type="text"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                value={login}
+                onChange={(e) => setLogin(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                placeholder="+998901234567"
+                placeholder="admin yoki login kiriting"
               />
             </div>
           </div>
 
+          {/* Parol maydoni */}
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">Parol</label>
             <div className="relative">
@@ -130,7 +143,7 @@ export default function LoginPage() {
             type="button"
             className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3.5 py-2 rounded-xl transition cursor-pointer"
           >
-            <Sparkles size={14} /> Demo Admin ma'lumotlarini to'ldirish
+            <Sparkles size={14} /> Demo Login ma'lumotlarini to'ldirish (admin / admin123)
           </button>
         </div>
       </div>
