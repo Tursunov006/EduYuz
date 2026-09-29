@@ -1,6 +1,7 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
@@ -26,15 +27,43 @@ if (typeof window !== 'undefined') {
 
 function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme } = useTheme();
   const isLight = theme === 'light';
 
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  // Login talab qilinmaydigan ochiq sahifalar
   const isExcluded = 
     pathname === '/login' || 
     pathname === '/portal' || 
     pathname.startsWith('/app') || 
     pathname.startsWith('/games/play') || 
     pathname.startsWith('/verify');
+
+  useEffect(() => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+    if (!isExcluded && !token) {
+      // 1. Agar foydalanuvchi tizimga kirmagan bo'lsa -> Zudlik bilan /login sahifasiga yo'naltirish
+      router.replace('/login');
+    } else if (pathname === '/login' && token) {
+      // 2. Agar foydalanuvchi allaqachon tizimga kirgan bo'lsa -> Boshqaruv Paneliga yo'naltirish
+      router.replace('/');
+    } else {
+      setIsAuthChecking(false);
+    }
+  }, [pathname, isExcluded, router]);
+
+  // Agar login tekshirilayotgan bo'lsa va login qilinmagan bo'lsa, xavfsiz yuklanish oynasi
+  if (isAuthChecking && !isExcluded) {
+    return (
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white gap-3">
+        <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+        <div className="text-xs text-slate-400 font-medium tracking-wide">EduYuz tizimiga ulanmoqda...</div>
+      </div>
+    );
+  }
 
   return (
     <>
