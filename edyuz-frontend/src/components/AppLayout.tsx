@@ -33,13 +33,14 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
 
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // Login talab qilinmaydigan ochiq sahifalar
+  // Standart CRM layout (sidebar va navbar) ko'rinmaydigan alohida sahifalar
   const isExcluded = 
     pathname === '/login' || 
     pathname === '/portal' || 
     pathname.startsWith('/app') || 
     pathname.startsWith('/games/play') || 
-    pathname.startsWith('/verify');
+    pathname.startsWith('/verify') ||
+    pathname.startsWith('/superadmin');
 
   useEffect(() => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;

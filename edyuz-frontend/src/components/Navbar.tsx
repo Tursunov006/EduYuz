@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Smartphone, Menu } from 'lucide-react';
+import { Smartphone, Menu, ShieldCheck } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
@@ -80,6 +80,16 @@ export default function Navbar() {
 
         {/* Bildirishnomalar Markazi */}
         <NotificationCenter />
+
+        {/* SuperAdmin Paneli (Faqat dasturchi / platforma egasi uchun) */}
+        <Link
+          href="/superadmin"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/30 text-purple-400 text-xs font-bold transition active:scale-95"
+          title="SuperAdmin SaaS Boshqaruvi"
+        >
+          <ShieldCheck className="w-3.5 h-3.5" />
+          <span className="hidden xl:inline">SuperAdmin</span>
+        </Link>
 
         {/* Admin Profil badge */}
         <div className={`flex items-center gap-2 pl-1.5 sm:pl-2 border-l ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
