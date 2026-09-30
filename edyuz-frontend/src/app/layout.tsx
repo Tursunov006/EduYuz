@@ -16,6 +16,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "EduYuz - O'quv markazlari boshqaruvi",
   description: "Ta'lim CRM va ERP platformasi",
+  icons: {
+    icon: [
+      { url: '/logo-icon.png' },
+      { url: '/logo-icon-transparent.png', type: 'image/png' },
+    ],
+    shortcut: '/logo-icon.png',
+    apple: '/logo-icon.png',
+  },
 };
 
 export default function RootLayout({
