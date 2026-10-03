@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, User, Sparkles } from 'lucide-react';
+import { Lock, User } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [login, setLogin] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [login, setLogin] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -63,12 +63,6 @@ export default function LoginPage() {
     }
   }
 
-  function fillAdmin() {
-    setLogin('admin');
-    setPassword('admin123');
-    setError('');
-  }
-
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-6 shadow-2xl">
@@ -106,7 +100,7 @@ export default function LoginPage() {
                 value={login}
                 onChange={(e) => setLogin(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                placeholder="admin yoki login kiriting"
+                placeholder="Login yoki telefon raqamingiz"
               />
             </div>
           </div>
@@ -135,17 +129,6 @@ export default function LoginPage() {
             {loading ? 'Tekshirilmoqda...' : 'Tizimga kirish'}
           </button>
         </form>
-
-        {/* Demo login tugmasi */}
-        <div className="pt-2 border-t border-slate-800/80 text-center">
-          <button
-            onClick={fillAdmin}
-            type="button"
-            className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3.5 py-2 rounded-xl transition cursor-pointer"
-          >
-            <Sparkles size={14} /> Demo Login ma'lumotlarini to'ldirish (admin / admin123)
-          </button>
-        </div>
       </div>
     </div>
   );
