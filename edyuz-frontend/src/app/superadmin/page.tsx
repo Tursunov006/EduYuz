@@ -113,13 +113,6 @@ export default function SuperAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
         <div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition"
-              title="CRM Boshqaruv Paneliga qaytish"
-            >
-              <ArrowLeft size={18} />
-            </Link>
             <div className="p-2 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30">
               <ShieldCheck size={24} />
             </div>
@@ -138,12 +131,6 @@ export default function SuperAdminPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition"
-          >
-            ← Boshqaruv Paneli
-          </Link>
           <button
             onClick={() => {
               setSuccessInfo(null);
@@ -152,6 +139,18 @@ export default function SuperAdminPage() {
             className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-purple-600/25 transition active:scale-95 cursor-pointer"
           >
             <Plus size={16} /> Yangi Markaz Qo‘shish
+          </button>
+
+          <button
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('user');
+              window.location.href = '/login';
+            }}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-xs font-semibold transition active:scale-95"
+            title="Tizimdan chiqish"
+          >
+            <LogOut size={16} /> Chiqish
           </button>
         </div>
       </div>
