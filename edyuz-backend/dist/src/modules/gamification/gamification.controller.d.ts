@@ -14,10 +14,10 @@ export declare class GamificationController {
     }[]>;
     awardCoins(dto: AwardCoinsDto): Promise<{
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;

@@ -33,6 +33,9 @@ let AiController = class AiController {
         const reply = await this.aiService.chatTutor(dto.message, dto.studentName, dto.topic);
         return { reply };
     }
+    async generateMarketing(dto) {
+        return this.aiService.generateMarketingContent(dto.platform, dto.topic);
+    }
 };
 exports.AiController = AiController;
 __decorate([
@@ -63,6 +66,13 @@ __decorate([
     __metadata("design:paramtypes", [ai_dto_1.AiChatDto]),
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "chat", null);
+__decorate([
+    (0, common_1.Post)('marketing'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AiController.prototype, "generateMarketing", null);
 exports.AiController = AiController = __decorate([
     (0, common_1.Controller)('ai'),
     __metadata("design:paramtypes", [ai_service_1.AiService])

@@ -6,6 +6,7 @@ export declare class PaymentsController {
     create(dto: CreatePaymentDto): Promise<{
         student: {
             id: string;
+            createdAt: Date;
             centerId: string;
             fullName: string;
             phone: string | null;
@@ -15,15 +16,14 @@ export declare class PaymentsController {
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
-        comment: string | null;
         studentId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paidAt: Date;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
     }>;
     chargeMonthly(groupId?: string): Promise<{
         success: boolean;
@@ -39,15 +39,16 @@ export declare class PaymentsController {
         };
     } & {
         id: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
-        comment: string | null;
         studentId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paidAt: Date;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
     })[]>;
     findOne(id: string): Promise<{
         student: {
             id: string;
+            createdAt: Date;
             centerId: string;
             fullName: string;
             phone: string | null;
@@ -57,14 +58,13 @@ export declare class PaymentsController {
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
-        comment: string | null;
         studentId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        paidAt: Date;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        comment: string | null;
     }>;
 }

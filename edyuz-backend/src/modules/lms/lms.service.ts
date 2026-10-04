@@ -160,4 +160,74 @@ export class LmsService {
       orderBy: { submittedAt: 'desc' },
     });
   }
+
+  // --- QUIZ & GAMIFICATION LOGIC ---
+  async createQuiz(lessonId: string, title: string, questions: any[]) {
+    return this.prisma.quiz.create({
+      data: {
+        lessonId,
+        title,
+        questions: {
+          create: questions.map(q => ({
+            question: q.question,
+            options: q.options,
+            correctIndex: q.correctIndex,
+            points: q.points || 10
+          }))
+        }
+      },
+      include: { questions: true }
+    });
+  }
+
+  async submitQuiz(quizId: string, studentId: string, answers: number[]) {
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: quizId },
+      include: { questions: true }
+    });
+    if (!quiz) throw new NotFoundException('Test topilmadi');
+
+    let score = 0;
+    let maxScore = 0;
+    quiz.questions.forEach((q, index) => {
+      maxScore += q.points;
+      if (answers[index] === q.correctIndex) {
+        score += q.points;
+      }
+    });
+
+    const passed = score >= (maxScore * 0.6); // 60% for passing
+
+    if (passed) {
+      await this.prisma.student.update({
+        where: { id: studentId },
+        data: {
+          coins: { increment: 20 },
+          points: { increment: score }
+        }
+      });
+      
+      await this.prisma.coinTransaction.create({
+        data: {
+          studentId,
+          amount: 20,
+          reason: `Testni muvaffaqiyatli topshirdi: ${quiz.title}`
+        }
+      });
+    }
+
+    // Save result (upsert to allow retries or just create)
+    const existing = await this.prisma.quizResult.findUnique({
+       where: { quizId_studentId: { quizId, studentId } }
+    });
+    if (existing) {
+       return this.prisma.quizResult.update({
+         where: { id: existing.id },
+         data: { score, maxScore, passed }
+       });
+    }
+    return this.prisma.quizResult.create({
+      data: { quizId, studentId, score, maxScore, passed }
+    });
+  }
 }

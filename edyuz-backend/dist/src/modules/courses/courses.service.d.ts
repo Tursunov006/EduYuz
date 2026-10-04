@@ -6,9 +6,9 @@ export declare class CoursesService {
     constructor(prisma: PrismaService);
     create(dto: CreateCourseDto): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         centerId: string;
-        title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
     findAll(centerId?: string): Promise<({
@@ -17,23 +17,23 @@ export declare class CoursesService {
         };
     } & {
         id: string;
+        title: string;
         createdAt: Date;
         centerId: string;
-        title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     })[]>;
     findOne(id: string): Promise<{
         groups: ({
             teacher: {
                 id: string;
-                phone: string;
                 fullName: string;
+                phone: string;
             };
         } & {
             id: string;
-            name: string;
             createdAt: Date;
             centerId: string;
+            name: string;
             courseId: string;
             teacherId: string;
             days: import("@prisma/client/runtime/library").JsonValue;
@@ -42,23 +42,23 @@ export declare class CoursesService {
         })[];
     } & {
         id: string;
+        title: string;
         createdAt: Date;
         centerId: string;
-        title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
     update(id: string, dto: UpdateCourseDto): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         centerId: string;
-        title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
     remove(id: string): Promise<{
         id: string;
+        title: string;
         createdAt: Date;
         centerId: string;
-        title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
 }

@@ -9,4 +9,15 @@ export declare class AiController {
     chat(dto: AiChatDto): Promise<{
         reply: string;
     }>;
+    generateMarketing(dto: {
+        platform: string;
+        topic: string;
+    }): Promise<{
+        success: boolean;
+        data: {
+            title: string;
+            content: string;
+            suggestedHashtags: string;
+        };
+    }>;
 }

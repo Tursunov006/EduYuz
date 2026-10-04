@@ -54,4 +54,16 @@ export class LmsController {
   async getSubmissions(@Param('homeworkId') homeworkId: string) {
     return this.lmsService.getSubmissionsByHomework(homeworkId);
   }
+
+  @Public()
+  @Post('quiz')
+  async createQuiz(@Body() dto: { lessonId: string; title: string; questions: any[] }) {
+    return this.lmsService.createQuiz(dto.lessonId, dto.title, dto.questions);
+  }
+
+  @Public()
+  @Post('quiz/submit')
+  async submitQuiz(@Body() dto: { quizId: string; studentId: string; answers: number[] }) {
+    return this.lmsService.submitQuiz(dto.quizId, dto.studentId, dto.answers);
+  }
 }

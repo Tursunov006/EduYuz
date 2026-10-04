@@ -6,10 +6,10 @@ export declare class StudentsService {
     constructor(prisma: PrismaService);
     create(dto: CreateStudentDto): Promise<{
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
@@ -22,16 +22,16 @@ export declare class StudentsService {
             group: {
                 course: {
                     id: string;
+                    title: string;
                     createdAt: Date;
                     centerId: string;
-                    title: string;
                     price: import("@prisma/client/runtime/library").Decimal;
                 };
             } & {
                 id: string;
-                name: string;
                 createdAt: Date;
                 centerId: string;
+                name: string;
                 courseId: string;
                 teacherId: string;
                 days: import("@prisma/client/runtime/library").JsonValue;
@@ -45,10 +45,10 @@ export declare class StudentsService {
         })[];
     } & {
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
@@ -59,22 +59,22 @@ export declare class StudentsService {
     findOne(id: string): Promise<{
         groups: ({
             group: {
+                course: {
+                    id: string;
+                    title: string;
+                    createdAt: Date;
+                    centerId: string;
+                    price: import("@prisma/client/runtime/library").Decimal;
+                };
                 teacher: {
                     id: string;
                     fullName: string;
                 };
-                course: {
-                    id: string;
-                    createdAt: Date;
-                    centerId: string;
-                    title: string;
-                    price: import("@prisma/client/runtime/library").Decimal;
-                };
             } & {
                 id: string;
-                name: string;
                 createdAt: Date;
                 centerId: string;
+                name: string;
                 courseId: string;
                 teacherId: string;
                 days: import("@prisma/client/runtime/library").JsonValue;
@@ -88,9 +88,9 @@ export declare class StudentsService {
         })[];
         attendances: {
             id: string;
+            groupId: string;
             createdAt: Date;
             status: import(".prisma/client").$Enums.AttendanceStatus;
-            groupId: string;
             studentId: string;
             date: Date;
             markedBy: string | null;
@@ -98,17 +98,17 @@ export declare class StudentsService {
         payments: {
             id: string;
             studentId: string;
-            paidAt: Date;
             amount: import("@prisma/client/runtime/library").Decimal;
+            paidAt: Date;
             paymentMethod: import(".prisma/client").$Enums.PaymentType;
             comment: string | null;
         }[];
     } & {
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
@@ -118,10 +118,10 @@ export declare class StudentsService {
     }>;
     update(id: string, dto: UpdateStudentDto): Promise<{
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
@@ -131,10 +131,10 @@ export declare class StudentsService {
     }>;
     remove(id: string): Promise<{
         id: string;
-        phone: string | null;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string | null;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;

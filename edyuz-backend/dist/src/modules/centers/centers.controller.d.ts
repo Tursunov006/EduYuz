@@ -6,46 +6,46 @@ export declare class CentersController {
     constructor(centersService: CentersService);
     create(dto: CreateCenterDto): Promise<{
         id: string;
-        name: string;
-        phone: string;
         createdAt: Date;
+        phone: string;
+        name: string;
     }>;
     findAll(): Promise<({
         _count: {
-            users: number;
-            courses: number;
             groups: number;
             students: number;
+            users: number;
+            courses: number;
         };
     } & {
         id: string;
-        name: string;
-        phone: string;
         createdAt: Date;
+        phone: string;
+        name: string;
     })[]>;
     findOne(id: string): Promise<{
         _count: {
-            users: number;
-            courses: number;
             groups: number;
             students: number;
+            users: number;
+            courses: number;
         };
     } & {
         id: string;
-        name: string;
-        phone: string;
         createdAt: Date;
+        phone: string;
+        name: string;
     }>;
     update(id: string, dto: UpdateCenterDto): Promise<{
         id: string;
-        name: string;
-        phone: string;
         createdAt: Date;
+        phone: string;
+        name: string;
     }>;
     remove(id: string): Promise<{
         id: string;
-        name: string;
-        phone: string;
         createdAt: Date;
+        phone: string;
+        name: string;
     }>;
 }

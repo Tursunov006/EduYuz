@@ -35,4 +35,12 @@ export declare class AiService {
     private generateSmartLessonFallback;
     private generateSmartQuizFallback;
     private generateSmartMatchFallback;
+    generateMarketingContent(platform: string, topic: string): Promise<{
+        success: boolean;
+        data: {
+            title: string;
+            content: string;
+            suggestedHashtags: string;
+        };
+    }>;
 }

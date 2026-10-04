@@ -34,8 +34,8 @@ export declare class TeachersController {
         recentPayments: {
             id: string;
             teacherId: string;
-            paidAt: Date;
             amount: import("@prisma/client/runtime/library").Decimal;
+            paidAt: Date;
             paymentMethod: import(".prisma/client").$Enums.PaymentType;
             comment: string | null;
             periodMonth: string;
@@ -43,13 +43,20 @@ export declare class TeachersController {
     }[]>;
     findOne(id: string): Promise<{
         groups: ({
+            course: {
+                id: string;
+                title: string;
+                createdAt: Date;
+                centerId: string;
+                price: import("@prisma/client/runtime/library").Decimal;
+            };
             students: ({
                 student: {
                     id: string;
-                    phone: string | null;
                     createdAt: Date;
                     centerId: string;
                     fullName: string;
+                    phone: string | null;
                     parentPhone: string;
                     parentChatId: bigint | null;
                     balance: import("@prisma/client/runtime/library").Decimal;
@@ -62,18 +69,11 @@ export declare class TeachersController {
                 studentId: string;
                 joinedAt: Date;
             })[];
-            course: {
-                id: string;
-                createdAt: Date;
-                centerId: string;
-                title: string;
-                price: import("@prisma/client/runtime/library").Decimal;
-            };
         } & {
             id: string;
-            name: string;
             createdAt: Date;
             centerId: string;
+            name: string;
             courseId: string;
             teacherId: string;
             days: import("@prisma/client/runtime/library").JsonValue;
@@ -83,18 +83,18 @@ export declare class TeachersController {
         salaryPayments: {
             id: string;
             teacherId: string;
-            paidAt: Date;
             amount: import("@prisma/client/runtime/library").Decimal;
+            paidAt: Date;
             paymentMethod: import(".prisma/client").$Enums.PaymentType;
             comment: string | null;
             periodMonth: string;
         }[];
     } & {
         id: string;
-        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string;
         passwordHash: string;
         role: import(".prisma/client").$Enums.RoleType;
         specialty: string | null;
@@ -104,19 +104,19 @@ export declare class TeachersController {
     }>;
     create(dto: CreateTeacherDto): Promise<{
         id: string;
-        phone: string;
         createdAt: Date;
         fullName: string;
+        phone: string;
         specialty: string;
         salaryType: string;
         salaryRate: import("@prisma/client/runtime/library").Decimal;
     }>;
     update(id: string, dto: UpdateTeacherDto): Promise<{
         id: string;
-        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string;
         passwordHash: string;
         role: import(".prisma/client").$Enums.RoleType;
         specialty: string | null;
@@ -126,10 +126,10 @@ export declare class TeachersController {
     }>;
     delete(id: string): Promise<{
         id: string;
-        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
+        phone: string;
         passwordHash: string;
         role: import(".prisma/client").$Enums.RoleType;
         specialty: string | null;
@@ -140,8 +140,8 @@ export declare class TeachersController {
     paySalary(id: string, dto: PaySalaryDto): Promise<{
         id: string;
         teacherId: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
+        paidAt: Date;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
         comment: string | null;
         periodMonth: string;
@@ -149,8 +149,8 @@ export declare class TeachersController {
     getSalaryHistory(id: string): Promise<{
         id: string;
         teacherId: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
+        paidAt: Date;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
         comment: string | null;
         periodMonth: string;

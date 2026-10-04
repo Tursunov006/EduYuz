@@ -45,6 +45,12 @@ let LmsController = class LmsController {
     async getSubmissions(homeworkId) {
         return this.lmsService.getSubmissionsByHomework(homeworkId);
     }
+    async createQuiz(dto) {
+        return this.lmsService.createQuiz(dto.lessonId, dto.title, dto.questions);
+    }
+    async submitQuiz(dto) {
+        return this.lmsService.submitQuiz(dto.quizId, dto.studentId, dto.answers);
+    }
 };
 exports.LmsController = LmsController;
 __decorate([
@@ -104,6 +110,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], LmsController.prototype, "getSubmissions", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('quiz'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], LmsController.prototype, "createQuiz", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('quiz/submit'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], LmsController.prototype, "submitQuiz", null);
 exports.LmsController = LmsController = __decorate([
     (0, common_1.Controller)('lms'),
     __metadata("design:paramtypes", [lms_service_1.LmsService])

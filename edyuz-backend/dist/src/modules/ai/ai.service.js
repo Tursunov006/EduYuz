@@ -347,6 +347,40 @@ Savolingizni bemalol yozishingiz yoki quyidagi menyudan foydalanishingiz mumkin!
             { id: 'm5', term: 'EduCoin', definition: 'O\'quvchining mehnati uchun beriladigan rag\'bat' },
         ];
     }
+    async generateMarketingContent(platform, topic) {
+        this.logger.log(`Generating Marketing Content for ${platform}: "${topic}"`);
+        let title = "";
+        let content = "";
+        const lowerTopic = topic.toLowerCase();
+        const isEnglish = lowerTopic.includes("ingliz") || lowerTopic.includes("ielts");
+        const isMath = lowerTopic.includes("matematika");
+        const isIt = lowerTopic.includes("dasturlash") || lowerTopic.includes("it");
+        if (platform === 'instagram_post') {
+            title = `🔥 Yangi Qabul! ${topic} kursiga yoziling!`;
+            content = `🎯 Farzandingiz kelajagini bugundan quring! Bizda ${topic} bo'yicha super darslar boshlanmoqda.\n\n✅ Nega aynan biz?\n- 👨‍🏫 Malakali va tajribali ustozlar\n- 🎮 Interaktiv darslar va amaliyot\n- 🏆 Eng yaxshilar uchun maxsus grantlar!\n\n💡 Shoshiling, joylar soni cheklangan!\n\n👇 Hoziroq ro'yxatdan o'tish uchun:\n📞 +998 90 123 45 67\n📩 Directga "+" belgisini yuboring!`;
+        }
+        else if (platform === 'reels_scenario') {
+            title = `🎬 Reels Ssenariysi: "${topic} sirlari"`;
+            content = `Davomiyligi: 15-20 soniya\n\n[Kadr 1: 0-3 soniya]\n- Video boshida O'qituvchi kameraga qarab energiya bilan gapiradi.\n- Matn: "Siz hali ham ${topic}ni o'rganolmayapsizmi?"\n- Kadrda: Savol belgisi grafikasi ekranga chiqadi.\n\n[Kadr 2: 3-10 soniya]\n- O'qituvchi doska yonida (yoki noutbukda) oson usulni ko'rsatadi.\n- Matn: "EduYuz markazida biz buni 3 ta oddiy qadamda o'rgatamiz!"\n- Kadrda: Dars jarayonidan qisqa chiroyli kadrlar o'tadi.\n\n[Kadr 3: 10-15 soniya]\n- Call to Action (Harakatga chaqiruv).\n- Matn: "Hoziroq profildagi ssilkaga o'ting va bepul sinov darsiga yoziling!"\n- Ovoz: Quvnoq trenddagi musiqa.`;
+        }
+        else if (platform === 'telegram_ad') {
+            title = `🚀 Telegram reklama matni: ${topic}`;
+            content = `⚡️ E'LON!\n\nEduYuz O'quv Markazida uzoq kutilgan *${topic}* kursi uchun qabul ochiq deb e'lon qilinadi!\n\n✅ Darslar haftada 3 kun, 1.5 soatdan bo'lib o'tadi.\n✅ Bepul co-working zona va kofe-breyk.\n✅ Eng zamonaviy o'quv dasturi.\n\nNarxi: hamyonbop! 🎉\n\n📌 Manzil: [Sizning manzilingiz]\nBatafsil ma'lumot: @EduYuz_Admin\n\n👇 Hoziroq joyingizni band qiling:`;
+        }
+        else {
+            title = `SMS: ${topic}`;
+            content = `Hurmatli ota-onalar! Markazimizda ${topic} kurslari boshlandi. Farzandingizni olib keling! Tel: 998901234567`;
+        }
+        await new Promise(r => setTimeout(r, 1500));
+        return {
+            success: true,
+            data: {
+                title,
+                content,
+                suggestedHashtags: `#${topic.replace(/\s+/g, '')} #OquvMarkaz #TaLim #EduYuz`
+            }
+        };
+    }
 };
 exports.AiService = AiService;
 exports.AiService = AiService = AiService_1 = __decorate([

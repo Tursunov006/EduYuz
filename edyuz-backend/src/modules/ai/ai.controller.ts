@@ -26,4 +26,9 @@ export class AiController {
     const reply = await this.aiService.chatTutor(dto.message, dto.studentName, dto.topic);
     return { reply };
   }
+
+  @Post('marketing')
+  async generateMarketing(@Body() dto: { platform: string; topic: string }) {
+    return this.aiService.generateMarketingContent(dto.platform, dto.topic);
+  }
 }

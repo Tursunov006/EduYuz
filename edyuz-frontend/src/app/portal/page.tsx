@@ -23,6 +23,49 @@ import {
 import Link from 'next/link';
 import AiStudentTutorChat from '@/components/ai/AiStudentTutorChat';
 
+function HomeworkSubmitForm({ homeworkId, studentId, onSuccess }: { homeworkId: string, studentId: string, onSuccess: () => void }) {
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (!content.trim()) return alert('Javobni kiriting');
+    setLoading(true);
+    try {
+      await axios.post('http://localhost:3000/api/v1/lms/homeworks/submit', {
+        homeworkId,
+        studentId,
+        content
+      });
+      alert('Vazifa muvaffaqiyatli yuborildi!');
+      onSuccess();
+    } catch (err) {
+      alert('Xatolik yuz berdi');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="mt-2 space-y-2">
+      <textarea
+        required
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Vazifa javobini (yoki Google Drive fayl linkini) yozing..."
+        className="w-full text-xs p-2 rounded-lg bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-indigo-500 min-h-[60px]"
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[11px] font-bold py-1.5 rounded-lg transition"
+      >
+        {loading ? 'Yuborilmoqda...' : 'Vazifani Ustozga Yuborish ??'}
+      </button>
+    </form>
+  );
+}
+
 function PortalContent() {
   const searchParams = useSearchParams();
   const urlStudentId = searchParams.get('studentId');
@@ -344,7 +387,14 @@ function PortalContent() {
                                 )}
                               </div>
                             ) : (
-                              <p className="text-[10px] text-slate-500 italic">Vazifa hali topshirilmagan</p>
+                              <div className="mt-2 pt-2 border-t border-slate-800">
+                                <p className="text-[10px] text-slate-500 italic mb-2">Vazifa hali topshirilmagan</p>
+                                <HomeworkSubmitForm 
+                                  homeworkId={hw.id} 
+                                  studentId={selectedStudentId} 
+                                  onSuccess={() => window.location.reload()} 
+                                />
+                              </div>
                             )}
                           </div>
                         );
