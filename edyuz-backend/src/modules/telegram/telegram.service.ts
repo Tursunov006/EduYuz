@@ -16,7 +16,9 @@ export class TelegramService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN') || null;
+    this.botToken =
+      this.configService.get<string>('TELEGRAM_BOT_TOKEN') ||
+      '8842750173:AAHo7Ep8GNuvrs1wdBhdmt10OCSQedGceoU';
     if (!this.botToken || this.botToken.includes('YOUR_TELEGRAM_BOT_TOKEN')) {
       this.logger.warn(
         '⚠️ TELEGRAM_BOT_TOKEN sozlanmagan. Telegram xabarlar simulyatsiya (console) rejimida ishlaydi.',
@@ -190,7 +192,8 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
     const chatId = msg.chat.id;
     const text = (msg.text || '').trim();
     const contact = msg.contact;
-    const webAppUrl = this.configService.get<string>('TELEGRAM_WEBAPP_URL') || '';
+    const webAppUrl =
+      this.configService.get<string>('TELEGRAM_WEBAPP_URL') || 'https://eduyuz.uz';
 
     // Qulay tezkor javob tugmalari (Reply Keyboard)
     const quickReplyKeyboard = {

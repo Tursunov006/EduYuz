@@ -13,8 +13,8 @@ export declare class CertificatesController {
         id: string;
         studentId: string;
         courseTitle: string;
-        grade: string;
         certificateNumber: string;
+        grade: string;
         issuedAt: Date;
     }>;
     findAll(): Promise<({
@@ -27,8 +27,8 @@ export declare class CertificatesController {
         id: string;
         studentId: string;
         courseTitle: string;
-        grade: string;
         certificateNumber: string;
+        grade: string;
         issuedAt: Date;
     })[]>;
     verify(certNumber: string): Promise<{
@@ -56,8 +56,8 @@ export declare class CertificatesController {
         id: string;
         studentId: string;
         courseTitle: string;
-        grade: string;
         certificateNumber: string;
+        grade: string;
         issuedAt: Date;
     }[]>;
 }

@@ -16,8 +16,8 @@ export declare class LmsController {
                 };
             } & {
                 id: string;
-                studentId: string;
                 status: import(".prisma/client").$Enums.SubmissionStatus;
+                studentId: string;
                 content: string;
                 fileUrl: string | null;
                 homeworkId: string;
@@ -30,10 +30,10 @@ export declare class LmsController {
             id: string;
             createdAt: Date;
             title: string;
-            lessonId: string;
             description: string;
             deadline: Date | null;
             maxScore: number;
+            lessonId: string;
         })[];
     } & {
         id: string;
@@ -72,15 +72,15 @@ export declare class LmsController {
         id: string;
         createdAt: Date;
         title: string;
-        lessonId: string;
         description: string;
         deadline: Date | null;
         maxScore: number;
+        lessonId: string;
     }>;
     submitHomework(dto: SubmitHomeworkDto): Promise<{
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;
@@ -91,8 +91,8 @@ export declare class LmsController {
     }>;
     gradeSubmission(submissionId: string, dto: GradeSubmissionDto): Promise<{
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;
@@ -109,8 +109,8 @@ export declare class LmsController {
         };
     } & {
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;

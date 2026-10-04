@@ -39,8 +39,8 @@ export declare class StudentsService {
                 endTime: string;
             };
         } & {
-            studentId: string;
             groupId: string;
+            studentId: string;
             joinedAt: Date;
         })[];
     } & {
@@ -82,16 +82,16 @@ export declare class StudentsService {
                 endTime: string;
             };
         } & {
-            studentId: string;
             groupId: string;
+            studentId: string;
             joinedAt: Date;
         })[];
         attendances: {
             id: string;
             createdAt: Date;
-            studentId: string;
             status: import(".prisma/client").$Enums.AttendanceStatus;
             groupId: string;
+            studentId: string;
             date: Date;
             markedBy: string | null;
         }[];

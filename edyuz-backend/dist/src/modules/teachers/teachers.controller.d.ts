@@ -58,8 +58,8 @@ export declare class TeachersController {
                     status: import(".prisma/client").$Enums.StudentStatus;
                 };
             } & {
-                studentId: string;
                 groupId: string;
+                studentId: string;
                 joinedAt: Date;
             })[];
             course: {

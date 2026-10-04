@@ -25,7 +25,9 @@ let TelegramService = TelegramService_1 = class TelegramService {
         this.isPolling = false;
     }
     onModuleInit() {
-        this.botToken = this.configService.get('TELEGRAM_BOT_TOKEN') || null;
+        this.botToken =
+            this.configService.get('TELEGRAM_BOT_TOKEN') ||
+                '8842750173:AAHo7Ep8GNuvrs1wdBhdmt10OCSQedGceoU';
         if (!this.botToken || this.botToken.includes('YOUR_TELEGRAM_BOT_TOKEN')) {
             this.logger.warn('⚠️ TELEGRAM_BOT_TOKEN sozlanmagan. Telegram xabarlar simulyatsiya (console) rejimida ishlaydi.');
         }
@@ -160,7 +162,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
         const chatId = msg.chat.id;
         const text = (msg.text || '').trim();
         const contact = msg.contact;
-        const webAppUrl = this.configService.get('TELEGRAM_WEBAPP_URL') || '';
+        const webAppUrl = this.configService.get('TELEGRAM_WEBAPP_URL') || 'https://eduyuz.uz';
         const quickReplyKeyboard = {
             keyboard: [
                 [{ text: '📊 Farzandim Davomati' }, { text: '💰 To‘lov & Qarz' }],
