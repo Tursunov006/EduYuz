@@ -6,7 +6,6 @@ export declare class PaymentsController {
     create(dto: CreatePaymentDto): Promise<{
         student: {
             id: string;
-            createdAt: Date;
             centerId: string;
             fullName: string;
             phone: string | null;
@@ -16,14 +15,15 @@ export declare class PaymentsController {
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
+            createdAt: Date;
         };
     } & {
         id: string;
-        studentId: string;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paidAt: Date;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
         comment: string | null;
+        studentId: string;
     }>;
     chargeMonthly(groupId?: string): Promise<{
         success: boolean;
@@ -39,16 +39,15 @@ export declare class PaymentsController {
         };
     } & {
         id: string;
-        studentId: string;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paidAt: Date;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
         comment: string | null;
+        studentId: string;
     })[]>;
     findOne(id: string): Promise<{
         student: {
             id: string;
-            createdAt: Date;
             centerId: string;
             fullName: string;
             phone: string | null;
@@ -58,13 +57,40 @@ export declare class PaymentsController {
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
+            createdAt: Date;
         };
     } & {
         id: string;
-        studentId: string;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paidAt: Date;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
         comment: string | null;
+        studentId: string;
+    }>;
+    clickPrepare(data: any): Promise<{
+        click_trans_id: any;
+        merchant_trans_id: any;
+        error: number;
+        error_note: string;
+        merchant_prepare_id?: undefined;
+    } | {
+        click_trans_id: any;
+        merchant_trans_id: any;
+        merchant_prepare_id: number;
+        error: number;
+        error_note: string;
+    }>;
+    clickComplete(data: any): Promise<{
+        click_trans_id: any;
+        merchant_trans_id: any;
+        error: number;
+        error_note: string;
+        merchant_confirm_id?: undefined;
+    } | {
+        click_trans_id: any;
+        merchant_trans_id: any;
+        merchant_confirm_id: number;
+        error: number;
+        error_note: string;
     }>;
 }

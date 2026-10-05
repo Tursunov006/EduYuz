@@ -41,4 +41,20 @@ export class PaymentsController {
   findOne(@Param('id') id: string) {
     return this.paymentsService.findOne(id);
   }
+
+  // ==========================================
+  // CLICK WEBHOOKS (Public APIs)
+  // ==========================================
+  
+  @Public()
+  @Post('click/prepare')
+  clickPrepare(@Body() data: any) {
+    return this.paymentsService.clickPrepare(data);
+  }
+
+  @Public()
+  @Post('click/complete')
+  clickComplete(@Body() data: any) {
+    return this.paymentsService.clickComplete(data);
+  }
 }

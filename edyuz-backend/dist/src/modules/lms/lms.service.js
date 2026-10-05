@@ -20,6 +20,9 @@ let LmsService = class LmsService {
         return this.prisma.lesson.findMany({
             where: { groupId },
             include: {
+                quiz: {
+                    include: { questions: true }
+                },
                 homeworks: {
                     include: {
                         submissions: {

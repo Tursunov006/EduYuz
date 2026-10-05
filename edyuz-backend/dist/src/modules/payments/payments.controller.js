@@ -35,6 +35,12 @@ let PaymentsController = class PaymentsController {
     findOne(id) {
         return this.paymentsService.findOne(id);
     }
+    clickPrepare(data) {
+        return this.paymentsService.clickPrepare(data);
+    }
+    clickComplete(data) {
+        return this.paymentsService.clickComplete(data);
+    }
 };
 exports.PaymentsController = PaymentsController;
 __decorate([
@@ -69,6 +75,22 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PaymentsController.prototype, "findOne", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('click/prepare'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PaymentsController.prototype, "clickPrepare", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('click/complete'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PaymentsController.prototype, "clickComplete", null);
 exports.PaymentsController = PaymentsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('payments'),

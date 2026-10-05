@@ -7,6 +7,21 @@ export declare class LmsController {
     private readonly lmsService;
     constructor(lmsService: LmsService);
     getLessons(groupId: string): Promise<({
+        quiz: {
+            questions: {
+                id: string;
+                points: number;
+                quizId: string;
+                question: string;
+                options: import("@prisma/client/runtime/library").JsonValue;
+                correctIndex: number;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            title: string;
+            lessonId: string;
+        };
         homeworks: ({
             submissions: ({
                 student: {
@@ -16,11 +31,11 @@ export declare class LmsController {
                 };
             } & {
                 id: string;
+                studentId: string;
+                status: import(".prisma/client").$Enums.SubmissionStatus;
                 content: string;
                 fileUrl: string | null;
-                status: import(".prisma/client").$Enums.SubmissionStatus;
                 homeworkId: string;
-                studentId: string;
                 score: number | null;
                 feedback: string | null;
                 submittedAt: Date;
@@ -28,8 +43,8 @@ export declare class LmsController {
             })[];
         } & {
             id: string;
-            title: string;
             createdAt: Date;
+            title: string;
             lessonId: string;
             description: string;
             deadline: Date | null;
@@ -37,41 +52,41 @@ export declare class LmsController {
         })[];
     } & {
         id: string;
-        groupId: string;
+        createdAt: Date;
         title: string;
+        groupId: string;
         content: string | null;
         videoUrl: string | null;
         fileUrl: string | null;
         orderIndex: number;
-        createdAt: Date;
         updatedAt: Date;
     })[]>;
     createLesson(dto: CreateLessonDto): Promise<{
         id: string;
-        groupId: string;
+        createdAt: Date;
         title: string;
+        groupId: string;
         content: string | null;
         videoUrl: string | null;
         fileUrl: string | null;
         orderIndex: number;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     deleteLesson(id: string): Promise<{
         id: string;
-        groupId: string;
+        createdAt: Date;
         title: string;
+        groupId: string;
         content: string | null;
         videoUrl: string | null;
         fileUrl: string | null;
         orderIndex: number;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     createHomework(dto: CreateHomeworkDto): Promise<{
         id: string;
-        title: string;
         createdAt: Date;
+        title: string;
         lessonId: string;
         description: string;
         deadline: Date | null;
@@ -79,11 +94,11 @@ export declare class LmsController {
     }>;
     submitHomework(dto: SubmitHomeworkDto): Promise<{
         id: string;
+        studentId: string;
+        status: import(".prisma/client").$Enums.SubmissionStatus;
         content: string;
         fileUrl: string | null;
-        status: import(".prisma/client").$Enums.SubmissionStatus;
         homeworkId: string;
-        studentId: string;
         score: number | null;
         feedback: string | null;
         submittedAt: Date;
@@ -91,11 +106,11 @@ export declare class LmsController {
     }>;
     gradeSubmission(submissionId: string, dto: GradeSubmissionDto): Promise<{
         id: string;
+        studentId: string;
+        status: import(".prisma/client").$Enums.SubmissionStatus;
         content: string;
         fileUrl: string | null;
-        status: import(".prisma/client").$Enums.SubmissionStatus;
         homeworkId: string;
-        studentId: string;
         score: number | null;
         feedback: string | null;
         submittedAt: Date;
@@ -109,11 +124,11 @@ export declare class LmsController {
         };
     } & {
         id: string;
+        studentId: string;
+        status: import(".prisma/client").$Enums.SubmissionStatus;
         content: string;
         fileUrl: string | null;
-        status: import(".prisma/client").$Enums.SubmissionStatus;
         homeworkId: string;
-        studentId: string;
         score: number | null;
         feedback: string | null;
         submittedAt: Date;
@@ -127,15 +142,15 @@ export declare class LmsController {
         questions: {
             id: string;
             points: number;
+            quizId: string;
             question: string;
             options: import("@prisma/client/runtime/library").JsonValue;
             correctIndex: number;
-            quizId: string;
         }[];
     } & {
         id: string;
-        title: string;
         createdAt: Date;
+        title: string;
         lessonId: string;
     }>;
     submitQuiz(dto: {
@@ -144,11 +159,11 @@ export declare class LmsController {
         answers: number[];
     }): Promise<{
         id: string;
-        createdAt: Date;
-        maxScore: number;
         studentId: string;
-        score: number;
+        createdAt: Date;
         quizId: string;
+        maxScore: number;
+        score: number;
         passed: boolean;
     }>;
 }
