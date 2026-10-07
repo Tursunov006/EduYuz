@@ -43,10 +43,12 @@ enum ExpenseCategory {
 }
 
 model Center {
-  id        String   @id @default(uuid()) @db.VarChar(36)
-  name      String   @db.VarChar(150)
-  phone     String   @db.VarChar(20)
-  createdAt DateTime @default(now()) @map("created_at")
+  id                 String   @id @default(uuid()) @db.VarChar(36)
+  name               String   @db.VarChar(150)
+  phone              String   @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at")
+  trialEndsAt        DateTime? @map("trial_ends_at")
+  subscriptionStatus String   @default("trial") @map("subscription_status") @db.VarChar(20) // 'trial', 'active', 'expired'
 
   users    User[]
   courses  Course[]

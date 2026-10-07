@@ -54,13 +54,18 @@ let AuthService = class AuthService {
         const token = this.generateToken(user.id, user.phone, user.role, user.centerId);
         return {
             message: 'Muvaffaqiyatli ro\'yxatdan o\'tildi',
-            user,
+            user: {
+                ...user,
+                trialEndsAt: center.trialEndsAt,
+                subscriptionStatus: center.subscriptionStatus,
+            },
             accessToken: token,
         };
     }
     async login(dto) {
         const user = await this.prisma.user.findUnique({
             where: { phone: dto.phone },
+            include: { center: true }
         });
         if (!user) {
             throw new common_1.UnauthorizedException('Telefon raqam yoki parol noto\'g\'ri');
@@ -81,6 +86,8 @@ let AuthService = class AuthService {
                 fullName: user.fullName,
                 phone: user.phone,
                 role: user.role,
+                trialEndsAt: user.center?.trialEndsAt,
+                subscriptionStatus: user.center?.subscriptionStatus,
             },
             accessToken: token,
         };

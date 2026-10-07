@@ -53,7 +53,11 @@ export class AuthService {
 
     return {
       message: 'Muvaffaqiyatli ro\'yxatdan o\'tildi',
-      user,
+      user: {
+        ...user,
+        trialEndsAt: center.trialEndsAt,
+        subscriptionStatus: center.subscriptionStatus,
+      },
       accessToken: token,
     };
   }
@@ -61,6 +65,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.prisma.user.findUnique({
       where: { phone: dto.phone },
+      include: { center: true }
     });
 
     if (!user) {
@@ -86,6 +91,8 @@ export class AuthService {
         fullName: user.fullName,
         phone: user.phone,
         role: user.role,
+        trialEndsAt: user.center?.trialEndsAt,
+        subscriptionStatus: user.center?.subscriptionStatus,
       },
       accessToken: token,
     };

@@ -6,46 +6,46 @@ export declare class CentersService {
     constructor(prisma: PrismaService);
     create(dto: CreateCenterDto): Promise<{
         id: string;
-        createdAt: Date;
         phone: string;
+        createdAt: Date;
         name: string;
     }>;
     findAll(): Promise<({
         _count: {
             groups: number;
-            students: number;
             users: number;
             courses: number;
+            students: number;
         };
     } & {
         id: string;
-        createdAt: Date;
         phone: string;
+        createdAt: Date;
         name: string;
     })[]>;
     findOne(id: string): Promise<{
         _count: {
             groups: number;
-            students: number;
             users: number;
             courses: number;
+            students: number;
         };
     } & {
         id: string;
-        createdAt: Date;
         phone: string;
+        createdAt: Date;
         name: string;
     }>;
     update(id: string, dto: UpdateCenterDto): Promise<{
         id: string;
-        createdAt: Date;
         phone: string;
+        createdAt: Date;
         name: string;
     }>;
     remove(id: string): Promise<{
         id: string;
-        createdAt: Date;
         phone: string;
+        createdAt: Date;
         name: string;
     }>;
 }

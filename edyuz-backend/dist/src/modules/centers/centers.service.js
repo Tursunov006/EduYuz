@@ -17,8 +17,14 @@ let CentersService = class CentersService {
         this.prisma = prisma;
     }
     async create(dto) {
+        const trialEndsAt = new Date();
+        trialEndsAt.setDate(trialEndsAt.getDate() + 7);
         return this.prisma.center.create({
-            data: dto,
+            data: {
+                ...dto,
+                trialEndsAt,
+                subscriptionStatus: 'trial'
+            },
         });
     }
     async findAll() {

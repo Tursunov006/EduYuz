@@ -8,8 +8,15 @@ export class CentersService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCenterDto) {
+    const trialEndsAt = new Date();
+    trialEndsAt.setDate(trialEndsAt.getDate() + 7); // 7 kunlik sinov muddati
+
     return this.prisma.center.create({
-      data: dto,
+      data: {
+        ...dto,
+        trialEndsAt,
+        subscriptionStatus: 'trial'
+      },
     });
   }
 
