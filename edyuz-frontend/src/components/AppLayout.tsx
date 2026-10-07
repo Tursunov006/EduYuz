@@ -76,9 +76,38 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
-          {/* Asosiy kontent maydoni: Telefonda 100% to'liq kenglikni egallaydi */}
-          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden">
+          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
             <Navbar />
+            
+            {/* Trial Banner */}
+            {(() => {
+              try {
+                const userRaw = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+                if (userRaw) {
+                  const user = JSON.parse(userRaw);
+                  if (user.subscriptionStatus === 'trial' && user.trialEndsAt) {
+                    const daysLeft = Math.ceil((new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+                    if (daysLeft >= 0) {
+                      return (
+                        <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[11px] sm:text-xs font-semibold py-1.5 px-4 flex items-center justify-center gap-2 shadow-sm z-40 relative">
+                          Siz 7-kunlik bepul sinov (Trial) versiyasidan foydalanyapsiz. Sinov tugashiga: {daysLeft} kun qoldi.
+                          <button className="bg-white/20 hover:bg-white/30 px-3 py-0.5 rounded-full text-white ml-2 transition">Faollashtirish</button>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[11px] sm:text-xs font-semibold py-1.5 px-4 flex items-center justify-center gap-2 shadow-sm z-40 relative">
+                          Sizning sinov muddatingiz tugagan. Tizimdan to'liq foydalanish uchun to'lovni amalga oshiring.
+                          <button className="bg-white/20 hover:bg-white/30 px-3 py-0.5 rounded-full text-white ml-2 transition">To'lov qilish</button>
+                        </div>
+                      );
+                    }
+                  }
+                }
+              } catch (e) {}
+              return null;
+            })()}
+
             <main className={`flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto transition-colors duration-300 w-full ${
               isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
             }`}>

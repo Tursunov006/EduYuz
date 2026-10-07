@@ -11,10 +11,10 @@ export declare class LmsService {
             questions: {
                 id: string;
                 points: number;
-                quizId: string;
                 question: string;
                 options: import("@prisma/client/runtime/library").JsonValue;
                 correctIndex: number;
+                quizId: string;
             }[];
         } & {
             id: string;
@@ -26,13 +26,13 @@ export declare class LmsService {
             submissions: ({
                 student: {
                     id: string;
-                    fullName: string;
                     phone: string;
+                    fullName: string;
                 };
             } & {
                 id: string;
-                studentId: string;
                 status: import(".prisma/client").$Enums.SubmissionStatus;
+                studentId: string;
                 content: string;
                 fileUrl: string | null;
                 homeworkId: string;
@@ -45,10 +45,10 @@ export declare class LmsService {
             id: string;
             createdAt: Date;
             title: string;
-            lessonId: string;
             description: string;
             deadline: Date | null;
             maxScore: number;
+            lessonId: string;
         })[];
     } & {
         id: string;
@@ -87,15 +87,15 @@ export declare class LmsService {
         id: string;
         createdAt: Date;
         title: string;
-        lessonId: string;
         description: string;
         deadline: Date | null;
         maxScore: number;
+        lessonId: string;
     }>;
     submitHomework(dto: SubmitHomeworkDto): Promise<{
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;
@@ -106,8 +106,8 @@ export declare class LmsService {
     }>;
     gradeSubmission(submissionId: string, dto: GradeSubmissionDto): Promise<{
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;
@@ -119,13 +119,13 @@ export declare class LmsService {
     getSubmissionsByHomework(homeworkId: string): Promise<({
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
-        studentId: string;
         status: import(".prisma/client").$Enums.SubmissionStatus;
+        studentId: string;
         content: string;
         fileUrl: string | null;
         homeworkId: string;
@@ -138,10 +138,10 @@ export declare class LmsService {
         questions: {
             id: string;
             points: number;
-            quizId: string;
             question: string;
             options: import("@prisma/client/runtime/library").JsonValue;
             correctIndex: number;
+            quizId: string;
         }[];
     } & {
         id: string;
@@ -151,11 +151,11 @@ export declare class LmsService {
     }>;
     submitQuiz(quizId: string, studentId: string, answers: number[]): Promise<{
         id: string;
-        studentId: string;
         createdAt: Date;
-        quizId: string;
+        studentId: string;
         maxScore: number;
         score: number;
+        quizId: string;
         passed: boolean;
     }>;
 }

@@ -6,45 +6,45 @@ export declare class UsersService {
     constructor(prisma: PrismaService);
     create(dto: CreateUserDto): Promise<{
         id: string;
+        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
-        phone: string;
         role: import(".prisma/client").$Enums.RoleType;
         isActive: boolean;
     }>;
     findAll(centerId?: string): Promise<{
         id: string;
+        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
-        phone: string;
         role: import(".prisma/client").$Enums.RoleType;
         isActive: boolean;
     }[]>;
     findOne(id: string): Promise<{
         id: string;
+        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
-        phone: string;
         role: import(".prisma/client").$Enums.RoleType;
         isActive: boolean;
     }>;
     update(id: string, dto: UpdateUserDto): Promise<{
         id: string;
+        phone: string;
         centerId: string;
         fullName: string;
-        phone: string;
         role: import(".prisma/client").$Enums.RoleType;
         isActive: boolean;
     }>;
     remove(id: string): Promise<{
         id: string;
+        phone: string;
         createdAt: Date;
         centerId: string;
         fullName: string;
-        phone: string;
         passwordHash: string;
         role: import(".prisma/client").$Enums.RoleType;
         specialty: string | null;

@@ -7,15 +7,15 @@ export declare class AuthController {
     register(dto: RegisterDto): Promise<{
         message: string;
         user: {
-            trialEndsAt: any;
-            subscriptionStatus: any;
+            trialEndsAt: Date;
+            subscriptionStatus: string;
             id: string;
-            fullName: string;
             phone: string;
-            role: import(".prisma/client").$Enums.RoleType;
-            isActive: boolean;
             createdAt: Date;
             centerId: string;
+            fullName: string;
+            role: import(".prisma/client").$Enums.RoleType;
+            isActive: boolean;
         };
         accessToken: string;
     }>;
@@ -27,8 +27,8 @@ export declare class AuthController {
             fullName: string;
             phone: string;
             role: import(".prisma/client").$Enums.RoleType;
-            trialEndsAt: any;
-            subscriptionStatus: any;
+            trialEndsAt: Date;
+            subscriptionStatus: string;
         };
         accessToken: string;
     }>;

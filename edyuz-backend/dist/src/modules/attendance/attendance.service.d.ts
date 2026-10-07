@@ -14,19 +14,19 @@ export declare class AttendanceService {
     findByGroupAndDate(groupId: string, date: string): Promise<({
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
         marker: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
-        groupId: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        groupId: string;
         studentId: string;
         date: Date;
         markedBy: string | null;
@@ -38,9 +38,9 @@ export declare class AttendanceService {
         };
     } & {
         id: string;
-        groupId: string;
         createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        groupId: string;
         studentId: string;
         date: Date;
         markedBy: string | null;

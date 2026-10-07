@@ -6,24 +6,24 @@ export declare class PaymentsController {
     create(dto: CreatePaymentDto): Promise<{
         student: {
             id: string;
+            phone: string | null;
+            createdAt: Date;
             centerId: string;
             fullName: string;
-            phone: string | null;
             parentPhone: string;
             parentChatId: bigint | null;
             balance: import("@prisma/client/runtime/library").Decimal;
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
+        studentId: string;
+        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
         comment: string | null;
-        studentId: string;
     }>;
     chargeMonthly(groupId?: string): Promise<{
         success: boolean;
@@ -34,38 +34,38 @@ export declare class PaymentsController {
     findAll(studentId?: string): Promise<({
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
+        studentId: string;
+        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
         comment: string | null;
-        studentId: string;
     })[]>;
     findOne(id: string): Promise<{
         student: {
             id: string;
+            phone: string | null;
+            createdAt: Date;
             centerId: string;
             fullName: string;
-            phone: string | null;
             parentPhone: string;
             parentChatId: bigint | null;
             balance: import("@prisma/client/runtime/library").Decimal;
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
+        studentId: string;
+        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        paidAt: Date;
         comment: string | null;
-        studentId: string;
     }>;
     clickPrepare(data: any): Promise<{
         click_trans_id: any;

@@ -6,46 +6,56 @@ export declare class CentersController {
     constructor(centersService: CentersService);
     create(dto: CreateCenterDto): Promise<{
         id: string;
+        name: string;
         phone: string;
         createdAt: Date;
-        name: string;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
     }>;
     findAll(): Promise<({
         _count: {
-            groups: number;
             users: number;
             courses: number;
+            groups: number;
             students: number;
         };
     } & {
         id: string;
+        name: string;
         phone: string;
         createdAt: Date;
-        name: string;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
     })[]>;
     findOne(id: string): Promise<{
         _count: {
-            groups: number;
             users: number;
             courses: number;
+            groups: number;
             students: number;
         };
     } & {
         id: string;
+        name: string;
         phone: string;
         createdAt: Date;
-        name: string;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
     }>;
     update(id: string, dto: UpdateCenterDto): Promise<{
         id: string;
+        name: string;
         phone: string;
         createdAt: Date;
-        name: string;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
     }>;
     remove(id: string): Promise<{
         id: string;
+        name: string;
         phone: string;
         createdAt: Date;
-        name: string;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
     }>;
 }

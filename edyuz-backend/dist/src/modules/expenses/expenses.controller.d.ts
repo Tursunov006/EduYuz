@@ -15,30 +15,30 @@ export declare class ExpensesController {
     }>;
     findAll(centerId?: string, category?: any): Promise<{
         id: string;
-        title: string;
         centerId: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
+        title: string;
         paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
         comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
     }[]>;
     create(dto: CreateExpenseDto): Promise<{
         id: string;
-        title: string;
         centerId: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
+        title: string;
         paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
         comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
     }>;
     delete(id: string): Promise<{
         id: string;
-        title: string;
         centerId: string;
-        amount: import("@prisma/client/runtime/library").Decimal;
+        title: string;
         paidAt: Date;
+        amount: import("@prisma/client/runtime/library").Decimal;
         paymentMethod: import(".prisma/client").$Enums.PaymentType;
         comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;

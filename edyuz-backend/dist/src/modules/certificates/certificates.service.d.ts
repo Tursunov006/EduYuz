@@ -6,8 +6,8 @@ export declare class CertificatesService {
     issue(dto: IssueCertificateDto): Promise<{
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
@@ -20,8 +20,8 @@ export declare class CertificatesService {
     findAll(): Promise<({
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
