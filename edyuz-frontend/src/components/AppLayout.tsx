@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import axios from 'axios';
 import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
+import HelpWidget from '@/components/HelpWidget';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
 import { SidebarProvider } from '@/lib/context/SidebarContext';
@@ -92,6 +93,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       )}
+      <HelpWidget />
     </>
   );
 }

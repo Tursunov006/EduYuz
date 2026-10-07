@@ -426,6 +426,40 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                       </div>
                     )}
 
+                    {/* Avtomatik Test (Quiz) bo'limi */}
+                    <div className="border-t border-slate-800/80 pt-5 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <CheckCircle2 size={16} className="text-emerald-400" />
+                          Avtomatik Testlar (Quiz) {lesson.quiz ? '(Mavjud)' : ''}
+                        </h4>
+                        {!lesson.quiz && (
+                          <button
+                            onClick={() => {
+                              alert("Test qo'shish moduli hozirda ishlab chiqilmoqda...");
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition"
+                          >
+                            <Plus size={14} /> Test Qo'shish
+                          </button>
+                        )}
+                      </div>
+                      
+                      {!lesson.quiz ? (
+                        <p className="text-xs text-slate-500 italic">Ushbu dars uchun bilimni tekshiruvchi test kiritilmagan.</p>
+                      ) : (
+                        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+                          <div>
+                            <h5 className="text-sm font-bold text-white">{lesson.quiz.title || 'Mavzulashtirilgan Test'}</h5>
+                            <p className="text-xs text-slate-400 mt-1">{lesson.quiz.questions?.length || 0} ta savol (Avtomatik tekshiriladi)</p>
+                          </div>
+                          <button className="text-xs text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-500/20">
+                            Natijalarni ko'rish
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Uyga vazifalar bo'limi */}
                     <div className="border-t border-slate-800/80 pt-5 space-y-4">
                       <div className="flex items-center justify-between">

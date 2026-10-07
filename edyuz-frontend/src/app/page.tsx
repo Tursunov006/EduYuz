@@ -174,12 +174,12 @@ export default function DashboardPage() {
 
         {/* Qarzdor o'quvchilar ro'yxati (1 ustun) */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              <AlertCircle size={18} className="text-rose-400" />
-              {t('dash.debtors', 'Qarzdorlar')}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 flex-1 min-w-[140px]">
+              <AlertCircle size={18} className="text-rose-400 shrink-0" />
+              <span className="leading-tight">{t('dash.debtors', 'Qarzdor o\'quvchilar')}</span>
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={handleExportDebtors}
                 title="Qarzdorlarni Excelga yuklash"

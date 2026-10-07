@@ -465,8 +465,25 @@ function PortalContent() {
             </div>
           ) : activeTab === 'payments' ? (
             /* 3. TO'LOVLAR TABI */
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <div className="space-y-4">
+              
+              {/* Click orqali To'lov Vidjeti */}
+              <div className="bg-gradient-to-r from-blue-900/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center text-center space-y-3">
+                <h4 className="text-sm font-bold text-white flex items-center gap-2"><CreditCard size={18} className="text-[#00AEEF]"/> Click orqali to'lov qilish</h4>
+                <p className="text-[11px] text-slate-300">
+                  O'quvchi ID: <span className="font-bold text-blue-300">{selectedStudentId.split('-')[0]}</span>
+                </p>
+                <a 
+                  href={`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-500/20"
+                >
+                  Click orqali {isDebt ? `${Math.abs(Number(studentData?.balance || 0)).toLocaleString()} so'm ` : ''}to'lash
+                </a>
+              </div>
+
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4">
                 To'lov Cheklari va Tarixi
               </h3>
               {payments.length === 0 ? (
