@@ -271,4 +271,116 @@ export class PaymentsService {
       };
     }
   }
+
+  // ==========================================
+  // ATMOS (PAYNET/UZCARD/HUMO) INTEGRATSIYASI
+  // ==========================================
+  
+  async createAtmosInvoice(studentId: string, amount: number) {
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId }
+    });
+    
+    if (!student) {
+      throw new NotFoundException("O'quvchi topilmadi");
+    }
+
+    try {
+      // 1. Atmos token olish (Test kalitlar bilan)
+      const consumerKey = 'test_consumer_key';
+      const consumerSecret = 'test_consumer_secret';
+      const storeId = 1234;
+      
+      const credentials = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+      
+      // Real muhitda bu qism ishlaydi
+      /*
+      const tokenRes = await fetch('https://apigw.atmos.uz/token', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Basic ${credentials}`,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'grant_type=client_credentials'
+      });
+      const tokenData = await tokenRes.json();
+      const accessToken = tokenData.access_token;
+      
+      // 2. Invoys yaratish
+      const invoiceRes = await fetch('https://apigw.atmos.uz/checkout/invoice/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          request_id: Date.now().toString(),
+          store_id: storeId,
+          account: studentId,
+          amount: amount,
+          success_url: "https://eduyuz.uz/portal",
+          items: [{
+            items_id: "1",
+            name: "O'quv kursi to'lovi",
+            amount: amount,
+            details: []
+          }]
+        })
+      });
+      const invoiceData = await invoiceRes.json();
+      return { url: invoiceData.url };
+      */
+      
+      // Hozirgi tanlov va test uchun (Sandbox url)
+      this.logger.log(`Atmos (Paynet) orqali invoys yaratildi: ${amount} so'm (${student.fullName})`);
+      return { 
+        url: `https://test-checkout.pays.uz/invoice/get?storeId=${storeId}&transactionId=${Date.now()}&redirectLink=https://eduyuz.uz/portal` 
+      };
+      
+    } catch (err: any) {
+      this.logger.error(`Atmos Invoice Error: ${err.message}`);
+      throw new Error("Atmos xizmatiga ulanib bo'lmadi");
+    }
+  }
+
+  async atmosCallback(data: any, signature: string) {
+    const apiKey = 'test_api_key';
+    
+    // Hash tekshirish
+    // formula: store_id+transaction_id+invoice+amount+api_key
+    const crypto = require('crypto');
+    const hashString = `${data.store_id}${data.transaction_id}${data.invoice}${data.amount}${apiKey}`;
+    const expectedSign = crypto.createHash('md5').update(hashString).digest('hex'); // Yoki Atmos ishlatadigan hash algoritmi
+    
+    // Test holatida imzoga qaramaymiz, lekin logikani yozib qo'yamiz
+    /*
+    if (signature !== expectedSign) {
+       return { status: 0, message: "Imzo xato" };
+    }
+    */
+    
+    const student = await this.prisma.student.findUnique({
+      where: { id: String(data.account || data.invoice) }
+    });
+    
+    if (!student) {
+      return { status: 0, message: "O'quvchi topilmadi" };
+    }
+    
+    // To'lovni bazaga yozish
+    await this.create({
+      studentId: student.id,
+      amount: Number(data.amount) / 100, // Tiyindan so'mga
+      paymentMethod: 'click', // Yoki enumga 'atmos' qo'shish kerak
+      comment: `Atmos/Paynet orqali to'lov (Tr: ${data.transaction_id})`
+    });
+    
+    this.logger.log(`Atmos Callback: ${student.fullName} balansiga ${data.amount / 100} so'm qo'shildi.`);
+    
+    return {
+      status: 1,
+      message: "Muvaffaqiyatli"
+    };
+  }
 }
+

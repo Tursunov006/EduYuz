@@ -57,4 +57,20 @@ export class PaymentsController {
   clickComplete(@Body() data: any) {
     return this.paymentsService.clickComplete(data);
   }
+
+  // ==========================================
+  // ATMOS WEBHOOKS & API (Public APIs)
+  // ==========================================
+
+  @Public()
+  @Post('atmos/create-invoice')
+  createAtmosInvoice(@Body() body: { studentId: string; amount: number }) {
+    return this.paymentsService.createAtmosInvoice(body.studentId, body.amount);
+  }
+
+  @Public()
+  @Post('atmos/callback')
+  atmosCallback(@Body() data: any, @Query('sign') sign: string) {
+    return this.paymentsService.atmosCallback(data, sign || '');
+  }
 }
