@@ -64,16 +64,14 @@ export default function PaymentsPage() {
 
   // Filtrlangan to'lovlar
   const filteredPayments = payments.filter((p) => {
+    const isPositive = Number(p.amount || 0) > 0;
     const matchesSearch = p.student?.fullName?.toLowerCase().includes(search.toLowerCase());
     const matchesMethod = methodFilter === 'ALL' || p.paymentMethod === methodFilter;
-    return matchesSearch && matchesMethod;
+    return isPositive && matchesSearch && matchesMethod;
   });
 
-  // Jami tushum faqat musbat (plyus) to'lovlarni hisoblashi kerak
-  const totalAmount = filteredPayments.reduce((acc, p) => {
-    const amount = Number(p.amount || 0);
-    return amount > 0 ? acc + amount : acc;
-  }, 0);
+  // Jami tushum
+  const totalAmount = filteredPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
 
   function exportToCSV() {
     if (filteredPayments.length === 0) return alert('Eksport uchun to\'lovlar yo\'q');
