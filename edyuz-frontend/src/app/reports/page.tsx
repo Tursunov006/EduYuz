@@ -108,8 +108,8 @@ export default function ReportsPage() {
         }).sort((a: any, b: any) => b.students - a.students).slice(0, 5);
 
         // calculate total for progress bar percentages
-        const totalStudents = tStats.reduce((acc, t) => acc + t.students, 0);
-        setTeacherStats(tStats.map((t, i) => ({
+        const totalStudents = tStats.reduce((acc: any, t: any) => acc + t.students, 0);
+        setTeacherStats(tStats.map((t: any, i: any) => ({
              ...t, 
              pct: totalStudents === 0 ? 0 : (t.students / totalStudents) * 100,
              color: COLORS[i % COLORS.length]

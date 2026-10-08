@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy } from 'lucide-react';
+import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import axios from 'axios';

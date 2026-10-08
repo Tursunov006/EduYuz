@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Sparkles, Instagram, Send, MessageSquare, Copy, CheckCircle2, Loader2, Video } from 'lucide-react';
+import { Bot, Sparkles, Camera, Send, MessageSquare, Copy, CheckCircle2, Loader2, Video } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 export default function AiMarketingPage() {
@@ -12,7 +12,7 @@ export default function AiMarketingPage() {
   const [copied, setCopied] = useState(false);
 
   const platforms = [
-    { id: 'instagram_post', name: 'Instagram Post', icon: Instagram, desc: 'Rasmli postlar uchun jozibali matnlar' },
+    { id: 'instagram_post', name: 'Instagram Post', icon: Camera, desc: 'Rasmli postlar uchun jozibali matnlar' },
     { id: 'reels_scenario', name: 'Reels Ssenariysi', icon: Video, desc: 'Qisqa videolar uchun tayyor ssenariy' },
     { id: 'telegram_ad', name: 'Telegram E\'lon', icon: Send, desc: 'Kanal va guruhlar uchun qabul e\'loni' },
     { id: 'sms_text', name: 'SMS Xabarnoma', icon: MessageSquare, desc: 'Ota-onalarga yuborish uchun qisqa SMS' },
