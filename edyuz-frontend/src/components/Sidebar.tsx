@@ -37,6 +37,7 @@ const menuItems = [
   { key: 'payments', name: 'To‘lovlar', href: '/payments', icon: CreditCard },
   { key: 'expenses', name: 'Moliya & Chiqim', href: '/expenses', icon: Wallet },
   { key: 'reports', name: 'Hisobotlar', href: '/reports', icon: TrendingUp },
+  { key: 'ai', name: 'AI Yordamchi', href: '/ai', icon: Bot },
   { key: 'lms', name: 'LMS Darslar', href: '/lms', icon: GraduationCap },
   { key: 'games', name: 'Mavzuli O‘yinlar', href: '/games', icon: Gamepad2 },
   { key: 'leaderboard', name: 'Reyting & Coins', href: '/leaderboard', icon: Trophy },

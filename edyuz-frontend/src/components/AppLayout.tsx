@@ -122,7 +122,6 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
           {children}
         </div>
       )}
-      <HelpWidget />
     </>
   );
 }
