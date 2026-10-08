@@ -69,7 +69,11 @@ export default function PaymentsPage() {
     return matchesSearch && matchesMethod;
   });
 
-  const totalAmount = filteredPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+  // Jami tushum faqat musbat (plyus) to'lovlarni hisoblashi kerak
+  const totalAmount = filteredPayments.reduce((acc, p) => {
+    const amount = Number(p.amount || 0);
+    return amount > 0 ? acc + amount : acc;
+  }, 0);
 
   function exportToCSV() {
     if (filteredPayments.length === 0) return alert('Eksport uchun to\'lovlar yo\'q');
