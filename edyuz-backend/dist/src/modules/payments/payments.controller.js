@@ -35,6 +35,9 @@ let PaymentsController = class PaymentsController {
     findOne(id) {
         return this.paymentsService.findOne(id);
     }
+    async resetAll() {
+        return this.paymentsService.resetAllPayments();
+    }
     clickPrepare(data) {
         return this.paymentsService.clickPrepare(data);
     }
@@ -81,6 +84,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], PaymentsController.prototype, "findOne", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('reset-all-data'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "resetAll", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('click/prepare'),

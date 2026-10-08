@@ -189,6 +189,15 @@ export class PaymentsService {
     return payment;
   }
 
+  // Presentation Reset
+  async resetAllPayments() {
+    await this.prisma.payment.deleteMany({});
+    await this.prisma.student.updateMany({
+      data: { balance: 0 }
+    });
+    return { success: true, message: "Kassa nollashtirildi!" };
+  }
+
   // ==========================================
   // CLICK INTEGRATSIYASI (WEBHOOK)
   // ==========================================

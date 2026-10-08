@@ -43,6 +43,15 @@ export class PaymentsController {
   }
 
   // ==========================================
+  // TEMPORARY RESET (For Presentation)
+  // ==========================================
+  @Public()
+  @Post('reset-all-data')
+  async resetAll() {
+    return this.paymentsService.resetAllPayments();
+  }
+
+  // ==========================================
   // CLICK WEBHOOKS (Public APIs)
   // ==========================================
   

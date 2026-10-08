@@ -152,6 +152,13 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         }
         return payment;
     }
+    async resetAllPayments() {
+        await this.prisma.payment.deleteMany({});
+        await this.prisma.student.updateMany({
+            data: { balance: 0 }
+        });
+        return { success: true, message: "Kassa nollashtirildi!" };
+    }
     async clickPrepare(data) {
         const student = await this.prisma.student.findUnique({
             where: { id: data.merchant_trans_id }

@@ -1,0 +1,1 @@
+import { PrismaClient } from '@prisma/client'; const prisma = new PrismaClient(); async function reset() { await prisma.payment.deleteMany({}); await prisma.student.updateMany({ data: { balance: 0 } }); console.log('Reset done!'); } reset();
