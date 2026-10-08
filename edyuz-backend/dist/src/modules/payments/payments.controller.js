@@ -41,6 +41,12 @@ let PaymentsController = class PaymentsController {
     clickComplete(data) {
         return this.paymentsService.clickComplete(data);
     }
+    createAtmosInvoice(body) {
+        return this.paymentsService.createAtmosInvoice(body.studentId, body.amount);
+    }
+    atmosCallback(data, sign) {
+        return this.paymentsService.atmosCallback(data, sign || '');
+    }
 };
 exports.PaymentsController = PaymentsController;
 __decorate([
@@ -91,6 +97,23 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], PaymentsController.prototype, "clickComplete", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('atmos/create-invoice'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], PaymentsController.prototype, "createAtmosInvoice", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('atmos/callback'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Query)('sign')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], PaymentsController.prototype, "atmosCallback", null);
 exports.PaymentsController = PaymentsController = __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('payments'),

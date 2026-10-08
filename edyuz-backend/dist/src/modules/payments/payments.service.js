@@ -219,6 +219,51 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
             };
         }
     }
+    async createAtmosInvoice(studentId, amount) {
+        const student = await this.prisma.student.findUnique({
+            where: { id: studentId }
+        });
+        if (!student) {
+            throw new common_1.NotFoundException("O'quvchi topilmadi");
+        }
+        try {
+            const consumerKey = 'test_consumer_key';
+            const consumerSecret = 'test_consumer_secret';
+            const storeId = 1234;
+            const credentials = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+            this.logger.log(`Atmos (Paynet) orqali invoys yaratildi: ${amount} so'm (${student.fullName})`);
+            return {
+                url: `https://test-checkout.pays.uz/invoice/get?storeId=${storeId}&transactionId=${Date.now()}&redirectLink=https://eduyuz.uz/portal`
+            };
+        }
+        catch (err) {
+            this.logger.error(`Atmos Invoice Error: ${err.message}`);
+            throw new Error("Atmos xizmatiga ulanib bo'lmadi");
+        }
+    }
+    async atmosCallback(data, signature) {
+        const apiKey = 'test_api_key';
+        const crypto = require('crypto');
+        const hashString = `${data.store_id}${data.transaction_id}${data.invoice}${data.amount}${apiKey}`;
+        const expectedSign = crypto.createHash('md5').update(hashString).digest('hex');
+        const student = await this.prisma.student.findUnique({
+            where: { id: String(data.account || data.invoice) }
+        });
+        if (!student) {
+            return { status: 0, message: "O'quvchi topilmadi" };
+        }
+        await this.create({
+            studentId: student.id,
+            amount: Number(data.amount) / 100,
+            paymentMethod: 'click',
+            comment: `Atmos/Paynet orqali to'lov (Tr: ${data.transaction_id})`
+        });
+        this.logger.log(`Atmos Callback: ${student.fullName} balansiga ${data.amount / 100} so'm qo'shildi.`);
+        return {
+            status: 1,
+            message: "Muvaffaqiyatli"
+        };
+    }
 };
 exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = PaymentsService_1 = __decorate([
