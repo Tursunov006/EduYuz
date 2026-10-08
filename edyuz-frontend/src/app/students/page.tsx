@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet } from 'lucide-react';
+import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import axios from 'axios';
@@ -16,6 +16,9 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
+  
+  // Telegram havola uchun modal
+  const [telegramLinkModal, setTelegramLinkModal] = useState({ isOpen: false, link: '', copied: false });
 
   // Forma ma'lumotlari
   const [form, setForm] = useState({
@@ -233,8 +236,7 @@ export default function StudentsPage() {
                         onClick={() => {
                           const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Edyuz_crmbot';
                           const link = `https://t.me/${botUser}?start=student_${s.id}`;
-                          navigator.clipboard.writeText(link);
-                          alert(`Ota-ona uchun Telegram Bot havolasi nusxalandi:\n${link}\n\nUshbu havolani ota-onaga yuborsangiz, ular botga kirib /start bosishi bilan tizimga avtomatik ulanadi!`);
+                          setTelegramLinkModal({ isOpen: true, link, copied: false });
                         }}
                         title="Telegram Botga ulash havolasi"
                         className="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition"
@@ -377,6 +379,52 @@ export default function StudentsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Telegram Link Modali */}
+      {telegramLinkModal.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Send className="text-sky-400" /> Telegram Havolasi
+            </h2>
+            <p className="text-sm text-slate-400">
+              Ushbu havoladan nusxa oling va ota-onaga yuboring. Ota-ona havola ustiga bosib, Telegram botda <strong className="text-white">/start</strong> buyrug'ini bersa, tizimga avtomatik ulanadi.
+            </p>
+            
+            <div className="flex items-center gap-2 mt-4">
+              <input 
+                type="text" 
+                readOnly 
+                value={telegramLinkModal.link} 
+                className="flex-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-sky-500/50"
+              />
+              <button 
+                onClick={() => {
+                  navigator.clipboard.writeText(telegramLinkModal.link);
+                  setTelegramLinkModal(prev => ({ ...prev, copied: true }));
+                  setTimeout(() => setTelegramLinkModal(prev => ({ ...prev, copied: false })), 2000);
+                }}
+                className={`p-2.5 rounded-xl transition flex items-center gap-2 ${
+                  telegramLinkModal.copied 
+                    ? 'bg-emerald-500/20 text-emerald-400' 
+                    : 'bg-sky-600 hover:bg-sky-700 text-white'
+                }`}
+              >
+                {telegramLinkModal.copied ? <CheckCircle2 size={18} /> : <Copy size={18} />}
+              </button>
+            </div>
+
+            <div className="flex justify-end pt-4">
+              <button
+                onClick={() => setTelegramLinkModal({ isOpen: false, link: '', copied: false })}
+                className="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition"
+              >
+                Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}
