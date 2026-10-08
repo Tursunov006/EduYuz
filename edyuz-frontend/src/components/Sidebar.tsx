@@ -19,7 +19,8 @@ import {
   Megaphone,
   TrendingUp,
   Bot,
-  X 
+  X,
+  HelpCircle
 } from 'lucide-react';
 
 import Logo from './Logo';
@@ -85,7 +86,15 @@ export default function Sidebar() {
   );
 
   const renderLogoutButton = () => (
-    <div className="p-4 border-t border-slate-800">
+    <div className="p-4 border-t border-slate-800 space-y-2">
+      <Link
+        href="https://t.me/tursunov_husniddin"
+        target="_blank"
+        className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+      >
+        <HelpCircle size={18} className="text-sky-400" />
+        <span>Yordam (Support)</span>
+      </Link>
       <button
         onClick={() => {
           localStorage.removeItem('token');
