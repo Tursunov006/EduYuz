@@ -7,6 +7,7 @@ import {
   CalendarCheck, 
   BookOpen, 
   CreditCard, 
+  QrCode,
   Award, 
   Coins, 
   CheckCircle2, 
@@ -468,19 +469,43 @@ function PortalContent() {
             <div className="space-y-4">
               
               {/* Click orqali To'lov Vidjeti */}
-              <div className="bg-gradient-to-r from-blue-900/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center text-center space-y-3">
-                <h4 className="text-sm font-bold text-white flex items-center gap-2"><CreditCard size={18} className="text-[#00AEEF]"/> Click orqali to'lov qilish</h4>
-                <p className="text-[11px] text-slate-300">
-                  O'quvchi ID: <span className="font-bold text-blue-300">{selectedStudentId.split('-')[0]}</span>
+              <div className="bg-gradient-to-r from-blue-900/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-2 opacity-10">
+                  <QrCode size={80} />
+                </div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod (Click)</h4>
+                <p className="text-[11px] text-slate-300 relative z-10">
+                  Ota-onangiz o'z telefonlaridagi Click yoki Uzum ilovasi orqali bu QR kodni skaner qilib, to'g'ridan-to'g'ri to'lov qilishlari mumkin!
                 </p>
-                <a 
-                  href={`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-500/20"
-                >
-                  Click orqali {isDebt ? `${Math.abs(Number(studentData?.balance || 0)).toLocaleString()} so'm ` : ''}to'lash
-                </a>
+                
+                {/* QR KOD RASMI */}
+                <div className="p-2 bg-white rounded-xl shadow-lg relative z-10 mx-auto">
+                  <img 
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`)}`}
+                    alt="To'lov QR Kodi"
+                    className="w-32 h-32 object-contain"
+                  />
+                </div>
+
+                <p className="text-[11px] font-mono bg-slate-900/50 px-3 py-1.5 rounded-lg text-slate-300 relative z-10">
+                  ID raqamingiz: <span className="font-bold text-white">{selectedStudentId.split('-')[0]}</span>
+                </p>
+
+                <div className="flex gap-2 w-full pt-2 relative z-10">
+                  <a 
+                    href={`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-blue-500/20"
+                  >
+                    Click
+                  </a>
+                  <button 
+                    className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-500/20"
+                  >
+                    ATMOS (UzCard)
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4">
