@@ -115,6 +115,9 @@ let StudentsService = class StudentsService {
     }
     async remove(id) {
         await this.findOne(id);
+        await this.prisma.payment.deleteMany({
+            where: { studentId: id }
+        });
         return this.prisma.student.delete({
             where: { id },
         });

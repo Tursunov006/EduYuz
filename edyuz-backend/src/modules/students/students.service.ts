@@ -117,6 +117,12 @@ export class StudentsService {
 
   async remove(id: string) {
     await this.findOne(id);
+    
+    // Prisma schema da payments Restrict qilingani uchun avval to'lovlarni tozalaymiz
+    await this.prisma.payment.deleteMany({
+      where: { studentId: id }
+    });
+
     return this.prisma.student.delete({
       where: { id },
     });
