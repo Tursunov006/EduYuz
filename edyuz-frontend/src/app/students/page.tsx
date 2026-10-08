@@ -213,7 +213,7 @@ export default function StudentsPage() {
                     </div>
                   </td>
                   <td className={`py-4 px-5 font-semibold ${Number(s.balance) < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {Number(s.balance).toLocaleString()} so'm
+                    {Math.abs(Number(s.balance)).toLocaleString()} so'm
                   </td>
                   <td className="py-4 px-5">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${

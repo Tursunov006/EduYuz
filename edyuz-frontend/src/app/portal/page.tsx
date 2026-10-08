@@ -539,7 +539,6 @@ function PortalContent() {
                               isCharge ? 'text-slate-400' : 'text-emerald-400'
                             }`}
                           >
-                            {isCharge ? '' : '+'}
                             {Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so'm
                           </span>
                           <span className="text-[9px] uppercase tracking-wider text-slate-500 block">
