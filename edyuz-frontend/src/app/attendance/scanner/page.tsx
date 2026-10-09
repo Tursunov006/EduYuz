@@ -49,31 +49,44 @@ export default function FaceIdScannerPage() {
     return () => stopCamera(); // Sahifadan chiqganda kamerani o'chirish
   }, []);
 
-  const handleScan = () => {
-    if (!streamActive) return;
+  const handleScan = async () => {
+    if (!streamActive || !videoRef.current) return;
     setIsScanning(true);
     setResult(null);
 
-    // Skanerlash effekti (AI imitatsiyasi)
-    setTimeout(() => {
+    try {
+      // 1. Rasmga olish (Canvas orqali)
+      const canvas = document.createElement('canvas');
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      }
+      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+
+      // 2. Backendga jo'natish
+      const data = await apiFetch('/attendance/face-scan', {
+        method: 'POST',
+        body: JSON.stringify({ image: base64Image })
+      });
+
       setIsScanning(false);
       
-      // Random o'quvchini tanlash (faqat taqdimot effekti uchun)
-      if (students.length > 0) {
-        const randomStudent = students[Math.floor(Math.random() * students.length)];
+      if (data.success || data.name) {
         setResult({
           success: true,
-          message: "Davomatga belgilandi va Telegram orqali ota-onasiga xabar yuborildi!",
-          name: randomStudent.fullName
+          message: data.message || "Davomatga belgilandi va Telegram orqali ota-onasiga xabar yuborildi!",
+          name: data.name || "Noma'lum O'quvchi"
         });
       } else {
-        setResult({
-          success: true,
-          message: "Sardorbek Olimov aniqlandi. Davomatga belgilandi!",
-          name: "Sardorbek Olimov"
-        });
+        alert(data.message || "Xatolik yuz berdi");
       }
-    }, 2500);
+    } catch (err) {
+      setIsScanning(false);
+      alert("Serverga ulanishda xatolik yuz berdi!");
+      console.error(err);
+    }
   };
 
   return (
