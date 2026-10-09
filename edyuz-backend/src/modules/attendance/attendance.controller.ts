@@ -22,6 +22,13 @@ export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Public()
+  @Post('face-scan')
+  async faceScan(@Body('image') image: string) {
+    if (!image) throw new Error("Rasm yuborilmadi");
+    return this.attendanceService.processFaceScan(image);
+  }
+
+  @Public()
   @Post('mark')
   markAttendance(
     @Body() dto: MarkAttendanceDto,

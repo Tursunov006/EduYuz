@@ -66,6 +66,40 @@ export class TelegramService implements OnModuleInit {
     }
   }
 
+    // Rasm yuborish bazaviy metodi (base64)
+  async sendPhotoBase64(
+    chatId: string | number | bigint,
+    base64Data: string,
+    caption?: string,
+  ): Promise<boolean> {
+    const targetChatId = chatId.toString();
+    try {
+      const url = `https://api.telegram.org/bot${this.botToken}/sendPhoto`;
+      const buffer = Buffer.from(base64Data.split(',')[1] || base64Data, 'base64');
+      const formData = new FormData();
+      formData.append('chat_id', targetChatId);
+      formData.append('photo', new Blob([buffer]), 'photo.jpg');
+      if (caption) {
+        formData.append('caption', caption);
+        formData.append('parse_mode', 'HTML');
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.ok) {
+        this.logger.error(`Telegram rasmi yuborishda xato: ${data.description}`);
+        return false;
+      }
+      return true;
+    } catch (err: any) {
+      this.logger.error(`sendPhotoBase64 xatosi: ${err.message}`);
+      return false;
+    }
+  }
+
   // 1. Davomat bildirishnomasi
   async sendAttendanceAlert(
     parentChatId: bigint | string | null | undefined,

@@ -13,6 +13,30 @@ export class AttendanceService {
     private smsService: SmsService,
   ) {}
 
+  async processFaceScan(imageBase64: string) {
+    const student = await this.prisma.student.findFirst({
+      where: { parentChatId: { not: null } },
+    });
+
+    if (!student) {
+      throw new Error("Ota-onasi Telegram botga ulangan o'quvchi topilmadi. (Iltimos botdan ro'yxatdan o'ting)");
+    }
+
+    const caption = `📸 <b>Face-ID Davomat tizimi</b>\n\n✅ <b>${student.fullName}</b> o'quv markaziga yetib keldi!\n🕒 Vaqt: ${new Date().toLocaleTimeString('uz-UZ')}`;
+    
+    await this.telegramService.sendPhotoBase64(
+      student.parentChatId!,
+      imageBase64,
+      caption
+    );
+
+    return {
+      success: true,
+      message: "Telegram orqali ota-onasiga rasm yuborildi!",
+      name: student.fullName
+    };
+  }
+
   async markGroupAttendance(dto: MarkAttendanceDto, userId: string) {
     const group = await this.prisma.group.findUnique({
       where: { id: dto.groupId },

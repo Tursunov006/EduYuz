@@ -3,6 +3,11 @@ import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 export declare class AttendanceController {
     private readonly attendanceService;
     constructor(attendanceService: AttendanceService);
+    faceScan(image: string): Promise<{
+        success: boolean;
+        message: string;
+        name: string;
+    }>;
     markAttendance(dto: MarkAttendanceDto, userId: string): Promise<{
         success: boolean;
         message: string;
@@ -10,18 +15,18 @@ export declare class AttendanceController {
     findByGroupAndDate(groupId: string, date: string): Promise<({
         student: {
             id: string;
-            phone: string;
             fullName: string;
+            phone: string;
         };
         marker: {
             id: string;
-            phone: string;
             fullName: string;
+            phone: string;
         };
     } & {
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        createdAt: Date;
         groupId: string;
         studentId: string;
         date: Date;
@@ -34,8 +39,8 @@ export declare class AttendanceController {
         };
     } & {
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        createdAt: Date;
         groupId: string;
         studentId: string;
         date: Date;

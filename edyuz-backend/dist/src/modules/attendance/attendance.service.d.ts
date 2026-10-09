@@ -7,6 +7,11 @@ export declare class AttendanceService {
     private telegramService;
     private smsService;
     constructor(prisma: PrismaService, telegramService: TelegramService, smsService: SmsService);
+    processFaceScan(imageBase64: string): Promise<{
+        success: boolean;
+        message: string;
+        name: string;
+    }>;
     markGroupAttendance(dto: MarkAttendanceDto, userId: string): Promise<{
         success: boolean;
         message: string;
@@ -14,18 +19,18 @@ export declare class AttendanceService {
     findByGroupAndDate(groupId: string, date: string): Promise<({
         student: {
             id: string;
-            phone: string;
             fullName: string;
+            phone: string;
         };
         marker: {
             id: string;
-            phone: string;
             fullName: string;
+            phone: string;
         };
     } & {
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        createdAt: Date;
         groupId: string;
         studentId: string;
         date: Date;
@@ -38,8 +43,8 @@ export declare class AttendanceService {
         };
     } & {
         id: string;
-        createdAt: Date;
         status: import(".prisma/client").$Enums.AttendanceStatus;
+        createdAt: Date;
         groupId: string;
         studentId: string;
         date: Date;

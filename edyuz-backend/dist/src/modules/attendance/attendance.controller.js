@@ -24,6 +24,11 @@ let AttendanceController = class AttendanceController {
     constructor(attendanceService) {
         this.attendanceService = attendanceService;
     }
+    async faceScan(image) {
+        if (!image)
+            throw new Error("Rasm yuborilmadi");
+        return this.attendanceService.processFaceScan(image);
+    }
     markAttendance(dto, userId) {
         return this.attendanceService.markGroupAttendance(dto, userId);
     }
@@ -35,6 +40,14 @@ let AttendanceController = class AttendanceController {
     }
 };
 exports.AttendanceController = AttendanceController;
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Post)('face-scan'),
+    __param(0, (0, common_1.Body)('image')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AttendanceController.prototype, "faceScan", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Post)('mark'),

@@ -66,6 +66,34 @@ let TelegramService = TelegramService_1 = class TelegramService {
             return false;
         }
     }
+    async sendPhotoBase64(chatId, base64Data, caption) {
+        const targetChatId = chatId.toString();
+        try {
+            const url = `https://api.telegram.org/bot${this.botToken}/sendPhoto`;
+            const buffer = Buffer.from(base64Data.split(',')[1] || base64Data, 'base64');
+            const formData = new FormData();
+            formData.append('chat_id', targetChatId);
+            formData.append('photo', new Blob([buffer]), 'photo.jpg');
+            if (caption) {
+                formData.append('caption', caption);
+                formData.append('parse_mode', 'HTML');
+            }
+            const res = await fetch(url, {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                this.logger.error(`Telegram rasmi yuborishda xato: ${data.description}`);
+                return false;
+            }
+            return true;
+        }
+        catch (err) {
+            this.logger.error(`sendPhotoBase64 xatosi: ${err.message}`);
+            return false;
+        }
+    }
     async sendAttendanceAlert(parentChatId, studentName, groupName, status, date) {
         if (!parentChatId)
             return;

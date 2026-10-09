@@ -12,6 +12,7 @@ export declare class TelegramService implements OnModuleInit {
     constructor(configService: ConfigService, prisma: PrismaService, aiService: AiService);
     onModuleInit(): void;
     sendMessage(chatId: string | number | bigint, text: string, replyMarkup?: any): Promise<boolean>;
+    sendPhotoBase64(chatId: string | number | bigint, base64Data: string, caption?: string): Promise<boolean>;
     sendAttendanceAlert(parentChatId: bigint | string | null | undefined, studentName: string, groupName: string, status: string, date: string): Promise<void>;
     sendPaymentReceipt(parentChatId: bigint | string | null | undefined, studentName: string, amount: number, method: string, newBalance: number, comment?: string | null): Promise<void>;
     sendDebtAlert(parentChatId: bigint | string | null | undefined, studentName: string, debtAmount: number, groupName: string): Promise<void>;

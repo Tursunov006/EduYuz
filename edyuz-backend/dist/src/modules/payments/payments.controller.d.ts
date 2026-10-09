@@ -6,6 +6,7 @@ export declare class PaymentsController {
     create(dto: CreatePaymentDto): Promise<{
         student: {
             id: string;
+            centerId: string;
             fullName: string;
             phone: string | null;
             parentPhone: string;
@@ -15,7 +16,6 @@ export declare class PaymentsController {
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
             createdAt: Date;
-            centerId: string;
         };
     } & {
         id: string;
@@ -48,6 +48,7 @@ export declare class PaymentsController {
     findOne(id: string): Promise<{
         student: {
             id: string;
+            centerId: string;
             fullName: string;
             phone: string | null;
             parentPhone: string;
@@ -57,7 +58,6 @@ export declare class PaymentsController {
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
             createdAt: Date;
-            centerId: string;
         };
     } & {
         id: string;
