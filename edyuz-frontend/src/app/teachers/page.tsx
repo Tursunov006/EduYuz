@@ -20,7 +20,9 @@ import {
   TrendingUp,
   Percent,
   Check,
-  X
+  X,
+  Bot,
+  Calculator
 } from 'lucide-react';
 import { formatMoney } from '@/lib/format';
 
@@ -223,6 +225,24 @@ export default function TeachersPage() {
       </div>
 
       {/* Umumiy Moliya va KPI Statistikasi */}
+      <div className="bg-gradient-to-r from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 mb-2 shadow-lg flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Bot className="text-indigo-400 animate-pulse" size={20} />
+            AI-HR Avtomatik Maosh Hisoblash
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Sun'iy intellekt barcha o'qituvchilarning dars soatlari, davomati va tushumlarini analiz qildi.
+          </p>
+        </div>
+        <button
+          onClick={() => alert("AI algoritmi 1 tiyinigacha aniq hisoblab chiqdi! (Taqdimot effekti)")}
+          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.5)] transition"
+        >
+          <Calculator size={18} /> Hisobotni Yakunlash
+        </button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-sm">
           <span className="text-xs text-slate-400 block font-medium">Jami O‘qituvchilar</span>

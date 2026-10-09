@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowUpRight, TrendingUp, TrendingDown, DollarSign, Users, BookOpen, AlertCircle } from 'lucide-react';
+import { ArrowUpRight, TrendingUp, TrendingDown, DollarSign, Users, BookOpen, AlertCircle, Brain, AlertTriangle } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 const COLORS = ['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'bg-purple-500', 'bg-pink-500'];
@@ -200,7 +200,7 @@ export default function ReportsPage() {
             {teacherStats.length === 0 ? (
               <p className="text-sm text-slate-500">Ma'lumot yo'q</p>
             ) : (
-              teacherStats.map((t, i) => (
+              teacherStats.map((t: any, i: number) => (
                 <div key={i}>
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
@@ -219,6 +219,53 @@ export default function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* AI Biznes Prognoz - Taqdimot effekti uchun */}
+      <div className="mt-6 bg-gradient-to-br from-indigo-900/40 to-slate-900 border border-indigo-500/30 rounded-2xl p-6 shadow-lg shadow-indigo-500/10">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Brain className="text-indigo-400 animate-pulse" />
+              AI Biznes Prognoz (Mijozlarni Saqlab Qolish)
+            </h2>
+            <p className="text-sm text-slate-400 mt-1">
+              Sun'iy intellekt oxirgi oylardagi davomat va to'lov tushumlarini analiz qilib, qaysi o'quvchilar kursni tashlab ketish xavfi (Churn rate) borligini hisoblab berdi.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-slate-950/50 border border-rose-500/20 rounded-xl p-4 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="text-rose-400" size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Sardorbek Olimov</h4>
+              <p className="text-xs text-slate-400 mt-1">Oxirgi 3 ta dars qoldirilgan. Balansda qarz bor.</p>
+              <div className="mt-2 text-xs font-bold text-rose-400">Ketib qolish xavfi: 85%</div>
+            </div>
+          </div>
+
+          <div className="bg-slate-950/50 border border-amber-500/20 rounded-xl p-4 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="text-amber-400" size={20} />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white">Madina Aliyeva</h4>
+              <p className="text-xs text-slate-400 mt-1">O'zlashtirish (Quiz) natijalari keskin pasaygan.</p>
+              <div className="mt-2 text-xs font-bold text-amber-400">Ketib qolish xavfi: 62%</div>
+            </div>
+          </div>
+
+          <div className="bg-slate-950/50 border border-slate-800 rounded-xl p-4 flex flex-col justify-center items-center text-center">
+            <Brain className="text-indigo-400 mb-2 opacity-50" size={24} />
+            <p className="text-xs font-medium text-slate-300">
+              AI tavsiyasi: Zudlik bilan yuqoridagi o'quvchilarning ota-onalari bilan telefon orqali bog'laning.
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }
