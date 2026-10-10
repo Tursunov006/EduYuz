@@ -24,11 +24,14 @@ export default function FaceIdScannerPage() {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setStreamActive(true);
-        setResult(null);
-      }
+      setStreamActive(true);
+      setResult(null);
+      // Wait for React to render the video element, then attach stream
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+      }, 100);
     } catch (err) {
       console.error("Kameraga ulanishda xato:", err);
       alert("Kameraga ulanib bo'lmadi! Brauzerdan kameraga ruxsat bering.");
