@@ -7,8 +7,11 @@ const http_exception_filter_1 = require("./common/filters/http-exception.filter"
 BigInt.prototype.toJSON = function () {
     return this.toString();
 };
+const express_1 = require("express");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
+    app.use((0, express_1.json)({ limit: '50mb' }));
+    app.use((0, express_1.urlencoded)({ extended: true, limit: '50mb' }));
     app.setGlobalPrefix('api/v1');
     app.enableCors({
         origin: '*',
