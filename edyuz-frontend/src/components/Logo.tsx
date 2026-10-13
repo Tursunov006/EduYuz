@@ -5,22 +5,25 @@ interface LogoProps {
 export default function Logo({ collapsed = false }: LogoProps) {
   return (
     <div className="flex items-center gap-3 select-none">
-      {/* Rasmiy EduYuz Ikona (O'quv kepkasi va o'quvchilar ramzi) */}
-      <div className="relative flex-shrink-0 w-10 h-10 rounded-xl bg-white p-1 flex items-center justify-center shadow-lg shadow-blue-500/20 transition-all duration-200 hover:scale-105 group border border-slate-100/10">
+      {/* Yangi EduYuz Concept B Ikona */}
+      <div className="relative flex-shrink-0 w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500/20 via-purple-500/20 to-pink-500/20 p-0.5 flex items-center justify-center shadow-lg shadow-purple-500/30 transition-all duration-300 hover:scale-105 group border border-purple-500/30 overflow-hidden">
         <img
-          src="/logo-icon-transparent.png"
-          alt="EduYuz"
-          className="w-8 h-8 object-contain transition-transform duration-200 group-hover:scale-110"
+          src="/eduyuz-logo-b.jpg"
+          alt="EduYuz AI"
+          className="w-full h-full object-cover rounded-[14px] transition-transform duration-300 group-hover:scale-110"
         />
       </div>
 
-      {/* Matn qismi (Sidebar ochiq bo'lganda) */}
+      {/* Matn qismi */}
       {!collapsed && (
         <div className="flex flex-col leading-tight">
           <div className="flex items-baseline text-[21px] font-black tracking-tight text-white">
-            Edu<span className="text-blue-400">Yuz</span>
+            Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Yuz</span>
+            <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30 font-extrabold uppercase tracking-widest">
+              AI
+            </span>
           </div>
-          <span className="text-[9px] uppercase tracking-[0.22em] text-slate-400 font-bold -mt-0.5">
+          <span className="text-[9px] uppercase tracking-[0.24em] text-slate-400 font-bold -mt-0.5">
             CRM PLATFORM
           </span>
         </div>

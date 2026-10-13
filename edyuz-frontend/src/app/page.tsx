@@ -66,44 +66,64 @@ export default function DashboardPage() {
   }
 
   const cards = [
-    { title: t('dash.totalStudents', "Jami O'quvchilar"), value: stats.studentsCount, icon: Users, color: 'from-blue-500 to-indigo-600', href: '/students' },
-    { title: t('dash.activeGroups', 'Faol Guruhlar'), value: stats.groupsCount, icon: BookOpen, color: 'from-emerald-500 to-teal-600', href: '/groups' },
-    { title: 'Kurslar', value: stats.coursesCount, icon: Calendar, color: 'from-amber-500 to-orange-600', href: '/groups' },
-    { title: t('dash.monthlyRevenue', 'Jami Tushum'), value: `${stats.paymentsTotal.toLocaleString()} so'm`, icon: TrendingUp, color: 'from-violet-500 to-purple-600', href: '/payments' },
+    { title: t('dash.totalStudents', "Jami O'quvchilar"), value: stats.studentsCount, icon: Users, color: 'from-blue-500 to-indigo-600', href: '/students', badge: '+12% bu oy' },
+    { title: t('dash.activeGroups', 'Faol Guruhlar'), value: stats.groupsCount, icon: BookOpen, color: 'from-cyan-500 to-teal-600', href: '/groups', badge: '100% to\'liq' },
+    { title: 'Kurs Yo\'nalishlari', value: stats.coursesCount, icon: Calendar, color: 'from-amber-500 to-orange-600', href: '/groups', badge: 'Standart' },
+    { title: t('dash.monthlyRevenue', 'Jami Tushum'), value: `${stats.paymentsTotal.toLocaleString()} so'm`, icon: TrendingUp, color: 'from-purple-500 via-indigo-600 to-pink-500', href: '/payments', badge: 'Kassa faol' },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Sarlavha va Tezkor tugmalar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">Boshqaruv Paneli</h1>
-          <p className="text-slate-400 mt-1">O'quv markazining asosiy statistikasi va tezkor amallar</p>
-        </div>
+    <div className="space-y-8 pb-10">
+      {/* 1. Header Banner & Tezkor Amallar (EduYuz 2.0 Hero) */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-indigo-950/50 border border-slate-800/80 p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-1/3 -mb-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Link
-            href="/students"
-            className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-medium transition"
-          >
-            <Plus size={14} className="text-indigo-400" /> O'quvchi qo'shish
-          </Link>
-          <Link
-            href="/groups"
-            className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-medium transition"
-          >
-            <Plus size={14} className="text-indigo-400" /> Guruh ochish
-          </Link>
-          <Link
-            href="/payments"
-            className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-medium transition shadow-lg shadow-indigo-600/20"
-          >
-            <Plus size={14} /> To'lov olish
-          </Link>
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20 text-purple-300 text-xs font-semibold">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              EduYuz 2.0 AI Hub • Tizim barqaror ishlamoqda
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+              Boshqaruv <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Markazi</span>
+            </h1>
+            <p className="text-slate-400 text-sm max-w-xl">
+              Markazingizning real vaqtdagi davomat, moliya va o'quvchilar balansi ko'rsatkichlari.
+            </p>
+          </div>
+
+          {/* Tezkor Tugmalar Bloki */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/attendance/scanner"
+              className="flex items-center gap-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/40 text-cyan-300 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-lg shadow-cyan-500/10 hover:scale-[1.02] active:scale-95"
+            >
+              <span className="text-sm">📷</span> Face-ID Skaner
+            </Link>
+            <Link
+              href="/students"
+              className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <Plus size={15} className="text-indigo-400" /> O'quvchi
+            </Link>
+            <Link
+              href="/groups"
+              className="flex items-center gap-2 bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 text-slate-200 px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all hover:scale-[1.02] active:scale-95"
+            >
+              <Plus size={15} className="text-indigo-400" /> Guruh
+            </Link>
+            <Link
+              href="/payments"
+              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
+            >
+              <Plus size={15} /> To'lov qabul qilish
+            </Link>
+          </div>
         </div>
       </div>
 
-      {/* Statistika Kartalari */}
+      {/* 2. Statistika Kartalari (EduYuz 2.0 KPI Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {cards.map((card, i) => {
           const Icon = card.icon;
@@ -111,36 +131,51 @@ export default function DashboardPage() {
             <Link
               key={i}
               href={card.href}
-              className="bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-5 shadow-sm flex items-center justify-between transition group"
+              className="relative overflow-hidden bg-slate-900/90 border border-slate-800/80 hover:border-slate-700 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 group hover:-translate-y-1 backdrop-blur-md"
             >
-              <div>
-                <p className="text-xs font-medium text-slate-400">{card.title}</p>
-                <h3 className="text-2xl font-bold mt-2 text-white">{loading ? '...' : card.value}</h3>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{card.title}</span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-indigo-300 border border-slate-700">
+                  {card.badge}
+                </span>
               </div>
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform`}>
-                <Icon size={22} />
+              
+              <div className="flex items-baseline justify-between">
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  {loading ? '...' : card.value}
+                </h3>
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${card.color} flex items-center justify-center text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
+                  <Icon size={22} />
+                </div>
               </div>
             </Link>
           );
         })}
       </div>
 
-      {/* Asosiy blok: So'nggi to'lovlar + Qarzdorlar */}
+      {/* 3. Asosiy blok: So'nggi to'lovlar + Qarzdorlar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* So'nggi to'lovlar jadvali (2 ustun) */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-              <CreditCard size={18} className="text-indigo-400" />
-              So'nggi qabul qilingan to'lovlar
-            </h2>
-            <Link href="/payments" className="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+        <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800/60">
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                <CreditCard size={18} className="text-cyan-400" />
+                So'nggi qabul qilingan to'lovlar
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Real vaqtdagi kassa tushumlari</p>
+            </div>
+            <Link 
+              href="/payments" 
+              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition flex items-center gap-1"
+            >
               Barchasi <ArrowUpRight size={14} />
             </Link>
           </div>
+
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-slate-800 text-slate-400 font-medium">
+              <thead className="text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800/80">
                 <tr>
                   <th className="py-3 px-3">O'quvchi</th>
                   <th className="py-3 px-3">Miqdor</th>
@@ -148,22 +183,31 @@ export default function DashboardPage() {
                   <th className="py-3 px-3">Sana</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-800/40">
                 {recentPayments.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-slate-500">To'lovlar mavjud emas</td>
+                    <td colSpan={4} className="py-10 text-center text-slate-500 text-xs">Hozircha to'lovlar kiritilmagan</td>
                   </tr>
                 ) : (
                   recentPayments.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-800/40">
-                      <td className="py-3 px-3 font-medium text-white">{p.student?.fullName || 'Noma\'lum'}</td>
-                      <td className="py-3 px-3 text-emerald-400 font-semibold">{Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so'm</td>
-                      <td className="py-3 px-3 uppercase text-xs">
-                        <span className="px-2 py-0.5 bg-slate-800 text-indigo-300 rounded font-medium border border-slate-700">
+                    <tr key={p.id} className="hover:bg-slate-800/50 transition">
+                      <td className="py-3.5 px-3 font-semibold text-white flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold">
+                          {p.student?.fullName?.[0] || 'O'}
+                        </div>
+                        {p.student?.fullName || 'Noma\'lum'}
+                      </td>
+                      <td className="py-3.5 px-3 text-emerald-400 font-extrabold font-mono">
+                        +{Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so'm
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="px-2.5 py-1 bg-slate-800/80 text-cyan-300 rounded-lg text-[11px] font-bold border border-slate-700/60 uppercase">
                           {p.paymentMethod}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-slate-400 text-xs">{new Date(p.paidAt).toLocaleDateString()}</td>
+                      <td className="py-3.5 px-3 text-slate-400 text-xs font-medium">
+                        {new Date(p.paidAt).toLocaleDateString('uz-UZ')}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -173,64 +217,79 @@ export default function DashboardPage() {
         </div>
 
         {/* Qarzdor o'quvchilar ro'yxati (1 ustun) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-base font-bold text-slate-100 flex items-center gap-2 flex-1 min-w-[140px]">
-              <AlertCircle size={18} className="text-rose-400 shrink-0" />
-              <span className="leading-tight">{t('dash.debtors', 'Qarzdor o\'quvchilar')}</span>
-            </h2>
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleExportDebtors}
-                title="Qarzdorlarni Excelga yuklash"
-                className="p-1 px-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-semibold flex items-center gap-1 transition active:scale-95"
-              >
-                <FileSpreadsheet size={13} />
-                <span>Excel</span>
-              </button>
-              <span className="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/20 font-medium">
-                {debtors.length} ta
-              </span>
+        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-6 shadow-xl space-y-4 backdrop-blur-md flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
+              <div>
+                <h2 className="text-base font-bold text-white flex items-center gap-2">
+                  <AlertCircle size={18} className="text-rose-400" />
+                  Qarzdorlar
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Nazorat talab etiladi</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleExportDebtors}
+                  title="Qarzdorlarni Excelga yuklash"
+                  className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center gap-1 transition active:scale-95"
+                >
+                  <FileSpreadsheet size={13} />
+                  <span>Excel</span>
+                </button>
+                <span className="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/20 font-bold">
+                  {debtors.length} ta
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 pt-3">
+              {debtors.length === 0 ? (
+                <div className="py-12 text-center">
+                  <span className="text-2xl">🎉</span>
+                  <p className="text-xs text-slate-400 mt-2">Hamma to'lovlar joyida! Qarzdorlar yo'q.</p>
+                </div>
+              ) : (
+                debtors.slice(0, 5).map((d) => (
+                  <div key={d.id} className="p-3 bg-slate-950/70 border border-slate-800/80 rounded-2xl flex items-center justify-between hover:border-slate-700 transition">
+                    <div>
+                      <h4 className="text-xs font-bold text-white">{d.fullName}</h4>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{d.parentPhone || d.phone}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-extrabold text-rose-400 font-mono">
+                        {Math.abs(Number(d.balance)).toLocaleString('uz-UZ')} so'm
+                      </span>
+                      <button
+                        onClick={async () => {
+                          if (!d.parentPhone) return alert("Ota-ona telefon raqami kiritilmagan");
+                          try {
+                            await axios.post('http://localhost:3000/api/v1/sms/send', {
+                              phone: d.parentPhone,
+                              message: `EduYuz: Hurmatli ota-ona! Farzandingiz ${d.fullName}ning ${Math.abs(Number(d.balance)).toLocaleString('uz-UZ')} so'm qarzdorligi mavjud. Iltimos, to'lovni amalga oshirishingizni so'raymiz.`,
+                            });
+                            alert(`✅ ${d.fullName}ning ota-onasiga SMS eslatma jo'natildi!`);
+                          } catch (err: any) {
+                            alert('SMS yuborishda xatolik');
+                          }
+                        }}
+                        title="SMS yuborish"
+                        className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition active:scale-95"
+                      >
+                        <MessageSquare size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
-          <div className="space-y-3">
-            {debtors.length === 0 ? (
-              <p className="text-xs text-slate-500 py-6 text-center">Qarzdor o'quvchilar mavjud emas 🎉</p>
-            ) : (
-              debtors.slice(0, 5).map((d) => (
-                <div key={d.id} className="p-3 bg-slate-950/60 border border-slate-800/80 rounded-xl flex items-center justify-between">
-                  <div>
-                    <h4 className="text-sm font-semibold text-white">{d.fullName}</h4>
-                    <p className="text-xs text-slate-400">{d.parentPhone}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-rose-400">
-                      {Math.abs(Number(d.balance)).toLocaleString('uz-UZ')} so'm
-                    </span>
-                    <button
-                      onClick={async () => {
-                        if (!d.parentPhone) return alert("Ota-ona telefon raqami kiritilmagan");
-                        try {
-                          await axios.post('http://localhost:3000/api/v1/sms/send', {
-                            phone: d.parentPhone,
-                            message: `EduYuz: Hurmatli ota-ona! Farzandingiz ${d.fullName}ning ${Math.abs(Number(d.balance)).toLocaleString('uz-UZ')} so'm qarzdorligi mavjud. Iltimos, to'lovni amalga oshirishingizni so'raymiz.`,
-                          });
-                          alert(`✅ ${d.fullName}ning ota-onasiga (${d.parentPhone}) SMS eslatma jo'natildi!`);
-                        } catch (err: any) {
-                          alert('SMS yuborishda xatolik');
-                        }
-                      }}
-                      title="Qarzdorlik haqida SMS yuborish"
-                      className="p-1.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-lg transition"
-                    >
-                      <MessageSquare size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <Link
+            href="/reports"
+            className="w-full text-center py-2.5 rounded-2xl bg-slate-800/70 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700/60 transition block"
+          >
+            Batafsil Moliya Hisobotlari →
+          </Link>
         </div>
       </div>
     </div>
