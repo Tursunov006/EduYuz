@@ -19,9 +19,6 @@ export default function Logo({ collapsed = false }: LogoProps) {
         <div className="flex flex-col leading-tight">
           <div className="flex items-baseline text-[21px] font-black tracking-tight text-white">
             Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Yuz</span>
-            <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded-md bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border border-purple-500/30 font-extrabold uppercase tracking-widest">
-              AI
-            </span>
           </div>
           <span className="text-[9px] uppercase tracking-[0.24em] text-slate-400 font-bold -mt-0.5">
             CRM PLATFORM
