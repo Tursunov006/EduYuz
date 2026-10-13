@@ -223,14 +223,14 @@ export default function StudentsPage() {
                     </span>
                   </td>
                   <td className="py-4 px-5 text-right">
-                    <div className="inline-flex items-center gap-2">
+                    <div className="inline-flex items-center gap-1.5 justify-end">
                       <Link
                         href={`/portal?studentId=${s.id}`}
                         target="_blank"
                         title="O'quvchi kabinetini ochish (Portal)"
-                        className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition"
+                        className="p-2 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition active:scale-95"
                       >
-                        <Smartphone size={16} />
+                        <Smartphone size={15} />
                       </Link>
                       <button
                         onClick={() => {
@@ -239,9 +239,9 @@ export default function StudentsPage() {
                           setTelegramLinkModal({ isOpen: true, link, copied: false });
                         }}
                         title="Telegram Botga ulash havolasi"
-                        className="p-1.5 text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 rounded-lg transition"
+                        className="p-2 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-xl transition active:scale-95"
                       >
-                        <Send size={16} />
+                        <Send size={15} />
                       </button>
                       <button
                         onClick={async () => {
@@ -259,23 +259,23 @@ export default function StudentsPage() {
                           }
                         }}
                         title="Ota-onaga tezkor SMS jo'natish"
-                        className="p-1.5 text-slate-400 hover:text-amber-400 hover:bg-amber-500/10 rounded-lg transition"
+                        className="p-2 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl transition active:scale-95"
                       >
-                        <MessageSquare size={16} />
+                        <MessageSquare size={15} />
                       </button>
                       <button
                         onClick={() => handleOpenEdit(s)}
                         title="Tahrirlash"
-                        className="p-1.5 text-slate-400 hover:text-indigo-400 hover:bg-slate-800 rounded-lg transition"
+                        className="p-2 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl transition active:scale-95"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={15} />
                       </button>
                       <button
                         onClick={() => handleDelete(s.id, s.fullName)}
                         title="O'chirish"
-                        className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                        className="p-2 text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition active:scale-95"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={15} />
                       </button>
                     </div>
                   </td>

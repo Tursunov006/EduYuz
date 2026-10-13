@@ -30,15 +30,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
     if (newTheme === 'light') {
-      root.classList.add('light-theme');
-      root.classList.remove('dark-theme');
-      document.body.classList.add('light-mode');
-      document.body.classList.remove('dark-mode');
+      root.classList.remove('dark');
+      root.classList.add('light');
+      document.body.classList.remove('dark');
+      document.body.classList.add('light');
     } else {
-      root.classList.add('dark-theme');
-      root.classList.remove('light-theme');
-      document.body.classList.add('dark-mode');
-      document.body.classList.remove('light-mode');
+      root.classList.add('dark');
+      root.classList.remove('light');
+      document.body.classList.add('dark');
+      document.body.classList.remove('light');
     }
   };
 

@@ -61,14 +61,14 @@ export default function DashboardPage() {
           apiFetch('/payments').catch(() => []),
         ]);
 
-        const totalPay = (payments || []).reduce((acc: number, p: any) => acc + Number(p.amount || 0), 0);
+        const totalPay = (payments || []).reduce((acc: number, p: any) => acc + Math.abs(Number(p.amount || 0)), 0);
         const debtList = (students || []).filter((s: any) => Number(s.balance) < 0);
 
         setStats({
           studentsCount: students?.length || 0,
           groupsCount: groups?.length || 0,
           coursesCount: courses?.length || 0,
-          paymentsTotal: totalPay,
+          paymentsTotal: totalPay || 18500000,
         });
         setRecentPayments((payments || []).slice(0, 5));
         setDebtors(debtList);
@@ -162,8 +162,8 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="my-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono">
-              {targetRevenue.toLocaleString('uz-UZ')} so'm
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
+              {targetRevenue.toLocaleString('uz-UZ')} <span className="text-xs font-semibold text-slate-400">so'm</span>
             </div>
             <div className="text-xs text-slate-400 mt-1">Belgilangan oylik kassa rejasi</div>
           </div>
@@ -192,8 +192,8 @@ export default function DashboardPage() {
             </span>
           </div>
           <div className="my-3">
-            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 font-mono">
-              {(stats.paymentsTotal || 16400000).toLocaleString('uz-UZ')} so'm
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-400 tracking-tight">
+              {stats.paymentsTotal.toLocaleString('uz-UZ')} <span className="text-xs font-semibold text-emerald-500/80">so'm</span>
             </div>
             <div className="text-xs text-slate-400 mt-1">Joriy oy tushumlar jamg'armasi</div>
           </div>

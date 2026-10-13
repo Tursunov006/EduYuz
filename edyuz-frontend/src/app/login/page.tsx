@@ -69,17 +69,19 @@ export default function LoginPage() {
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-6 shadow-2xl">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="bg-white rounded-2xl px-5 py-3 shadow-xl shadow-blue-500/10 inline-flex items-center justify-center border border-white/20 hover:scale-[1.02] transition-transform">
+            <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-cyan-500/20 via-purple-500/20 to-pink-500/20 p-1 flex items-center justify-center shadow-xl shadow-purple-500/30 border border-purple-500/30 hover:scale-105 transition-all">
               <img
-                src="/logo-full.png"
+                src="/eduyuz-logo-b.jpg"
                 alt="EduYuz CRM Platform"
-                className="h-12 sm:h-14 w-auto object-contain"
+                className="w-full h-full object-cover rounded-2xl"
               />
             </div>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">EduYuz Tizimiga Kirish</h1>
-            <p className="text-xs text-slate-400 mt-1">Xodimlar va administratorlar uchun boshqaruv tizimi</p>
+            <h1 className="text-2xl font-black text-white tracking-tight">
+              Edu<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Yuz</span> CRM
+            </h1>
+            <p className="text-xs text-slate-400 mt-1">O'quv markazlari uchun yagona boshqaruv tizimi</p>
           </div>
         </div>
 
