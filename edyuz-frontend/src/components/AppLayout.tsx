@@ -71,12 +71,14 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
     <>
       {!isExcluded ? (
         <div className={`min-h-screen flex w-full transition-colors duration-300 ${
-          isLight ? 'bg-slate-100 text-slate-800' : 'bg-slate-950 text-slate-100'
+          isLight ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-slate-100'
         }`}>
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
-          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
+          <div className={`flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative ${
+            isLight ? 'bg-slate-50' : 'bg-slate-950'
+          }`}>
             <Navbar />
             
             {/* Trial Banner */}
@@ -109,7 +111,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
             })()}
 
             <main className={`flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto transition-colors duration-300 w-full ${
-              isLight ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
+              isLight ? 'bg-slate-100/80 text-slate-900' : 'bg-slate-950 text-slate-100'
             }`}>
               {children}
             </main>

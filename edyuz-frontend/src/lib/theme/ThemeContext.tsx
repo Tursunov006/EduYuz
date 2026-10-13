@@ -18,10 +18,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('eduyuz_theme') as Theme | null;
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      setThemeState(savedTheme);
-      applyTheme(savedTheme);
+    if (savedTheme === 'light') {
+      setThemeState('light');
+      applyTheme('light');
     } else {
+      setThemeState('dark');
       applyTheme('dark');
     }
     setMounted(true);
