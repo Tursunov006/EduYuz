@@ -17,6 +17,10 @@ import {
   ShieldCheck,
   MessageCircle,
   ExternalLink,
+  Calculator,
+  TrendingUp,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
@@ -47,9 +51,21 @@ interface ChatMessage {
 }
 
 export default function InstagramBioPage() {
-  const [activeTab, setActiveTab] = useState<'form' | 'chat' | 'features'>('form');
+  const [activeTab, setActiveTab] = useState<'calc' | 'form' | 'chat' | 'features'>('calc');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  // Interaktiv Kalkulyator holati
+  const [studentCount, setStudentCount] = useState<number>(150);
+  const [coursePrice, setCoursePrice] = useState<number>(450000);
+
+  // Kalkulyator hisob-kitoblari
+  const monthlyRevenue = studentCount * coursePrice;
+  // CRM bo'lmaganda o'rtacha 16% tushum vaqtida to'lanmagan qarzlar va yo'qolgan lidlar sabab boy beriladi
+  const monthlyLossWithoutCrm = Math.round(monthlyRevenue * 0.16);
+  // EduYuz CRM (Lidlar voronkasi + Avto-SMS + Face-ID) orqali qo'shimcha +22% o'sish
+  const extraProfitWithEduYuz = Math.round(monthlyRevenue * 0.22);
+  const savedHoursPerMonth = Math.max(Math.round(studentCount * 0.35), 12);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -79,6 +95,14 @@ export default function InstagramBioPage() {
     }
   }
 
+  function handleClaimFromCalculator() {
+    setForm((prev) => ({
+      ...prev,
+      note: `Kalkulyator: ${studentCount} ta o'quvchi, kurs narxi ${coursePrice.toLocaleString('uz-UZ')} so'm (Oyiga +${extraProfitWithEduYuz.toLocaleString('uz-UZ')} so'm o'sish)`,
+    }));
+    setActiveTab('form');
+  }
+
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.fullName.trim() || form.phone.trim().length < 7) return;
@@ -92,8 +116,8 @@ export default function InstagramBioPage() {
       stage: 'new',
       igUsername: form.igUsername.replace('@', '').trim(),
       note: form.note
-        ? `${form.note} (@eduyuzcrmuz Bio orqali)`
-        : '@eduyuzcrmuz Instagram Bio havolasi orqali kelgan ariza',
+        ? `${form.note} (@eduyuzcrmuz Bio)`
+        : `@eduyuzcrmuz Bio orqali (${studentCount} o'quvchi)`,
     };
 
     try {
@@ -142,7 +166,6 @@ export default function InstagramBioPage() {
         },
       ]);
     } catch {
-      // Smart local fallback if server is sleeping
       const lower = text.toLowerCase();
       const phoneMatch = text.match(/(?:\+?998[\s-]?)?(?:\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}|\d{9})/);
       let reply =
@@ -230,42 +253,163 @@ export default function InstagramBioPage() {
             <p>📷 Face-ID Davomat • 💰 Moliya • 🎯 Lidlar Voronkasi • 🤖 Telegram Bot</p>
           </div>
 
-          {/* 3-Tab Switcher */}
-          <div className="grid grid-cols-3 gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800/80 mt-4">
+          {/* 4-Tab Switcher */}
+          <div className="grid grid-cols-4 gap-1 bg-slate-950 p-1.5 rounded-2xl border border-slate-800/80 mt-4">
+            <button
+              onClick={() => setActiveTab('calc')}
+              className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
+                activeTab === 'calc'
+                  ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Calculator size={13} /> Kalkulyator
+            </button>
             <button
               onClick={() => setActiveTab('form')}
-              className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'form'
                   ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <Sparkles size={13} /> Bepul Demo
+              <Sparkles size={13} /> Demo Olish
             </button>
             <button
               onClick={() => setActiveTab('chat')}
-              className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'chat'
                   ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <MessageCircle size={13} /> AI Konsultant
+              <MessageCircle size={13} /> AI Chat
             </button>
             <button
               onClick={() => setActiveTab('features')}
-              className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+              className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'features'
                   ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              <ShieldCheck size={13} /> Imkoniyatlar
+              <ShieldCheck size={13} /> Tizim
             </button>
           </div>
         </div>
 
-        {/* 2. TAB 1: BEPUL 7-KUNLIK DEMO ARIZA FORMASI */}
+        {/* 2. TAB 1: INTERAKTIV FOYDA VA YO'QOTISH KALKULYATORI (LEAD MAGNET) */}
+        {activeTab === 'calc' && (
+          <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-5">
+            <div>
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full">
+                🧮 O&apos;quv Markaz Rahbarlari Uchun Tahlil
+              </span>
+              <h2 className="text-lg sm:text-xl font-extrabold text-white mt-2">
+                Markazingiz Oyiga Qancha Pul Yo&apos;qotyapti?
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                O&apos;quvchilaringiz sonini belgilang va EduYuz CRM sizga oyiga qancha qo&apos;shimcha sof foyda keltirishini ko&apos;ring:
+              </p>
+            </div>
+
+            {/* Slayder 1: O'quvchilar soni */}
+            <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-300">O&apos;quvchilaringiz soni:</span>
+                <span className="text-sm font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-0.5 rounded-xl">
+                  {studentCount} ta o&apos;quvchi
+                </span>
+              </div>
+              <input
+                type="range"
+                min={30}
+                max={1000}
+                step={10}
+                value={studentCount}
+                onChange={(e) => setStudentCount(Number(e.target.value))}
+                className="w-full accent-pink-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500 font-medium">
+                <span>30 ta</span>
+                <span>250 ta</span>
+                <span>500 ta</span>
+                <span>1 000 ta</span>
+              </div>
+            </div>
+
+            {/* Slayder 2: O'rtacha kurs narxi */}
+            <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-300">O&apos;rtacha oylik kurs narxi:</span>
+                <span className="text-sm font-extrabold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-0.5 rounded-xl">
+                  {coursePrice.toLocaleString('uz-UZ')} so&apos;m
+                </span>
+              </div>
+              <input
+                type="range"
+                min={200000}
+                max={1500000}
+                step={50000}
+                value={coursePrice}
+                onChange={(e) => setCoursePrice(Number(e.target.value))}
+                className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+              />
+              <div className="flex justify-between text-[10px] text-slate-500 font-medium">
+                <span>200 ming</span>
+                <span>500 ming</span>
+                <span>1 mln</span>
+                <span>1.5 mln</span>
+              </div>
+            </div>
+
+            {/* Natija Kartochkalari */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="bg-rose-950/30 border border-rose-500/30 rounded-2xl p-4 space-y-1">
+                <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold">
+                  <AlertTriangle size={14} /> CRM-siz oylik yo&apos;qotish:
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold text-rose-400">
+                  -{monthlyLossWithoutCrm.toLocaleString('uz-UZ')} so&apos;m
+                </div>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Unutilgan qarzlar, kechikkan to&apos;lovlar va javobsiz qolgan Instagram lidlar hisobiga (~16%)
+                </p>
+              </div>
+
+              <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-4 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
+                  <TrendingUp size={14} /> EduYuz bilan oylik o&apos;sish:
+                </div>
+                <div className="text-lg sm:text-xl font-extrabold text-emerald-400">
+                  +{extraProfitWithEduYuz.toLocaleString('uz-UZ')} so&apos;m
+                </div>
+                <p className="text-[11px] text-slate-400 leading-snug">
+                  Avto-SMS eslatma, Kanban voronka va Face-ID orqali saqlab qolingan o&apos;quvchilar (+22%)
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3 flex items-center justify-between text-xs">
+              <span className="text-slate-300 flex items-center gap-2">
+                <Clock size={15} className="text-indigo-400" />
+                Admin va rahbar tejaydigan vaqt:
+              </span>
+              <strong className="text-indigo-400 font-extrabold">
+                Oyiga {savedHoursPerMonth} soat
+              </strong>
+            </div>
+
+            <button
+              onClick={handleClaimFromCalculator}
+              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center justify-center gap-2"
+            >
+              🔥 Yo&apos;qotishni To&apos;xtatish — 7 Kun Bepul Sinab Ko&apos;rish <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* 3. TAB 2: BEPUL 7-KUNLIK DEMO ARIZA FORMASI */}
         {activeTab === 'form' && (
           <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
             {submitted ? (
@@ -400,23 +544,16 @@ export default function InstagramBioPage() {
                   disabled={submitting}
                   className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
                 >
-                  {submitting ? (
-                    'Yuborilmoqda...'
-                  ) : (
-                    <>
-                      🚀 7 Kunlik Bepul Demo Olish
-                    </>
-                  )}
+                  {submitting ? 'Yuborilmoqda...' : <>🚀 7 Kunlik Bepul Demo Olish</>}
                 </button>
               </form>
             )}
           </div>
         )}
 
-        {/* 3. TAB 2: INSTAGRAM DIRECT AI KONSULTANT (24/7 CHAT) */}
+        {/* 4. TAB 3: INSTAGRAM DIRECT AI KONSULTANT (24/7 CHAT) */}
         {activeTab === 'chat' && (
           <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl flex flex-col h-[500px]">
-            {/* Chat Header */}
             <div className="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center text-white">
@@ -435,7 +572,6 @@ export default function InstagramBioPage() {
               </span>
             </div>
 
-            {/* Tezkor Savollar */}
             <div className="px-3 py-2 bg-slate-950/40 border-b border-slate-800/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {[
                 { label: '💎 Narxlar qancha?', q: 'EduYuz CRM narxlari va tariflari qancha?' },
@@ -452,7 +588,6 @@ export default function InstagramBioPage() {
               ))}
             </div>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.map((m, idx) => (
                 <div
@@ -486,7 +621,6 @@ export default function InstagramBioPage() {
               )}
             </div>
 
-            {/* Input */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -512,7 +646,7 @@ export default function InstagramBioPage() {
           </div>
         )}
 
-        {/* 4. TAB 3: PLATFORMA IMKONIYATLARI */}
+        {/* 5. TAB 4: PLATFORMA IMKONIYATLARI */}
         {activeTab === 'features' && (
           <div className="space-y-3">
             {[
@@ -525,7 +659,7 @@ export default function InstagramBioPage() {
               },
               {
                 icon: CreditCard,
-                title: "Aniq Moliya, Kassa va Qarzdorlar",
+                title: 'Aniq Moliya, Kassa va Qarzdorlar',
                 desc: "Oylik kurs to'lovlarini avtomatik yechish, kvitansiyalar, o'qituvchilar KPI maoshi va qarzdorlar ro'yxati.",
                 badge: '100% Aniq',
                 color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
