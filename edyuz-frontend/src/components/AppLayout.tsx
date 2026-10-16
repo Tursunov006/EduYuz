@@ -38,6 +38,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   const isExcluded = 
     pathname === '/login' || 
     pathname === '/portal' || 
+    pathname.startsWith('/insta') ||
     pathname.startsWith('/app') || 
     pathname.startsWith('/games/play') || 
     pathname.startsWith('/verify') ||

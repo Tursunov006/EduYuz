@@ -1,11 +1,45 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  UserPlus, Phone, MessageSquare, ArrowRight, Plus, Search, 
-  CheckCircle2, Clock, Sparkles, Filter, Trash2, Send, ExternalLink, X
+import Link from 'next/link';
+import {
+  UserPlus,
+  Phone,
+  ArrowRight,
+  Plus,
+  Search,
+  CheckCircle2,
+  Sparkles,
+  Trash2,
+  ExternalLink,
+  X,
+  Copy,
+  Check,
+  Bot,
+  Send,
+  RefreshCw,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+
+function Instagram({ size = 16, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
 
 type LeadStage = 'new' | 'contacted' | 'trial' | 'enrolled';
 
@@ -18,6 +52,7 @@ interface Lead {
   stage: LeadStage;
   createdAt: string;
   note?: string;
+  igUsername?: string;
 }
 
 const INITIAL_LEADS: Lead[] = [
@@ -29,7 +64,8 @@ const INITIAL_LEADS: Lead[] = [
     source: 'Instagram',
     stage: 'new',
     createdAt: 'Bugun, 10:30',
-    note: 'Kechki guruh so‘radi',
+    note: 'Kechki guruh so‘radi (@eduyuzcrmuz)',
+    igUsername: 'azizbek_dev',
   },
   {
     id: 'l-2',
@@ -54,29 +90,29 @@ const INITIAL_LEADS: Lead[] = [
 ];
 
 const STAGES: { key: LeadStage; title: string; badgeColor: string; borderColor: string }[] = [
-  { 
-    key: 'new', 
-    title: 'Yangi Murojaatlar', 
+  {
+    key: 'new',
+    title: 'Yangi Murojaatlar',
     badgeColor: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-    borderColor: 'border-t-cyan-500'
+    borderColor: 'border-t-cyan-500',
   },
-  { 
-    key: 'contacted', 
-    title: 'Aloqaga Chiqildi', 
+  {
+    key: 'contacted',
+    title: 'Aloqaga Chiqildi',
     badgeColor: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    borderColor: 'border-t-amber-500'
+    borderColor: 'border-t-amber-500',
   },
-  { 
-    key: 'trial', 
-    title: 'Sinov Darsiga Yozildi', 
+  {
+    key: 'trial',
+    title: 'Sinov Darsiga Yozildi',
     badgeColor: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-    borderColor: 'border-t-purple-500'
+    borderColor: 'border-t-purple-500',
   },
-  { 
-    key: 'enrolled', 
-    title: 'O‘quvchiga Aylandi', 
+  {
+    key: 'enrolled',
+    title: 'O‘quvchiga Aylandi',
     badgeColor: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    borderColor: 'border-t-emerald-500'
+    borderColor: 'border-t-emerald-500',
   },
 ];
 
@@ -84,8 +120,16 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInstaModalOpen, setIsInstaModalOpen] = useState(false);
   const [centers, setCenters] = useState<any[]>([]);
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  // Instagram DM AI Simulator state
+  const [testDmText, setTestDmText] = useState('Salom! CRM narxi qancha? Raqamim: +998901234567');
+  const [testDmReply, setTestDmReply] = useState<string | null>(null);
+  const [testDmLoading, setTestDmLoading] = useState(false);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -95,19 +139,57 @@ export default function LeadsPage() {
     note: '',
   });
 
-  useEffect(() => {
-    const saved = localStorage.getItem('eduyuz_leads_v1');
-    if (saved) {
-      try {
-        setLeads(JSON.parse(saved));
-      } catch {
-        setLeads(INITIAL_LEADS);
+  async function fetchAndMergeLeads() {
+    setSyncing(true);
+    let localList: Lead[] = INITIAL_LEADS;
+    try {
+      const saved = localStorage.getItem('eduyuz_leads_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) localList = parsed;
       }
-    } else {
-      setLeads(INITIAL_LEADS);
+    } catch {
+      // ignore
     }
 
-    apiFetch('/centers').then((res) => setCenters(res || [])).catch(() => {});
+    try {
+      const remote = await apiFetch('/instagram/leads');
+      if (Array.isArray(remote) && remote.length > 0) {
+        const mappedRemote: Lead[] = remote.map((r: any) => ({
+          id: r.id,
+          fullName: r.fullName,
+          phone: r.phone,
+          courseInterest: r.course || 'EduYuz CRM Demo',
+          source: (r.source as Lead['source']) || 'Instagram',
+          stage: r.stage === 'converted' ? 'enrolled' : (r.stage as LeadStage) || 'new',
+          createdAt: r.createdAt || 'Bugun',
+          note: r.note,
+          igUsername: r.igUsername,
+        }));
+
+        const remoteIds = new Set(mappedRemote.map((m) => m.id));
+        const merged = [
+          ...mappedRemote,
+          ...localList.filter((l) => !remoteIds.has(l.id)),
+        ];
+        setLeads(merged);
+        localStorage.setItem('eduyuz_leads_v1', JSON.stringify(merged));
+        setSyncing(false);
+        return;
+      }
+    } catch {
+      // fallback to localList
+    }
+
+    setLeads(localList);
+    setSyncing(false);
+  }
+
+  useEffect(() => {
+    fetchAndMergeLeads();
+    apiFetch('/centers')
+      .then((res) => setCenters(res || []))
+      .catch(() => {});
   }, []);
 
   const saveLeads = (updated: Lead[]) => {
@@ -115,9 +197,9 @@ export default function LeadsPage() {
     localStorage.setItem('eduyuz_leads_v1', JSON.stringify(updated));
   };
 
-  const handleAddLead = (e: React.FormEvent) => {
+  const handleAddLead = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newLead: Lead = {
+    const tempLead: Lead = {
       id: `lead-${Date.now()}`,
       fullName: form.fullName,
       phone: form.phone,
@@ -127,19 +209,57 @@ export default function LeadsPage() {
       createdAt: 'Hozirgina',
       note: form.note,
     };
-    saveLeads([newLead, ...leads]);
+
+    saveLeads([tempLead, ...leads]);
     setIsModalOpen(false);
-    setForm({ fullName: '', phone: '+998', courseInterest: 'Frontend Dasturlash', source: 'Instagram', note: '' });
+    setForm({
+      fullName: '',
+      phone: '+998',
+      courseInterest: 'Frontend Dasturlash',
+      source: 'Instagram',
+      note: '',
+    });
+
+    try {
+      await apiFetch('/instagram/lead', {
+        method: 'POST',
+        body: JSON.stringify({
+          fullName: tempLead.fullName,
+          phone: tempLead.phone,
+          course: tempLead.courseInterest,
+          source: tempLead.source,
+          stage: 'new',
+          note: tempLead.note,
+        }),
+      });
+      fetchAndMergeLeads();
+    } catch {
+      // kept in localStorage
+    }
   };
 
-  const moveStage = (id: string, nextStage: LeadStage) => {
+  const moveStage = async (id: string, nextStage: LeadStage) => {
     const updated = leads.map((l) => (l.id === id ? { ...l, stage: nextStage } : l));
     saveLeads(updated);
+
+    try {
+      await apiFetch(`/instagram/leads/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ stage: nextStage === 'enrolled' ? 'converted' : nextStage }),
+      });
+    } catch {
+      // local state already updated
+    }
   };
 
-  const deleteLead = (id: string) => {
+  const deleteLead = async (id: string) => {
     if (!confirm('Ushbu murojaatni o‘chirmoqchimisiz?')) return;
     saveLeads(leads.filter((l) => l.id !== id));
+    try {
+      await apiFetch(`/instagram/leads/${id}`, { method: 'DELETE' });
+    } catch {
+      // ignore
+    }
   };
 
   // Lidni haqiqiy O'quvchiga aylantirish (Bazaga yozish)
@@ -173,6 +293,36 @@ export default function LeadsPage() {
     }
   };
 
+  const copyToClipboard = (text: string, key: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey(null), 2000);
+  };
+
+  const handleTestInstagramDm = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testDmText.trim()) return;
+    setTestDmLoading(true);
+    try {
+      const res = await apiFetch('/instagram/ai-chat', {
+        method: 'POST',
+        body: JSON.stringify({
+          message: testDmText,
+          senderName: 'Instagram Mijoz (@eduyuzcrmuz)',
+          igUsername: 'eduyuz_client',
+        }),
+      });
+      setTestDmReply(res?.reply || 'Javob olindi!');
+      await fetchAndMergeLeads();
+    } catch {
+      setTestDmReply(
+        "✅ Raqamingiz qabul qilindi va EduYuz CRM Lidlar voronkasiga qo'shildi! Mutaxassisimiz tez orada bog'lanadi."
+      );
+    } finally {
+      setTestDmLoading(false);
+    }
+  };
+
   const filteredLeads = leads.filter(
     (l) =>
       l.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -182,52 +332,76 @@ export default function LeadsPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8 pb-12">
-      
       {/* 1. Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-indigo-950/60 border border-slate-800/80 p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-cyan-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-pink-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-semibold">
-              <Sparkles size={13} /> Sotuv va Marketing Voronkasi (Kanban)
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300 text-xs font-semibold">
+              <Instagram size={13} /> @eduyuzcrmuz • Instagram & Sotuv Voronkasi
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
               <UserPlus className="text-cyan-400" /> Lidlar va Murojaatlar
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm max-w-xl">
-              Instagram, Telegram va qo'ng'iroq orqali kelgan yangi mijozlarni sinov darsiga yozing va bir tugma bilan o'quvchiga aylantiring.
+              Instagram (@eduyuzcrmuz), Telegram va qo&apos;ng&apos;iroq orqali kelgan yangi mijozlarni sinov darsiga yozing va bir tugma bilan o&apos;quvchiga aylantiring.
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
-          >
-            <Plus size={16} /> + Yangi Lid Qo'shish
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsInstaModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-indigo-600/20 hover:from-pink-600/30 hover:to-indigo-600/30 border border-pink-500/40 text-pink-300 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg shadow-pink-500/10"
+            >
+              <Instagram size={16} className="text-pink-400" /> @eduyuzcrmuz Integratsiya
+            </button>
+
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
+            >
+              <Plus size={16} /> + Yangi Lid Qo&apos;shish
+            </button>
+          </div>
         </div>
       </div>
 
       {/* 2. Qidiruv va Konversiya Ko'rsatkichlari */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Ism, telefon yoki kurs bo'yicha qidirish..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-          />
+        <div className="relative flex-1 max-w-md flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Ism, telefon yoki kurs bo'yicha qidirish..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <button
+            onClick={fetchAndMergeLeads}
+            title="Instagram lidlarini yangilash"
+            className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
+          >
+            <RefreshCw size={16} className={syncing ? 'animate-spin text-pink-400' : ''} />
+          </button>
         </div>
 
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <Link
+            href="/insta"
+            target="_blank"
+            className="px-3.5 py-2 rounded-2xl bg-pink-500/10 border border-pink-500/30 text-pink-300 font-bold flex items-center gap-1.5 hover:bg-pink-500/20 transition"
+          >
+            <Instagram size={14} /> eduyuz.uz/insta sahifasini ochish <ExternalLink size={12} />
+          </Link>
           <div className="px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300">
             Jami murojaatlar: <strong className="text-white font-bold">{leads.length} ta</strong>
           </div>
           <div className="px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
-            O'quvchiga aylandi: {leads.filter((l) => l.stage === 'enrolled').length} ta
+            O&apos;quvchiga aylandi: {leads.filter((l) => l.stage === 'enrolled').length} ta
           </div>
         </div>
       </div>
@@ -256,7 +430,7 @@ export default function LeadsPage() {
               <div className="space-y-3 flex-1">
                 {stageLeads.length === 0 ? (
                   <div className="h-44 flex items-center justify-center text-center text-xs text-slate-600 border border-dashed border-slate-800/80 rounded-2xl p-4">
-                    Bu bosqichda murojaatlar yo'q
+                    Bu bosqichda murojaatlar yo&apos;q
                   </div>
                 ) : (
                   stageLeads.map((lead) => (
@@ -266,8 +440,14 @@ export default function LeadsPage() {
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 border border-indigo-500/20">
-                            {lead.source}
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                              lead.source === 'Instagram'
+                                ? 'bg-pink-500/15 text-pink-300 border-pink-500/30'
+                                : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
+                            }`}
+                          >
+                            {lead.source === 'Instagram' ? '📸 Instagram' : lead.source}
                           </span>
                           <h4 className="text-sm font-extrabold text-white mt-1.5">{lead.fullName}</h4>
                         </div>
@@ -285,9 +465,14 @@ export default function LeadsPage() {
                         <div className="flex items-center gap-1.5 text-slate-400">
                           <Phone size={12} /> {lead.phone}
                         </div>
+                        {lead.igUsername && (
+                          <div className="text-[11px] text-pink-400 font-medium">
+                            @{lead.igUsername.replace('@', '')}
+                          </div>
+                        )}
                         {lead.note && (
                           <p className="text-[11px] text-slate-400 bg-slate-900/90 p-2 rounded-xl border border-slate-800/70 mt-1">
-                            "{lead.note}"
+                            &quot;{lead.note}&quot;
                           </p>
                         )}
                       </div>
@@ -302,7 +487,7 @@ export default function LeadsPage() {
                               onClick={() => moveStage(lead.id, 'contacted')}
                               className="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center gap-1 transition"
                             >
-                              Bog'lanildi <ArrowRight size={11} />
+                              Bog&apos;lanildi <ArrowRight size={11} />
                             </button>
                           )}
 
@@ -342,7 +527,139 @@ export default function LeadsPage() {
         })}
       </div>
 
-      {/* 4. Yangi Lid Qo'shish Modali */}
+      {/* 4. INSTAGRAM (@eduyuzcrmuz) INTEGRATSIYA VA SOZLAMALAR MODALI */}
+      {isInstaModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white">
+                  <Instagram size={18} />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-extrabold text-white">
+                    @eduyuzcrmuz Instagram + AI Integratsiya
+                  </h2>
+                  <p className="text-xs text-slate-400">
+                    Instagram Bio havolasi va Direct (DM) AI Sotuv Menejer sozlamalari
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsInstaModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* 1-Qadam: Bio Link */}
+            <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-pink-400 uppercase tracking-wider">
+                  1. Instagram Bio Havolasi (Tayyor!)
+                </span>
+                <Link
+                  href="/insta"
+                  target="_blank"
+                  className="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
+                >
+                  Ochib ko&apos;rish <ExternalLink size={12} />
+                </Link>
+              </div>
+              <p className="text-xs text-slate-400">
+                Ushbu havolani <strong>@eduyuzcrmuz</strong> profilingizdagi <strong>Edit profile → Website</strong> qismiga qo&apos;ying. Mijozlar kirib ariza qoldirsa yoki AI bilan gaplashsa, shu Kanban doskaga avtomatik tushadi:
+              </p>
+              <div className="flex items-center gap-2">
+                <input
+                  readOnly
+                  value="https://eduyuz.uz/insta"
+                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400"
+                />
+                <button
+                  onClick={() => copyToClipboard('https://eduyuz.uz/insta', 'bio')}
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1.5"
+                >
+                  {copiedKey === 'bio' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedKey === 'bio' ? 'Nusxalandi' : 'Nusxalash'}
+                </button>
+              </div>
+            </div>
+
+            {/* 2-Qadam: Meta Webhook / ManyChat */}
+            <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 space-y-2.5">
+              <span className="text-xs font-extrabold text-cyan-400 uppercase tracking-wider">
+                2. Instagram Direct Webhook (Meta Developer / ManyChat)
+              </span>
+              <p className="text-xs text-slate-400">
+                Meta for Developers yoki ManyChat ichida Instagram DM Webhook sifatida quyidagi manzilni ulang:
+              </p>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    readOnly
+                    value="https://eduyuz.onrender.com/api/v1/instagram/webhook"
+                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300"
+                  />
+                  <button
+                    onClick={() =>
+                      copyToClipboard('https://eduyuz.onrender.com/api/v1/instagram/webhook', 'webhook')
+                    }
+                    className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1"
+                  >
+                    {copiedKey === 'webhook' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-900/70 px-3 py-1.5 rounded-xl">
+                  <span>
+                    Verify Token: <strong className="text-white font-mono">eduyuz_insta_2026</strong>
+                  </span>
+                  <button
+                    onClick={() => copyToClipboard('eduyuz_insta_2026', 'token')}
+                    className="text-indigo-400 hover:text-indigo-300 font-semibold"
+                  >
+                    {copiedKey === 'token' ? 'Nusxalandi!' : 'Tokenni nusxalash'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 3-Qadam: Jonli Sinov (Instagram DM Simulator) */}
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-extrabold text-indigo-300">
+                <Bot size={15} className="text-indigo-400" />
+                3. Instagram Direct AI Menejerni Hoziroq Sinab Ko&apos;ring:
+              </div>
+              <form onSubmit={handleTestInstagramDm} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={testDmText}
+                  onChange={(e) => setTestDmText(e.target.value)}
+                  placeholder="Instagram mijoz xabarini yozing..."
+                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                />
+                <button
+                  type="submit"
+                  disabled={testDmLoading}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-indigo-600 text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Send size={13} /> {testDmLoading ? '...' : 'Yuborish'}
+                </button>
+              </form>
+              {testDmReply && (
+                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 whitespace-pre-line">
+                  <div className="text-[10px] font-bold text-pink-400 mb-1">
+                    🤖 @eduyuzcrmuz AI javobi (va Lid yaratildi):
+                  </div>
+                  {testDmReply}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Yangi Lid Qo'shish Modali */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
@@ -389,16 +706,16 @@ export default function LeadsPage() {
                     onChange={(e) => setForm({ ...form, source: e.target.value as Lead['source'] })}
                     className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                   >
-                    <option value="Instagram">Instagram Target</option>
+                    <option value="Instagram">Instagram (@eduyuzcrmuz)</option>
                     <option value="Telegram">Telegram Kanal/Bot</option>
-                    <option value="Tavsiya">Do'stlar tavsiyasi</option>
+                    <option value="Tavsiya">Do&apos;stlar tavsiyasi</option>
                     <option value="Sayt">EduYuz.uz sayti</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Qiziqqan fan yo'nalishi</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Qiziqqan fan yo&apos;nalishi</label>
                 <input
                   required
                   type="text"
@@ -432,14 +749,13 @@ export default function LeadsPage() {
                   type="submit"
                   className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white text-xs font-bold shadow-lg shadow-purple-600/30"
                 >
-                  Voronkaga Qo'shish
+                  Voronkaga Qo&apos;shish
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }

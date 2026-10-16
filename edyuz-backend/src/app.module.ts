@@ -18,6 +18,7 @@ import { ExpensesModule } from './modules/expenses/expenses.module';
 import { SmsModule } from './modules/sms/sms.module';
 import { AiModule } from './modules/ai/ai.module';
 import { GamesModule } from './modules/games/games.module';
+import { InstagramModule } from './modules/instagram/instagram.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { GamesModule } from './modules/games/games.module';
     ExpensesModule,
     AiModule,
     GamesModule,
+    InstagramModule,
     AuthModule,
     CentersModule,
     UsersModule,
