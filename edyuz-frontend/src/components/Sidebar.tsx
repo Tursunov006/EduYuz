@@ -20,7 +20,8 @@ import {
   TrendingUp,
   Bot,
   X,
-  HelpCircle
+  HelpCircle,
+  UserPlus
 } from 'lucide-react';
 
 import Logo from './Logo';
@@ -29,6 +30,7 @@ import { useSidebar } from '@/lib/context/SidebarContext';
 
 const menuItems = [
   { key: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { key: 'leads', name: 'Lidlar (Voronka)', href: '/leads', icon: UserPlus },
   { key: 'announcements', name: 'E‘lonlar', href: '/announcements', icon: Megaphone },
   { key: 'students', name: 'O‘quvchilar', href: '/students', icon: Users },
   { key: 'groups', name: 'Guruhlar', href: '/groups', icon: BookOpen },

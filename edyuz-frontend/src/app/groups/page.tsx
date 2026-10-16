@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
 import { 
-  BookOpen, Plus, Calendar, Clock, User, Layers, Users, 
-  Search, Filter, Sparkles, CheckCircle2, ArrowRight, X
+  BookOpen, Plus, Calendar, Clock, User, Users, 
+  Search, ArrowRight, X, GraduationCap, DollarSign
 } from 'lucide-react';
 
 interface Group {
@@ -14,9 +14,21 @@ interface Group {
   days: string[] | string;
   startTime: string;
   endTime: string;
-  course?: { title: string; price: number };
-  teacher?: { fullName: string };
+  course?: { id: string; title: string; price: number };
+  teacher?: { id: string; fullName: string };
   _count?: { students: number };
+}
+
+interface CourseItem {
+  id: string;
+  title: string;
+  price: number;
+}
+
+interface TeacherItem {
+  id: string;
+  fullName: string;
+  specialty?: string;
 }
 
 // Fanga qarab chiroyli piktogramma va rang tanlash
@@ -39,16 +51,27 @@ const getCourseBadge = (title: string = '') => {
 
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
+  const [teachers, setTeachers] = useState<TeacherItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
     name: '',
+    courseId: '',
+    teacherId: '',
     startTime: '14:00',
     endTime: '16:00',
     days: 'Dush-Chor-Jum',
+  });
+
+  // Yangi kurs formasi
+  const [courseForm, setCourseForm] = useState({
+    title: '',
+    price: 500000,
   });
 
   const getHeaders = () => {
@@ -56,22 +79,35 @@ export default function GroupsPage() {
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
-  const fetchGroups = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/api/v1/groups', {
-        headers: getHeaders(),
-      });
-      setGroups(res.data);
+      const [groupsRes, coursesRes, teachersRes] = await Promise.all([
+        axios.get('http://localhost:3000/api/v1/groups', { headers: getHeaders() }).catch(() => ({ data: [] })),
+        axios.get('http://localhost:3000/api/v1/courses', { headers: getHeaders() }).catch(() => ({ data: [] })),
+        axios.get('http://localhost:3000/api/v1/teachers', { headers: getHeaders() }).catch(() => ({ data: [] })),
+      ]);
+
+      setGroups(groupsRes.data || []);
+      const cList = coursesRes.data || [];
+      const tList = teachersRes.data || [];
+      setCourses(cList);
+      setTeachers(tList);
+
+      setFormData((prev) => ({
+        ...prev,
+        courseId: prev.courseId || (cList[0]?.id ?? ''),
+        teacherId: prev.teacherId || (tList[0]?.id ?? ''),
+      }));
     } catch (err) {
-      console.error('Guruhlarni yuklashda xatolik:', err);
+      console.error('Ma\'lumotlarni yuklashda xatolik:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchGroups();
+    fetchData();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,12 +117,44 @@ export default function GroupsPage() {
         headers: getHeaders(),
       });
       setIsModalOpen(false);
-      setFormData({ name: '', startTime: '14:00', endTime: '16:00', days: 'Dush-Chor-Jum' });
-      fetchGroups();
+      setFormData({
+        name: '',
+        courseId: courses[0]?.id || '',
+        teacherId: teachers[0]?.id || '',
+        startTime: '14:00',
+        endTime: '16:00',
+        days: 'Dush-Chor-Jum',
+      });
+      fetchData();
     } catch (err: any) {
       const msg = err.response?.data?.error || err.response?.data?.message || 'Guruh yaratishda xatolik yuz berdi!';
       alert(Array.isArray(msg) ? msg.join(', ') : msg);
-      console.error(err);
+    }
+  };
+
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const centersRes = await axios.get('http://localhost:3000/api/v1/centers', { headers: getHeaders() }).catch(() => ({ data: [] }));
+      const centerId = centersRes.data?.[0]?.id;
+
+      const res = await axios.post(
+        'http://localhost:3000/api/v1/courses',
+        {
+          title: courseForm.title,
+          price: Number(courseForm.price),
+          ...(centerId ? { centerId } : {}),
+        },
+        { headers: getHeaders() }
+      );
+      setIsCourseModalOpen(false);
+      setCourseForm({ title: '', price: 500000 });
+      await fetchData();
+      if (res.data?.id) {
+        setFormData((prev) => ({ ...prev, courseId: res.data.id }));
+      }
+    } catch (err: any) {
+      alert('Kurs yaratishda xatolik yuz berdi');
     }
   };
 
@@ -107,22 +175,30 @@ export default function GroupsPage() {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Jami {groups.length} ta faol guruh
+              Jami {groups.length} ta faol guruh • {courses.length} ta fan yo'nalishi
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              <BookOpen className="text-cyan-400" /> Guruhlar Jadvali
+              <BookOpen className="text-cyan-400" /> Guruhlar va Kurslar
             </h1>
             <p className="text-slate-400 text-xs sm:text-sm">
-              Markazdagi barcha dars guruhlari, o'qituvchilar va xonalar taqvimi
+              Markazdagi barcha dars guruhlari, o'qituvchilar va fan yo'nalishlari jadvali
             </p>
           </div>
 
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
-          >
-            <Plus size={16} /> Yangi Guruh Ochish
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsCourseModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-750 text-cyan-300 border border-cyan-500/30 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95"
+            >
+              <GraduationCap size={16} /> + Yangi Fan (Kurs)
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
+            >
+              <Plus size={16} /> Yangi Guruh Ochish
+            </button>
+          </div>
         </div>
       </div>
 
@@ -177,13 +253,19 @@ export default function GroupsPage() {
                     </span>
                   </div>
 
-                  {/* Guruh Nomi */}
-                  <Link href={`/groups/${group.id}`} className="block">
-                    <h3 className="text-lg font-extrabold text-white group-hover:text-cyan-400 transition flex items-center justify-between">
-                      <span className="truncate">{group.name}</span>
-                      <ArrowRight size={16} className="text-slate-500 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
-                    </h3>
-                  </Link>
+                  {/* Guruh Nomi va Narxi */}
+                  <div className="flex items-baseline justify-between gap-2">
+                    <Link href={`/groups/${group.id}`} className="block flex-1 min-w-0">
+                      <h3 className="text-lg font-extrabold text-white group-hover:text-cyan-400 transition truncate">
+                        {group.name}
+                      </h3>
+                    </Link>
+                    {group.course?.price ? (
+                      <span className="text-xs font-extrabold text-emerald-400 font-mono shrink-0">
+                        {Number(group.course.price).toLocaleString('uz-UZ')} so'm
+                      </span>
+                    ) : null}
+                  </div>
 
                   {/* O'quvchilar sig'imi progress bari */}
                   <div className="space-y-1">
@@ -248,10 +330,10 @@ export default function GroupsPage() {
         </div>
       )}
 
-      {/* 4. Yangi guruh qo'shish modali (Zamonaviy Modal) */}
+      {/* 4. Yangi guruh qo'shish modali (Kurs va O'qituvchi tanlash bilan) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-800">
               <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
                 <BookOpen size={18} className="text-cyan-400" /> Yangi guruh ochish
@@ -275,6 +357,58 @@ export default function GroupsPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 transition"
                 />
+              </div>
+
+              {/* Fan / Kurs tanlash */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-300">Fan yo'nalishi (Kurs)</label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setIsCourseModalOpen(true);
+                    }}
+                    className="text-[11px] text-cyan-400 hover:underline font-semibold"
+                  >
+                    + Yangi fan qo'shish
+                  </button>
+                </div>
+                <select
+                  value={formData.courseId}
+                  onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  {courses.length === 0 ? (
+                    <option value="">Standart Kurs (Avtomatik yaratiladi)</option>
+                  ) : (
+                    courses.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.title} ({Number(c.price).toLocaleString('uz-UZ')} so'm)
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              {/* O'qituvchi tanlash */}
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Mas'ul O'qituvchi (Ustoz)</label>
+                <select
+                  value={formData.teacherId}
+                  onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                >
+                  {teachers.length === 0 ? (
+                    <option value="">Bosh O'qituvchi (Avtomatik)</option>
+                  ) : (
+                    teachers.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.fullName} ({t.specialty || 'Ustoz'})
+                      </option>
+                    ))
+                  )}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -324,7 +458,68 @@ export default function GroupsPage() {
                   type="submit"
                   className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/30"
                 >
-                  Saqlash
+                  Guruhni Saqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Yangi Fan (Kurs) Qo'shish Modali */}
+      {isCourseModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <h2 className="text-base font-extrabold text-white flex items-center gap-2">
+                <GraduationCap size={18} className="text-cyan-400" /> Yangi fan (kurs) qo'shish
+              </h2>
+              <button 
+                onClick={() => setIsCourseModalOpen(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCourse} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Fan / Kurs nomi</label>
+                <input
+                  required
+                  type="text"
+                  placeholder="Masalan: Ingliz tili (IELTS) yoki Python"
+                  value={courseForm.title}
+                  onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-300 mb-1.5">Oylik to'lov narxi (so'm)</label>
+                <input
+                  required
+                  type="number"
+                  step="10000"
+                  value={courseForm.price}
+                  onChange={(e) => setCourseForm({ ...courseForm, price: Number(e.target.value) })}
+                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsCourseModalOpen(false)}
+                  className="px-4 py-2.5 rounded-2xl bg-slate-800 text-slate-300 text-xs font-bold"
+                >
+                  Yopish
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-lg shadow-cyan-600/20"
+                >
+                  Qo'shish
                 </button>
               </div>
             </form>

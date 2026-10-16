@@ -61,7 +61,8 @@ export default function DashboardPage() {
           apiFetch('/payments').catch(() => []),
         ]);
 
-        const totalPay = (payments || []).reduce((acc: number, p: any) => acc + Math.abs(Number(p.amount || 0)), 0);
+        const positivePayments = (payments || []).filter((p: any) => Number(p.amount) > 0);
+        const totalPay = positivePayments.reduce((acc: number, p: any) => acc + Number(p.amount || 0), 0);
         const debtList = (students || []).filter((s: any) => Number(s.balance) < 0);
 
         setStats({
@@ -70,7 +71,7 @@ export default function DashboardPage() {
           coursesCount: courses?.length || 0,
           paymentsTotal: totalPay || 18500000,
         });
-        setRecentPayments((payments || []).slice(0, 5));
+        setRecentPayments(positivePayments.slice(0, 5));
         setDebtors(debtList);
       } catch (err) {
         console.error(err);
