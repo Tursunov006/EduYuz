@@ -655,6 +655,57 @@ export default function LeadsPage() {
                 </div>
               )}
             </div>
+
+            {/* 4-Qadam: Obunachi Yig'ish Algoritmi (Viral Reels + Komment Trigger) */}
+            <div className="bg-gradient-to-br from-pink-950/30 to-slate-950 border border-pink-500/30 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-extrabold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles size={14} /> 4. Obunachi Yig&apos;ish Algoritmi (Faol!)
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+                  Avto-Trigger Yoqilgan
+                </span>
+              </div>
+
+              <div className="text-xs text-slate-300 space-y-1.5">
+                <p>
+                  <strong>Qanday ishlaydi:</strong> Reels yoki Post ostiga mijoz quyidagi kalit so&apos;zlardan birini komment yozsa, algoritm uning Direct&apos;iga avtomatik <strong>100 000 so&apos;m Vaucher + Bepul Demo</strong> havolasini yuboradi:
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {['CRM', 'DEMO', 'NARX', 'BONUS', '+'].map((kw) => (
+                    <span
+                      key={kw}
+                      className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-300 font-mono text-[11px] font-bold"
+                    >
+                      &quot;{kw}&quot;
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-300">
+                    🎬 Tayyor Viral Reels & Post Matni (Nusxalab qo&apos;ying):
+                  </span>
+                  <button
+                    onClick={() =>
+                      copyToClipboard(
+                        `🎓 O'quv markazingiz CRM-siz oyiga qancha pul yo'qotayotganini bilasizmi?\n\n📷 0.5 soniyada Face-ID kamera davomat\n💰 100% aniq Kassa va Qarzdorlar nazorati\n🎯 Instagram Lidlar voronkasi\n\n🎁 @eduyuzcrmuz sahifamizga OBUNA bo'ling va kommentga «CRM» deb yozing — Direct'ingizga 7 kunlik BEPUL DEMO + 100,000 so'm Vaucher yuboramiz! 👇`,
+                        'reels_caption'
+                      )
+                    }
+                    className="text-[11px] text-pink-400 hover:text-pink-300 font-bold flex items-center gap-1"
+                  >
+                    {copiedKey === 'reels_caption' ? <Check size={12} /> : <Copy size={12} />}
+                    {copiedKey === 'reels_caption' ? 'Nusxalandi!' : 'Matnni nusxalash'}
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 italic leading-relaxed">
+                  &quot;🎓 O&apos;quv markazingiz CRM-siz oyiga qancha pul yo&apos;qotayotganini bilasizmi? @eduyuzcrmuz sahifamizga OBUNA bo&apos;ling va kommentga «CRM» deb yozing — Direct&apos;ingizga 7 kunlik BEPUL DEMO + 100,000 so&apos;m Vaucher yuboramiz! 👇&quot;
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}

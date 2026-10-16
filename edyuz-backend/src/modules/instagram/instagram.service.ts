@@ -225,9 +225,10 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
         return { status: 'lead_saved', lead };
       }
 
-      // B) Rasmiy Meta Instagram Messaging Webhook formati
+      // B) Rasmiy Meta Instagram Messaging & Comments Webhook formati
       const entries = body?.entry || [];
       for (const entry of entries) {
+        // 1. Direct (DM) xabarlar
         const messagingEvents = entry?.messaging || [];
         for (const event of messagingEvents) {
           const senderId = event?.sender?.id;
@@ -237,6 +238,28 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
           if (senderId && messageText && !isEcho) {
             const aiRes = await this.chatInstagramSales(messageText, `IG #${senderId.slice(-4)}`, senderId);
             await this.sendInstagramDirectReply(senderId, aiRes.reply);
+          }
+        }
+
+        // 2. Reels va Post ostidagi Kommentlar (Viral Obunachi Algoritmi: "CRM", "DEMO", "+")
+        const changes = entry?.changes || [];
+        for (const change of changes) {
+          if (change?.field === 'comments' && change?.value) {
+            const commentText = (change.value.text || '').toLowerCase();
+            const commenterId = change.value.from?.id;
+            const commenterUsername = change.value.from?.username || 'Instagram Foydalanuvchi';
+
+            if (
+              commenterId &&
+              (commentText.includes('crm') ||
+                commentText.includes('demo') ||
+                commentText.includes('narx') ||
+                commentText.includes('bonus') ||
+                commentText.trim() === '+')
+            ) {
+              const dmText = `Salom @${commenterUsername}! 👋 @eduyuzcrmuz sahifamizga obuna bo'lganingiz uchun rahmat!\n\n🎁 Siz so'ragan **7 kunlik BEPUL DEMO** va **100,000 so'm Vaucher** mana bu yerda:\n👉 https://eduyuz.uz/insta\n\nShu xabarga **telefon raqamingizni** yozib yuboring, tizimni 5 daqiqada yoqib beramiz! 🚀`;
+              await this.sendInstagramDirectReply(commenterId, dmText);
+            }
           }
         }
       }

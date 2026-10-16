@@ -21,6 +21,10 @@ import {
   TrendingUp,
   AlertTriangle,
   Clock,
+  Lock,
+  Unlock,
+  Gift,
+  Share2,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
@@ -55,15 +59,17 @@ export default function InstagramBioPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Obunachi ko'paytirish algoritmi (Follow-to-Unlock & Viral Share)
+  const [isFollowed, setIsFollowed] = useState(false);
+  const [sharedBonus, setSharedBonus] = useState(false);
+
   // Interaktiv Kalkulyator holati
   const [studentCount, setStudentCount] = useState<number>(150);
   const [coursePrice, setCoursePrice] = useState<number>(450000);
 
   // Kalkulyator hisob-kitoblari
   const monthlyRevenue = studentCount * coursePrice;
-  // CRM bo'lmaganda o'rtacha 16% tushum vaqtida to'lanmagan qarzlar va yo'qolgan lidlar sabab boy beriladi
   const monthlyLossWithoutCrm = Math.round(monthlyRevenue * 0.16);
-  // EduYuz CRM (Lidlar voronkasi + Avto-SMS + Face-ID) orqali qo'shimcha +22% o'sish
   const extraProfitWithEduYuz = Math.round(monthlyRevenue * 0.22);
   const savedHoursPerMonth = Math.max(Math.round(studentCount * 0.35), 12);
 
@@ -95,10 +101,39 @@ export default function InstagramBioPage() {
     }
   }
 
+  function handleFollowUnlock() {
+    window.open('https://www.instagram.com/eduyuzcrmuz/', '_blank');
+    setIsFollowed(true);
+    setForm((prev) => ({
+      ...prev,
+      note: prev.note
+        ? `${prev.note} [VIP Obunachi Vaucher: EDUYUZ100]`
+        : 'VIP Obunachi Vaucher: EDUYUZ100 (100,000 so‘m chegirma)',
+    }));
+  }
+
+  async function handleViralShare() {
+    const shareData = {
+      title: 'EduYuz CRM — O‘quv markazlar uchun #1 tizim',
+      text: 'O‘quv markazingiz oyiga qancha pul yo‘qotayotganini 5 soniyada hisoblab ko‘ring va 7 kun BEPUL CRM oling:',
+      url: 'https://eduyuz.uz/insta',
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText('https://eduyuz.uz/insta');
+      }
+    } catch {
+      // ignore
+    }
+    setSharedBonus(true);
+  }
+
   function handleClaimFromCalculator() {
     setForm((prev) => ({
       ...prev,
-      note: `Kalkulyator: ${studentCount} ta o'quvchi, kurs narxi ${coursePrice.toLocaleString('uz-UZ')} so'm (Oyiga +${extraProfitWithEduYuz.toLocaleString('uz-UZ')} so'm o'sish)`,
+      note: `Kalkulyator: ${studentCount} ta o'quvchi, kurs narxi ${coursePrice.toLocaleString('uz-UZ')} so'm (Oyiga +${extraProfitWithEduYuz.toLocaleString('uz-UZ')} so'm o'sish)${isFollowed ? ' + VIP Vaucher EDUYUZ100' : ''}`,
     }));
     setActiveTab('form');
   }
@@ -249,8 +284,60 @@ export default function InstagramBioPage() {
           </div>
 
           <div className="mt-4 pt-3.5 border-t border-slate-800/80 text-xs text-slate-300 space-y-1 leading-relaxed">
-            <p>🎓 O&apos;quv markazlarini 100% avtomatlashtiruvchi zamonaviy CRM</p>
-            <p>📷 Face-ID Davomat • 💰 Moliya • 🎯 Lidlar Voronkasi • 🤖 Telegram Bot</p>
+            <p>🎓 O&apos;quv markazlar uchun #1 CRM tizim</p>
+            <p>📷 Face-ID Davomat • 💰 Aniq Moliya • 🎯 Lidlar Voronkasi</p>
+          </div>
+
+          {/* OBUNACHI YIG'ISH ALGORITMI: FOLLOW-TO-UNLOCK & VIRAL SHARE */}
+          <div className="mt-3.5 p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/30 space-y-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-300 flex-shrink-0">
+                  {isFollowed ? <Unlock size={15} className="text-emerald-400" /> : <Lock size={15} />}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-extrabold text-white truncate">
+                    {isFollowed
+                      ? '🔓 VIP Bonus Ochildi: EDUYUZ100 (-100 000 so‘m)'
+                      : '🔒 Obunachilar uchun 100 000 so‘m Vaucher'}
+                  </div>
+                  <p className="text-[10px] text-slate-400 truncate">
+                    {isFollowed
+                      ? 'Arizangizga avtomatik 100 000 so‘m bonus biriktirildi!'
+                      : '1-qadam: @eduyuzcrmuz sahifasiga obuna bo‘lib qulfni oching'}
+                  </p>
+                </div>
+              </div>
+
+              {!isFollowed ? (
+                <button
+                  onClick={handleFollowUnlock}
+                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-[11px] font-extrabold whitespace-nowrap shadow-md shadow-pink-600/20 flex items-center gap-1"
+                >
+                  <Instagram size={12} /> + Obuna bo&apos;lish
+                </button>
+              ) : (
+                <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold whitespace-nowrap">
+                  ✓ Faol
+                </span>
+              )}
+            </div>
+
+            {/* Viral Referral Share */}
+            <div className="pt-2 border-t border-slate-800/70 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-slate-300 flex items-center gap-1.5">
+                <Gift size={13} className="text-amber-400 flex-shrink-0" />
+                {sharedBonus
+                  ? '🎉 Havola nusxalandi! Do‘stingizga yuboring (+15 kun bonus)'
+                  : 'Do‘stingizga ulashing va +15 kun BEPUL CRM oling:'}
+              </span>
+              <button
+                onClick={handleViralShare}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-cyan-300 flex items-center gap-1 whitespace-nowrap transition"
+              >
+                <Share2 size={12} /> Ulashish
+              </button>
+            </div>
           </div>
 
           {/* 4-Tab Switcher */}
