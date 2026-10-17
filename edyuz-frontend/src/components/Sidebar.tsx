@@ -28,19 +28,17 @@ import Logo from './Logo';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
+const ACADEMIC_PATHS = ['/lms', '/certificates', '/leaderboard', '/games', '/announcements'];
+
 const menuItems = [
   { key: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { key: 'leads', name: 'Lidlar (Voronka)', href: '/leads', icon: UserPlus },
-  { key: 'announcements', name: 'E‘lonlar', href: '/announcements', icon: Megaphone },
   { key: 'students', name: 'O‘quvchilar', href: '/students', icon: Users },
-  { key: 'groups', name: 'Guruhlar', href: '/groups', icon: BookOpen },
+  { key: 'groups', name: 'Guruhlar va Jadval', href: '/groups', icon: BookOpen },
   { key: 'teachers', name: 'O‘qituvchilar', href: '/teachers', icon: UserCheck },
   { key: 'attendance', name: 'Davomat', href: '/attendance', icon: CalendarCheck },
   { key: 'payments', name: 'Moliya va Kassa', href: '/payments', icon: Wallet },
-  { key: 'lms', name: 'LMS Darslar', href: '/lms', icon: GraduationCap },
-  { key: 'games', name: 'Mavzuli O‘yinlar', href: '/games', icon: Gamepad2 },
-  { key: 'leaderboard', name: 'Reyting & Coins', href: '/leaderboard', icon: Trophy },
-  { key: 'certificates', name: 'Sertifikatlar', href: '/certificates', icon: Award },
+  { key: 'lms', name: 'Ta‘lim va Sertifikatlar', href: '/lms', icon: GraduationCap },
   { key: 'portal', name: 'O‘quvchi Portali', href: '/portal', icon: Smartphone },
 ];
 
@@ -64,7 +62,10 @@ export default function Sidebar() {
     <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
       {menuItems.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        const isActive =
+          item.key === 'lms'
+            ? ACADEMIC_PATHS.includes(pathname)
+            : pathname === item.href;
         return (
           <Link
             key={item.href}

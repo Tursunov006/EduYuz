@@ -14,6 +14,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
+import AcademicHubNav from '@/components/AcademicHubNav';
 
 export default function CertificatesPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
@@ -77,6 +78,8 @@ export default function CertificatesPage() {
 
   return (
     <div className="space-y-6">
+      <AcademicHubNav />
+
       {/* Sarlavha va Sertifikat Berish Tugmasi */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

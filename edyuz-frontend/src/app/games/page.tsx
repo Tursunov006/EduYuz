@@ -6,6 +6,7 @@ import {
   Gamepad2, Sparkles, Trophy, Play, Flame, Search, BookOpen, Star, Brain
 } from 'lucide-react';
 import Link from 'next/link';
+import AcademicHubNav from '@/components/AcademicHubNav';
 
 export default function GamesHubPage() {
   const router = useRouter();
@@ -61,6 +62,8 @@ export default function GamesHubPage() {
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">
+      <AcademicHubNav />
+
       {/* Hero Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-blue-950/40 border border-slate-800 p-8 sm:p-10 shadow-2xl">
         <div className="relative z-10 max-w-2xl space-y-4">

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { useTheme } from '@/lib/theme/ThemeContext';
+import AcademicHubNav from '@/components/AcademicHubNav';
 
 export interface Announcement {
   id: string;
@@ -188,6 +189,8 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
+      <AcademicHubNav />
+
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-400/30 animate-bounce">

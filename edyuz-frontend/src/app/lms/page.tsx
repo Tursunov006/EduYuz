@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BookOpen, Users, Layers } from 'lucide-react';
 import LmsView from '@/components/lms/LmsView';
+import AcademicHubNav from '@/components/AcademicHubNav';
 
 export default function LmsPage() {
   const [groups, setGroups] = useState<any[]>([]);
@@ -38,6 +39,8 @@ export default function LmsPage() {
 
   return (
     <div className="space-y-6">
+      <AcademicHubNav />
+
       {/* Sarlavha va Guruh tanlash filtri */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

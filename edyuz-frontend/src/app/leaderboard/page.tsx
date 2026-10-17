@@ -12,6 +12,7 @@ import {
   Plus, 
   User 
 } from 'lucide-react';
+import AcademicHubNav from '@/components/AcademicHubNav';
 
 export default function LeaderboardPage() {
   const [leaders, setLeaders] = useState<any[]>([]);
@@ -80,6 +81,8 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-8 max-w-6xl mx-auto">
+      <AcademicHubNav />
+
       {/* Sarlavha va Guruh filtri */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
