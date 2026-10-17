@@ -136,7 +136,7 @@ export class InstagramService {
       });
 
       return {
-        reply: `✅ Rahmat! Raqamingiz (**${extractedPhone}**) qabul qilindi va **EduYuz CRM** tizimiga avtomatik kiritildi!\n\n👨‍💻 Mutaxassisimiz tez orada siz bilan bog'lanib, **7 kunlik BEPUL DEMO** akkauntingizni yoqib beradi.`,
+        reply: `✅ Rahmat! Raqamingiz (**${extractedPhone}**) qabul qilindi va **EduYuz CRM** tizimiga avtomatik kiritildi!\n\n👨‍💻 Mutaxassisimiz tez orada siz bilan bog'lanib, **14 kunlik BEPUL DEMO** akkauntingizni yoqib beradi.`,
         leadCreated,
       };
     }
@@ -162,7 +162,7 @@ EduYuz CRM afzalliklari:
 2. 💰 Moliya, Kassa, Oylik avto-yechim va Qarzdorlar nazorati.
 3. 🎯 Lidlar voronkasi (Kanban) va Instagram integratsiya.
 4. 🎮 Gamifikatsiya (EduCoins), Sertifikatlar va Ota-onalar portali.
-5. 🎁 7 kunlik BEPUL sinov (Trial) mavjud! Narxi: oyiga atigi 199,000 so'mdan boshlanadi.
+5. 🎁 14 kunlik BEPUL sinov (Trial) mavjud! Narxi: oyiga atigi 299,000 so'mdan boshlanadi.
 
 Mijoz xabari: "${text}"
 Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va oxirida bepul demo olish uchun telefon raqamini yozib qoldirishni so'ra.`,
@@ -186,24 +186,24 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
     // Smart Local Sales Fallback (API kalit bo'lmasa ham 100% mukammal ishlaydi)
     if (lower.includes('narx') || lower.includes('qancha') || lower.includes('tarif') || lower.includes('pul')) {
       return {
-        reply: `💎 **EduYuz CRM tariflari juda hamyonbop:**\n\n• **Start (Boshlang'ich):** 199 000 so'm/oy (200 tagacha o'quvchi, Davomat, Kassa va Lidlar)\n• **Pro (To'liq):** 349 000 so'm/oy (Cheksiz o'quvchi, Analitika, Telegram Bot va SMS)\n\n🎁 **7 kunlik BEPUL DEMO** hoziroq tayyor! Sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring 👇`,
+        reply: `💎 **EduYuz CRM tariflari:**\n\n• **START:** 299 000 so'm/oy (100 tagacha o'quvchi, Davomat, Kassa va Jadval)\n• **PRO BIZNES:** 499 000 so'm/oy (500 tagacha o'quvchi, AI, Telegram Bot, Instagram Voronka va Sertifikatlar)\n• **VIP / TARMOQ:** 899 000 so'm/oy (Cheksiz o'quvchilar va filiallar)\n\n🎁 **14 kunlik BEPUL DEMO** hoziroq tayyor! Sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring 👇`,
       };
     }
 
     if (lower.includes('davomat') || lower.includes('bot') || lower.includes('sms')) {
       return {
-        reply: `📅 **EduYuz Avtomatik Davomat va Ota-onalar Boti:**\n\nO'qituvchi 1 tugma bilan guruh davomatini belgilaydi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram/SMS xabar yuboriladi.\n\n📱 O'z markazingizda bepul sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring!`,
+        reply: `📅 **EduYuz Avtomatik Davomat va Ota-onalar Boti:**\n\nO'qituvchi 1 tugma bilan guruh davomatini belgilaydi va o'quvchining ota-onasiga darhol Telegram/SMS xabar yuboriladi.\n\n📱 O'z markazingizda 14 kun bepul sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring!`,
       };
     }
 
     if (lower.includes('demo') || lower.includes('sinov') || lower.includes('ulash') || lower.includes('kerak') || lower === '+') {
       return {
-        reply: `🚀 **Ajoyib tanlov!** EduYuz CRM tizimini 5 daqiqada o'quv markazingizga ulab, **7 kunlik BEPUL VIP-DEMO** ochib beramiz.\n\n📞 Iltimos, **ismingiz va telefon raqamingizni** (masalan: *+998 90 123 45 67*) shu yerga yozib yuboring!`,
+        reply: `🚀 **Ajoyib tanlov!** EduYuz CRM tizimini 5 daqiqada o'quv markazingizga ulab, **14 kunlik BEPUL VIP-DEMO** ochib beramiz.\n\n📞 Iltimos, **ismingiz va telefon raqamingizni** (masalan: *+998 90 123 45 67*) shu yerga yozib yuboring!`,
       };
     }
 
     return {
-      reply: `Assalomu alaykum! 👋 **@eduyuzcrmuz — EduYuz 2.0 CRM** rasmiy AI yordamchisiman.\n\nBiz o'quv markazlarni to'liq avtomatlashtiramiz:\n✅ **Avtomatik Davomat** va Ota-onalar Boti\n✅ **Aniq Moliya** va Qarzdorlar nazorati\n✅ **Lidlar Voronkasi (Kanban)** va Instagram integratsiyasi\n\n🎁 **7 kunlik bepul Demo** olish yoki savolingiz bo'lsa, **telefon raqamingizni** yozib qoldiring!`,
+      reply: `Assalomu alaykum! 👋 **@eduyuzcrmuz — EduYuz 2.0 CRM** rasmiy AI yordamchisiman.\n\nBiz o'quv markazlarni to'liq avtomatlashtiramiz:\n✅ **Avtomatik Davomat** va Ota-onalar Boti\n✅ **Aniq Moliya** va Qarzdorlar nazorati\n✅ **Lidlar Voronkasi (Kanban)** va Instagram integratsiyasi\n\n🎁 **14 kunlik bepul Demo** olish yoki savolingiz bo'lsa, **telefon raqamingizni** yozib qoldiring!`,
     };
   }
 
@@ -257,7 +257,7 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
                 commentText.includes('bonus') ||
                 commentText.trim() === '+')
             ) {
-              const dmText = `Salom @${commenterUsername}! 👋 @eduyuzcrmuz sahifamizga obuna bo'lganingiz uchun rahmat!\n\n🎁 Siz so'ragan **7 kunlik BEPUL DEMO** va **100,000 so'm Vaucher** mana bu yerda:\n👉 https://eduyuz.uz/insta\n\nShu xabarga **telefon raqamingizni** yozib yuboring, tizimni 5 daqiqada yoqib beramiz! 🚀`;
+              const dmText = `Salom @${commenterUsername}! 👋 @eduyuzcrmuz sahifamizga obuna bo'lganingiz uchun rahmat!\n\n🎁 Siz so'ragan **14 kunlik BEPUL DEMO** va **100,000 so'm Vaucher** mana bu yerda:\n👉 https://eduyuz.uz/insta\n\nShu xabarga **telefon raqamingizni** yozib yuboring, tizimni 5 daqiqada yoqib beramiz! 🚀`;
               await this.sendInstagramDirectReply(commenterId, dmText);
             }
           }

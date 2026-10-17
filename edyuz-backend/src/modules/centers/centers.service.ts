@@ -11,7 +11,7 @@ export class CentersService {
 
   async create(dto: CreateCenterDto) {
     const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + 7); // 7 kunlik sinov muddati
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14); // 14 kunlik bepul sinov muddati
 
     const center = await this.prisma.center.create({
       data: {

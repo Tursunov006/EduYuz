@@ -81,6 +81,21 @@ export class AuthService {
       throw new UnauthorizedException('Foydalanuvchi akkaunti nofaol qilingan');
     }
 
+    let trialEndsAt = user.center?.trialEndsAt;
+    const subscriptionStatus = user.center?.subscriptionStatus || 'trial';
+
+    if (user.center && subscriptionStatus === 'trial' && !trialEndsAt) {
+      const d = new Date();
+      d.setDate(d.getDate() + 14);
+      trialEndsAt = d;
+      await this.prisma.center
+        .update({
+          where: { id: user.center.id },
+          data: { trialEndsAt: d, subscriptionStatus: 'trial' },
+        })
+        .catch(() => {});
+    }
+
     const token = this.generateToken(user.id, user.phone, user.role, user.centerId);
 
     return {
@@ -88,11 +103,12 @@ export class AuthService {
       user: {
         id: user.id,
         centerId: user.centerId,
+        centerName: user.center?.name,
         fullName: user.fullName,
         phone: user.phone,
         role: user.role,
-        trialEndsAt: user.center?.trialEndsAt,
-        subscriptionStatus: user.center?.subscriptionStatus,
+        trialEndsAt,
+        subscriptionStatus,
       },
       accessToken: token,
     };

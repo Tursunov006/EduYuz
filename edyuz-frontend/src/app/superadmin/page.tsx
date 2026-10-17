@@ -24,6 +24,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function SuperAdminPage() {
   const [centers, setCenters] = useState<any[]>([]);
@@ -42,6 +43,9 @@ export default function SuperAdminPage() {
   const [isBotModalOpen, setIsBotModalOpen] = useState(false);
   const [newBotToken, setNewBotToken] = useState('');
   const [botSaving, setBotSaving] = useState(false);
+
+  // Tariflar oynasini ko'rish modali
+  const [isPreviewPricingOpen, setIsPreviewPricingOpen] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -252,6 +256,13 @@ export default function SuperAdminPage() {
             </Link>
 
             <button
+              onClick={() => setIsPreviewPricingOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-bold transition cursor-pointer"
+            >
+              <Sparkles size={16} /> 💎 Tariflar Oyna
+            </button>
+
+            <button
               onClick={() => setIsBotModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-cyan-500/15 hover:bg-cyan-500/25 border border-cyan-500/30 text-cyan-300 text-xs font-bold transition cursor-pointer"
             >
@@ -456,7 +467,7 @@ export default function SuperAdminPage() {
                           </span>
                         ) : (
                           <span className="px-3 py-1 bg-amber-500/10 text-amber-300 rounded-full text-xs font-bold border border-amber-500/20 inline-flex items-center gap-1.5">
-                            <Clock size={13} /> 7-kunlik Trial
+                            <Clock size={13} /> 14-kunlik Trial
                           </span>
                         )}
                       </td>
@@ -617,7 +628,7 @@ export default function SuperAdminPage() {
                   </div>
                   <div className="flex justify-between items-center py-1">
                     <span className="text-slate-500">Litsenziya:</span>
-                    <span className="text-amber-300 font-bold">7-kunlik Bepul Sinov (Trial)</span>
+                    <span className="text-amber-300 font-bold">14-kunlik Bepul Sinov (Free Trial)</span>
                   </div>
                 </div>
 
@@ -689,6 +700,15 @@ export default function SuperAdminPage() {
           </div>
         </div>
       )}
+
+      {/* 6. 14 kundan keyin chiqadigan Tariflar Ro'yxati oynasini ko'rish */}
+      <SubscriptionModal
+        isOpen={isPreviewPricingOpen}
+        isExpired={false}
+        daysLeft={14}
+        centerName="EduYuz SaaS Demo"
+        onClose={() => setIsPreviewPricingOpen(false)}
+      />
     </div>
   );
 }
