@@ -31,7 +31,7 @@ export default function HelpWidget() {
           
           <div className="p-2 flex flex-col gap-1">
             <a 
-              href="https://t.me/tursunov_husniddin" 
+              href="https://t.me/Dasturchi_76" 
               target="_blank" 
               rel="noreferrer"
               className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition text-sm font-medium text-slate-200"
@@ -39,7 +39,10 @@ export default function HelpWidget() {
               <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
                 <Send size={16} />
               </div>
-              Telegram orqali yozish
+              <div>
+                <div className="font-bold text-slate-100">Telegram (@Dasturchi_76)</div>
+                <div className="text-[11px] text-slate-400">Ibrohim Tursunov • +998 94 769 07 76</div>
+              </div>
             </a>
             
             <a 

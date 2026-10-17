@@ -88,12 +88,12 @@ export default function Sidebar() {
   const renderLogoutButton = () => (
     <div className="p-4 border-t border-slate-800 space-y-2">
       <Link
-        href="https://t.me/tursunov_husniddin"
+        href="https://t.me/Dasturchi_76"
         target="_blank"
         className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
       >
         <HelpCircle size={18} className="text-sky-400" />
-        <span>Yordam (Support)</span>
+        <span>Yordam (@Dasturchi_76)</span>
       </Link>
       <button
         onClick={() => {

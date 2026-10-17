@@ -134,7 +134,7 @@ export default function SubscriptionModal({
         }
       }
       alert(
-        'Hozircha to‘lov tasdiqlanishi kutilmoqda. Agar to‘lov qilgan bo‘lsangiz, Telegram orqali @tursunov_husniddin ga xabar bering — 1 daqiqada faollashtiriladi!',
+        'Hozircha to‘lov tasdiqlanishi kutilmoqda. Agar to‘lov qilgan bo‘lsangiz, Telegram orqali @Dasturchi_76 (Ibrohim Tursunov, +998 94 769 07 76) ga xabar bering — 1 daqiqada faollashtiriladi!',
       );
     } catch (e) {
       window.location.reload();
@@ -147,9 +147,9 @@ export default function SubscriptionModal({
     const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
     const periodText = billingCycle === 'monthly' ? '1 oylik' : 'Yillik (-20% chegirma bilan)';
     const msg = encodeURIComponent(
-      `Assalomu alaykum! Men EduYuz CRM bo'yicha obunani faollashtirmoqchiman:\n\n🏢 O'quv markazi: ${centerName}\n📞 Telefon: ${userPhone || 'Kiritilmagan'}\n💎 Tanlangan tarif: ${plan.name} (${periodText})\n💳 Summa: ${price.toLocaleString('uz-UZ')} so'm/oy\n\nIltimos, to'lov rekvizitlarini yuboring va litsenziyani faollashtirib bering.`,
+      `Assalomu alaykum, Ibrohim aka! Men EduYuz CRM bo'yicha obunani faollashtirmoqchiman:\n\n🏢 O'quv markazi: ${centerName}\n📞 Telefon: ${userPhone || 'Kiritilmagan'}\n💎 Tanlangan tarif: ${plan.name} (${periodText})\n💳 Summa: ${price.toLocaleString('uz-UZ')} so'm/oy\n\nIltimos, to'lov rekvizitlarini yuboring va litsenziyani faollashtirib bering.`,
     );
-    window.open(`https://t.me/tursunov_husniddin?text=${msg}`, '_blank');
+    window.open(`https://t.me/Dasturchi_76?text=${msg}`, '_blank');
   }
 
   return (
@@ -317,19 +317,30 @@ export default function SubscriptionModal({
                 Click, Payme, Uzcard / Humo yoki Pul o‘tkazish orqali 1 daqiqada faollashtirish
               </h4>
               <p className="text-xs text-slate-400 mt-0.5">
-                Tanlangan tarif tugmasini bosing — Telegram orqali menejerimiz darhol litsenziyangizni 30 yoki 365 kunga yoqib beradi.
+                Dasturchi va Bosh Menejer: <strong className="text-slate-200">Ibrohim Tursunov</strong> • Tel:{' '}
+                <a href="tel:+998947690776" className="text-emerald-400 font-bold hover:underline">
+                  +998 94 769 07 76
+                </a>
               </p>
             </div>
           </div>
 
-          <a
-            href="https://t.me/tursunov_husniddin"
-            target="_blank"
-            rel="noreferrer"
-            className="px-5 py-2.5 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-extrabold whitespace-nowrap transition"
-          >
-            💬 Menejer bilan bog‘lanish (@tursunov_husniddin)
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href="tel:+998947690776"
+              className="px-4 py-2.5 rounded-2xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-extrabold whitespace-nowrap transition"
+            >
+              📞 +998 94 769 07 76
+            </a>
+            <a
+              href="https://t.me/Dasturchi_76"
+              target="_blank"
+              rel="noreferrer"
+              className="px-5 py-2.5 rounded-2xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-300 text-xs font-extrabold whitespace-nowrap transition"
+            >
+              💬 Telegram: @Dasturchi_76
+            </a>
+          </div>
         </div>
       </div>
     </div>
