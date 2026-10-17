@@ -6,7 +6,6 @@ import { Smartphone, Menu } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
-import AdminProfileMenu from './AdminProfileMenu';
 import { useTheme } from '@/lib/theme/ThemeContext';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
@@ -60,7 +59,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* O'ng tomon: Asboblar, Rejim, Til, Bildirishnoma, Interaktiv Admin Profil */}
+      {/* O'ng tomon: Asboblar, Rejim, Til, Bildirishnoma, Profil */}
       <div className="flex items-center gap-1.5 sm:gap-3">
         {/* Quick link to Mobile Mini App (faqat planshet/kompyuterda) */}
         <Link
@@ -82,8 +81,16 @@ export default function Navbar() {
         {/* Bildirishnomalar Markazi */}
         <NotificationCenter />
 
-        {/* Interaktiv Admin Profil va Markaz Sozlamalari */}
-        <AdminProfileMenu />
+        {/* Admin Profil badge */}
+        <div className={`flex items-center gap-2 pl-1.5 sm:pl-2 border-l ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm shrink-0">
+            A
+          </div>
+          <div className="hidden lg:block text-left">
+            <div className={`text-xs font-bold leading-tight ${isLight ? 'text-slate-800' : 'text-white'}`}>Admin</div>
+            <div className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Boshqaruvchi</div>
+          </div>
+        </div>
       </div>
     </header>
   );
