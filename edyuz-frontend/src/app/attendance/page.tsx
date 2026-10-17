@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { CalendarCheck, Check, X, Clock, Save, CheckCheck, ScanFace } from 'lucide-react';
-import Link from 'next/link';
+import { CalendarCheck, Check, X, Clock, Save, CheckCheck } from 'lucide-react';
 
 interface Student {
   id: string;
@@ -150,13 +149,6 @@ export default function AttendancePage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/attendance/scanner"
-            className="flex items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-[0_0_15px_rgba(99,102,241,0.4)]"
-          >
-            <ScanFace size={18} /> Face-ID Skaner
-          </Link>
-          
           <button
             onClick={markAllPresent}
             disabled={students.length === 0}

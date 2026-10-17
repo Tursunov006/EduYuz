@@ -84,7 +84,7 @@ export default function InstagramBioPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'bot',
-      text: "Assalomu alaykum! 👋 Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Face-ID davomat yoki 7 kunlik BEPUL DEMO bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
+      text: "Assalomu alaykum! 👋 Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Moliya, Lidlar voronkasi yoki 7 kunlik BEPUL DEMO bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
       time: 'Hozir',
     },
   ]);
@@ -204,7 +204,7 @@ export default function InstagramBioPage() {
       const lower = text.toLowerCase();
       const phoneMatch = text.match(/(?:\+?998[\s-]?)?(?:\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}|\d{9})/);
       let reply =
-        "✨ EduYuz CRM orqali Face-ID davomat, Moliya, Kassir va Lidlarni bitta ekranda boshqarasiz. 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib yuboring!";
+        "✨ EduYuz CRM orqali Kunlik Davomat, Moliya, Kassir va Lidlarni bitta ekranda boshqarasiz. 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib yuboring!";
 
       if (phoneMatch) {
         const phone = phoneMatch[0];
@@ -221,10 +221,10 @@ export default function InstagramBioPage() {
         reply = `✅ Rahmat! Raqamingiz (${phone}) EduYuz CRM Lidlar voronkasiga qo'shildi. Mutaxassisimiz tez orada siz bilan bog'lanib, 7 kunlik BEPUL DEMO yoqib beradi!`;
       } else if (lower.includes('narx') || lower.includes('qancha')) {
         reply =
-          "💎 Tariflarimiz:\n• Start: 199 000 so'm/oy (Face-ID, Kassa, Lidlar, 200 o'quvchi)\n• Pro: 349 000 so'm/oy (Cheksiz o'quvchi, Telegram Bot, SMS va Analitika)\n\n🎁 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib qoldiring!";
-      } else if (lower.includes('face') || lower.includes('kamera')) {
+          "💎 Tariflarimiz:\n• Start: 199 000 so'm/oy (Davomat, Kassa, Lidlar, 200 o'quvchi)\n• Pro: 349 000 so'm/oy (Cheksiz o'quvchi, Telegram Bot, SMS va Analitika)\n\n🎁 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib qoldiring!";
+      } else if (lower.includes('davomat') || lower.includes('bot') || lower.includes('sms')) {
         reply =
-          "📷 Face-ID Biometrik Davomat qimmat turniket talab qilmaydi! Oddiy noutbuk yoki telefon kamerasi orqali o'quvchini 0.5 soniyada taniydi va ota-onaga xabar yuboradi.\n\nSinab ko'rish uchun telefon raqamingizni qoldiring!";
+          "📅 Kunlik Davomat va Avto-Xabarnoma: O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram/SMS xabar boradi!\n\nSinab ko'rish uchun telefon raqamingizni qoldiring!";
       }
 
       setMessages((prev) => [...prev, { role: 'bot', text: reply, time: now }]);
@@ -285,7 +285,7 @@ export default function InstagramBioPage() {
 
           <div className="mt-4 pt-3.5 border-t border-slate-800/80 text-xs text-slate-300 space-y-1 leading-relaxed">
             <p>🎓 O&apos;quv markazlar uchun #1 CRM tizim</p>
-            <p>📷 Face-ID Davomat • 💰 Aniq Moliya • 🎯 Lidlar Voronkasi</p>
+            <p>📅 Onlayn Davomat • 💰 Aniq Moliya • 🎯 Lidlar Voronkasi</p>
           </div>
 
           {/* OBUNACHI YIG'ISH ALGORITMI: FOLLOW-TO-UNLOCK & VIRAL SHARE */}
@@ -472,7 +472,7 @@ export default function InstagramBioPage() {
                   +{extraProfitWithEduYuz.toLocaleString('uz-UZ')} so&apos;m
                 </div>
                 <p className="text-[11px] text-slate-400 leading-snug">
-                  Avto-SMS eslatma, Kanban voronka va Face-ID orqali saqlab qolingan o&apos;quvchilar (+22%)
+                  Avto-SMS eslatma, Kanban voronka va Ota-onalar Boti orqali saqlab qolingan o&apos;quvchilar (+22%)
                 </p>
               </div>
             </div>
@@ -662,7 +662,7 @@ export default function InstagramBioPage() {
             <div className="px-3 py-2 bg-slate-950/40 border-b border-slate-800/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {[
                 { label: '💎 Narxlar qancha?', q: 'EduYuz CRM narxlari va tariflari qancha?' },
-                { label: '📷 Face-ID haqida', q: 'Face-ID kamera davomat qanday ishlaydi?' },
+                { label: '📅 Davomat va SMS', q: 'Kunlik davomat va ota-onalar Telegram boti qanday ishlaydi?' },
                 { label: '🎁 Bepul Demo olish', q: '7 kunlik bepul demo qanday olaman?' },
               ].map((btn, i) => (
                 <button
@@ -738,9 +738,9 @@ export default function InstagramBioPage() {
           <div className="space-y-3">
             {[
               {
-                icon: Camera,
-                title: 'Face-ID Biometrik Davomat',
-                desc: "Qimmat turniketlarsiz! Kamera orqali o'quvchi yuzini 0.5 soniyada taniydi va ota-onaga darhol Telegram/SMS xabar yuboradi.",
+                icon: ShieldCheck,
+                title: 'Avtomatik Davomat va SMS/Telegram',
+                desc: "O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram va SMS xabar boradi.",
                 badge: 'Eng mashhur',
                 color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
               },

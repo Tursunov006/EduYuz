@@ -158,7 +158,7 @@ export class InstagramService {
                       text: `Sen @eduyuzcrmuz (EduYuz CRM Platformasi) ning rasmiy Instagram AI Sotuv Menejerisan.
 Vazifang: O'quv markazi rahbarlariga va mijozlarga EduYuz CRM imkoniyatlarini qisqa, samimiy va sotuvchi ohangda tushuntirish hamda ulardan telefon raqamini so'rab olish.
 EduYuz CRM afzalliklari:
-1. 📷 Face-ID Biometrik Davomat (kamera orqali 1 soniyada davomat va ota-onaga Telegram/SMS xabar).
+1. 📅 Kunlik Davomat va Ota-onalarga avtomatik Telegram/SMS xabar yuborish.
 2. 💰 Moliya, Kassa, Oylik avto-yechim va Qarzdorlar nazorati.
 3. 🎯 Lidlar voronkasi (Kanban) va Instagram integratsiya.
 4. 🎮 Gamifikatsiya (EduCoins), Sertifikatlar va Ota-onalar portali.
@@ -186,13 +186,13 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
     // Smart Local Sales Fallback (API kalit bo'lmasa ham 100% mukammal ishlaydi)
     if (lower.includes('narx') || lower.includes('qancha') || lower.includes('tarif') || lower.includes('pul')) {
       return {
-        reply: `💎 **EduYuz CRM tariflari juda hamyonbop:**\n\n• **Start (Boshlang'ich):** 199 000 so'm/oy (200 tagacha o'quvchi, Face-ID, Kassa va Lidlar)\n• **Pro (To'liq):** 349 000 so'm/oy (Cheksiz o'quvchi, AI Analitika, Telegram Bot va SMS)\n\n🎁 **7 kunlik BEPUL DEMO** hoziroq tayyor! Sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring 👇`,
+        reply: `💎 **EduYuz CRM tariflari juda hamyonbop:**\n\n• **Start (Boshlang'ich):** 199 000 so'm/oy (200 tagacha o'quvchi, Davomat, Kassa va Lidlar)\n• **Pro (To'liq):** 349 000 so'm/oy (Cheksiz o'quvchi, Analitika, Telegram Bot va SMS)\n\n🎁 **7 kunlik BEPUL DEMO** hoziroq tayyor! Sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring 👇`,
       };
     }
 
-    if (lower.includes('face') || lower.includes('kamera') || lower.includes('davomat') || lower.includes('yuz')) {
+    if (lower.includes('davomat') || lower.includes('bot') || lower.includes('sms')) {
       return {
-        reply: `📷 **EduYuz Face-ID Biometrik Davomat:**\n\nQo'shimcha qimmat turniket sotib olish shart emas! Oddiy noutbuk, planshet yoki telefon kamerasi orqali o'quvchi yuzini **0.5 soniyada** taniydi va darhol ota-onasiga Telegram/SMS xabar yuboradi.\n\n📱 O'z markazingizda bepul sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring!`,
+        reply: `📅 **EduYuz Avtomatik Davomat va Ota-onalar Boti:**\n\nO'qituvchi 1 tugma bilan guruh davomatini belgilaydi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram/SMS xabar yuboriladi.\n\n📱 O'z markazingizda bepul sinab ko'rish uchun **telefon raqamingizni** yozib qoldiring!`,
       };
     }
 
@@ -203,7 +203,7 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
     }
 
     return {
-      reply: `Assalomu alaykum! 👋 **@eduyuzcrmuz — EduYuz 2.0 CRM** rasmiy AI yordamchisiman.\n\nBiz o'quv markazlarni to'liq avtomatlashtiramiz:\n✅ **Face-ID Davomat** va Ota-onalar Boti\n✅ **Aniq Moliya** va Qarzdorlar nazorati\n✅ **Lidlar Voronkasi (Kanban)** va Instagram integratsiyasi\n\n🎁 **7 kunlik bepul Demo** olish yoki savolingiz bo'lsa, **telefon raqamingizni** yozib qoldiring!`,
+      reply: `Assalomu alaykum! 👋 **@eduyuzcrmuz — EduYuz 2.0 CRM** rasmiy AI yordamchisiman.\n\nBiz o'quv markazlarni to'liq avtomatlashtiramiz:\n✅ **Avtomatik Davomat** va Ota-onalar Boti\n✅ **Aniq Moliya** va Qarzdorlar nazorati\n✅ **Lidlar Voronkasi (Kanban)** va Instagram integratsiyasi\n\n🎁 **7 kunlik bepul Demo** olish yoki savolingiz bo'lsa, **telefon raqamingizni** yozib qoldiring!`,
     };
   }
 

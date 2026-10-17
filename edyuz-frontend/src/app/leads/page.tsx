@@ -691,7 +691,7 @@ export default function LeadsPage() {
                   <button
                     onClick={() =>
                       copyToClipboard(
-                        `🎓 O'quv markazingiz CRM-siz oyiga qancha pul yo'qotayotganini bilasizmi?\n\n📷 0.5 soniyada Face-ID kamera davomat\n💰 100% aniq Kassa va Qarzdorlar nazorati\n🎯 Instagram Lidlar voronkasi\n\n🎁 @eduyuzcrmuz sahifamizga OBUNA bo'ling va kommentga «CRM» deb yozing — Direct'ingizga 7 kunlik BEPUL DEMO + 100,000 so'm Vaucher yuboramiz! 👇`,
+                        `🎓 O'quv markazingiz CRM-siz oyiga qancha pul yo'qotayotganini bilasizmi?\n\n📅 Avtomatik davomat va Ota-onalar Telegram boti\n💰 100% aniq Kassa va Qarzdorlar nazorati\n🎯 Instagram Lidlar voronkasi\n\n🎁 @eduyuzcrmuz sahifamizga OBUNA bo'ling va kommentga «CRM» deb yozing — Direct'ingizga 7 kunlik BEPUL DEMO + 100,000 so'm Vaucher yuboramiz! 👇`,
                         'reels_caption'
                       )
                     }
