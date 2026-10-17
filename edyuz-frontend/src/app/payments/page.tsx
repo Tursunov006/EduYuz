@@ -32,6 +32,7 @@ import {
   Users,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { exportToExcel } from '@/lib/excelExport';
 
 const CATEGORY_MAP: Record<string, { label: string; icon: any; color: string; bg: string }> = {
   rent: { label: 'Bino Ijarasi', icon: Building2, color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
@@ -281,26 +282,169 @@ export default function UnifiedFinancePage() {
     }
   }
 
-  // Excel (CSV) Eksport
+  // Professional ko'p ustunli Excel (.xls) Eksport (Kassa, Qarzdorlar, Chiqimlar va KPI uchun)
+  const METHOD_LABELS: Record<string, string> = {
+    cash: 'Naqd pul',
+    card: 'Plastik karta',
+    click: 'Click',
+    payme: 'Payme',
+  };
+
   function exportPaymentsCSV() {
+    const today = new Date().toISOString().split('T')[0];
+
+    if (activeTab === 'debtors') {
+      if (debtors.length === 0) return alert('Qarzdorlar ro‘yxati bo‘sh');
+      exportToExcel(
+        `EduYuz_Qarzdorlar_${today}`,
+        [
+          { header: "O'quvchi F.I.O", key: 'fullName', width: 240 },
+          { header: 'Shaxsiy telefon', key: 'phone', width: 160, align: 'center' },
+          { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
+          {
+            header: "Qarzdorlik summasi (so'm)",
+            key: 'balance',
+            width: 190,
+            isCurrency: true,
+            format: (v) => `-${Math.abs(Number(v || 0)).toLocaleString('uz-UZ')} so'm`,
+          },
+        ],
+        debtors,
+        {
+          title: "EduYuz CRM — Qarzdor O'quvchilar Hisoboti",
+          summaryLabel: 'JAMI QARZDORLIK SUMMASI:',
+          summaryValue: `-${totalDebt.toLocaleString('uz-UZ')} so'm`,
+        }
+      );
+      return;
+    }
+
+    if (activeTab === 'expenses') {
+      if (filteredExpenses.length === 0) return alert('Eksport uchun xarajatlar topilmadi');
+      const expTotal = filteredExpenses.reduce((acc, e) => acc + Math.abs(Number(e.amount || 0)), 0);
+      exportToExcel(
+        `EduYuz_Chiqimlar_${today}`,
+        [
+          { header: 'Xarajat nomi / Maqsadi', key: 'title', width: 240 },
+          {
+            header: 'Kategoriya',
+            key: 'category',
+            width: 180,
+            format: (v) => CATEGORY_MAP[v]?.label || 'Boshqa xarajat',
+          },
+          {
+            header: "To'lov usuli",
+            key: 'paymentMethod',
+            width: 140,
+            align: 'center',
+            format: (v) => METHOD_LABELS[v] || v || 'Naqd pul',
+          },
+          { header: 'Izoh', key: 'comment', width: 220 },
+          {
+            header: 'Sana',
+            key: 'paidAt',
+            width: 130,
+            align: 'center',
+            format: (v, row) => new Date(v || row.createdAt || new Date()).toLocaleDateString('uz-UZ'),
+          },
+          {
+            header: "Chiqim summasi (so'm)",
+            key: 'amount',
+            width: 180,
+            isCurrency: true,
+            format: (v) => `-${Math.abs(Number(v || 0)).toLocaleString('uz-UZ')} so'm`,
+          },
+        ],
+        filteredExpenses,
+        {
+          title: 'EduYuz CRM — Chiqim va Xarajatlar Hisoboti',
+          summaryLabel: 'JAMI XARAJATLAR SUMMASI:',
+          summaryValue: `-${expTotal.toLocaleString('uz-UZ')} so'm`,
+        }
+      );
+      return;
+    }
+
+    if (activeTab === 'reports') {
+      if (teacherStats.length === 0) return alert("O'qituvchilar ma'lumoti topilmadi");
+      const totalKpi = teacherStats.reduce((acc, t) => acc + t.kpiSalary, 0);
+      exportToExcel(
+        `EduYuz_Ustozlar_KPI_${today}`,
+        [
+          { header: "O'qituvchi F.I.O", key: 'name', width: 240 },
+          { header: 'Faol guruhlar soni', key: 'groups', width: 150, align: 'center' },
+          { header: "Jami o'quvchilar soni", key: 'students', width: 160, align: 'center' },
+          {
+            header: "50% KPI Oylik Maosh (so'm)",
+            key: 'kpiSalary',
+            width: 200,
+            isCurrency: true,
+            format: (v) => `${Number(v || 0).toLocaleString('uz-UZ')} so'm`,
+          },
+        ],
+        teacherStats,
+        {
+          title: "EduYuz CRM — O'qituvchilar KPI va Ish Haqi Hisoboti",
+          summaryLabel: 'JAMI KPI MAOSH FONDI:',
+          summaryValue: `${totalKpi.toLocaleString('uz-UZ')} so'm`,
+        }
+      );
+      return;
+    }
+
+    // Default: Kassa va To'lovlar (income)
     if (filteredPayments.length === 0) return alert("Eksport uchun to'lovlar yo'q");
-    const headers = ["O'quvchi", 'Miqdor', 'Usul', 'Izoh', 'Sana'];
-    const rows = filteredPayments.map((p) => [
-      `"${p.student?.fullName || ''}"`,
-      p.amount,
-      p.paymentMethod,
-      `"${p.comment || ''}"`,
-      new Date(p.paidAt).toLocaleDateString('uz-UZ'),
-    ]);
-    const csvContent =
-      'data:text/csv;charset=utf-8,\uFEFF' +
-      [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
-    const link = document.createElement('a');
-    link.setAttribute('href', encodeURI(csvContent));
-    link.setAttribute('download', `EduYuz_Moliya_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportToExcel(
+      `EduYuz_Kassa_Tolovlar_${today}`,
+      [
+        {
+          header: "O'quvchi F.I.O",
+          key: 'student',
+          width: 240,
+          format: (_, row) => row.student?.fullName || "Noma'lum o'quvchi",
+        },
+        {
+          header: 'Telefon',
+          key: 'phone',
+          width: 150,
+          align: 'center',
+          format: (_, row) => row.student?.phone || row.student?.parentPhone || '—',
+        },
+        {
+          header: "To'lov usuli",
+          key: 'paymentMethod',
+          width: 150,
+          align: 'center',
+          format: (v) => METHOD_LABELS[v] || String(v || '').toUpperCase(),
+        },
+        {
+          header: 'Izoh',
+          key: 'comment',
+          width: 230,
+          format: (v) => v || "Kurs to'lovi",
+        },
+        {
+          header: 'Sana',
+          key: 'paidAt',
+          width: 140,
+          align: 'center',
+          format: (v) => (v ? new Date(v).toLocaleDateString('uz-UZ') : '—'),
+        },
+        {
+          header: "To'lov miqdori (so'm)",
+          key: 'amount',
+          width: 190,
+          isCurrency: true,
+          format: (v) => `+${Number(v || 0).toLocaleString('uz-UZ')} so'm`,
+        },
+      ],
+      filteredPayments,
+      {
+        title: "EduYuz CRM — Kassa va Kirim To'lovlar Hisoboti",
+        summaryLabel: 'JAMI KASSA TUSHUMI:',
+        summaryValue: `+${filteredIncomeTotal.toLocaleString('uz-UZ')} so'm`,
+      }
+    );
   }
 
   // 6. Hisobotlar va Analitika (6 oylik grafik va O'qituvchilar KPI)

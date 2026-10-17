@@ -84,16 +84,27 @@ export default function DashboardPage() {
 
   function handleExportDebtors() {
     if (debtors.length === 0) return alert('Qarzdorlar ro‘yxati bo‘sh');
+    const totalDebtSum = debtors.reduce((acc, s) => acc + Math.abs(Number(s.balance || 0)), 0);
     exportToExcel(
       `EduYuz_Qarzdorlar_${new Date().toISOString().split('T')[0]}`,
       [
-        { header: 'ID', key: 'id' },
-        { header: t('students.name', 'F.I.SH'), key: 'fullName' },
-        { header: t('students.phone', 'Telefon'), key: 'phone' },
-        { header: 'Ota-ona telefoni', key: 'parentPhone' },
-        { header: 'Qarzdorlik', key: 'balance', format: (val) => `${Math.abs(Number(val) || 0).toLocaleString('uz-UZ')} so'm` },
+        { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
+        { header: t('students.phone', 'Telefon'), key: 'phone', width: 160, align: 'center' },
+        { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
+        {
+          header: 'Qarzdorlik summasi',
+          key: 'balance',
+          width: 190,
+          isCurrency: true,
+          format: (val) => `-${Math.abs(Number(val) || 0).toLocaleString('uz-UZ')} so'm`,
+        },
       ],
-      debtors
+      debtors,
+      {
+        title: "EduYuz CRM — Qarzdor O'quvchilar Ro'yxati",
+        summaryLabel: 'JAMI QARZDORLIK:',
+        summaryValue: `-${totalDebtSum.toLocaleString('uz-UZ')} so'm`,
+      }
     );
   }
 

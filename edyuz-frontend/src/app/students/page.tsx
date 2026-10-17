@@ -124,15 +124,37 @@ export default function StudentsPage() {
     exportToExcel(
       `EduYuz_Oquvchilar_${new Date().toISOString().split('T')[0]}`,
       [
-        { header: 'ID', key: 'id' },
-        { header: t('students.name', 'F.I.SH'), key: 'fullName' },
-        { header: t('students.phone', 'Telefon'), key: 'phone' },
-        { header: 'Ota-ona telefoni', key: 'parentPhone' },
-        { header: t('students.balance', 'Balans'), key: 'balance', format: (val) => `${val || 0} so'm` },
-        { header: t('students.coins', 'EduCoins'), key: 'coins', format: (val) => val || 0 },
-        { header: t('students.status', 'Holat'), key: 'status' },
+        { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
+        { header: t('students.phone', 'Shaxsiy Telefon'), key: 'phone', width: 160, align: 'center' },
+        { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
+        {
+          header: t('students.balance', 'Hisob Balansi (so‘m)'),
+          key: 'balance',
+          width: 180,
+          isCurrency: true,
+          format: (val) => `${Number(val || 0).toLocaleString('uz-UZ')} so'm`,
+        },
+        {
+          header: t('students.coins', 'EduCoins'),
+          key: 'coins',
+          width: 120,
+          align: 'center',
+          format: (val) => `${val || 0} 🪙`,
+        },
+        {
+          header: t('students.status', 'Holati'),
+          key: 'status',
+          width: 130,
+          align: 'center',
+          format: (val) => (val === 'active' ? 'Faol' : val === 'graduated' ? 'Bitirgan' : 'Nofaol'),
+        },
       ],
-      students
+      students,
+      {
+        title: "EduYuz CRM — Markaz O'quvchilari Bazasi",
+        summaryLabel: "JAMI RO'YXATDAGI O'QUVCHILAR:",
+        summaryValue: `${students.length} nafar`,
+      }
     );
   }
 
