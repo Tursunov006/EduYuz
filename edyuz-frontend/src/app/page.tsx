@@ -45,11 +45,28 @@ export default function DashboardPage() {
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
   const [debtors, setDebtors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [targetRevenue, setTargetRevenue] = useState<number>(25000000);
 
   // Reja ko'rsatkichlari (Plan vs Actual)
-  const targetRevenue = 25000000; // 25 mln so'm oylik reja
   const currentRevenue = stats.paymentsTotal || 16400000;
-  const revenuePercent = Math.min(Math.round((currentRevenue / targetRevenue) * 100), 100);
+  const revenuePercent = Math.min(Math.round((currentRevenue / (targetRevenue || 25000000)) * 100), 100);
+
+  useEffect(() => {
+    function syncSettings() {
+      try {
+        const raw = localStorage.getItem('eduyuz_center_settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed.monthlyTarget && Number(parsed.monthlyTarget) > 0) {
+            setTargetRevenue(Number(parsed.monthlyTarget));
+          }
+        }
+      } catch {}
+    }
+    syncSettings();
+    window.addEventListener('eduyuz-settings-updated', syncSettings);
+    return () => window.removeEventListener('eduyuz-settings-updated', syncSettings);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
