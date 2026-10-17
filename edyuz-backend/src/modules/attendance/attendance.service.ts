@@ -106,19 +106,15 @@ export class AttendanceService {
         .catch(() => {});
     }
 
-    // Ota-onaga Telegram orqali xabar yuborish (kelmagan yoki kechikkan bo'lsa)
-    const absentOrLateRecords = dto.records.filter(
-      (r) => r.status === 'absent' || r.status === 'late',
-    );
-
-    if (absentOrLateRecords.length > 0) {
-      const studentIds = absentOrLateRecords.map((r) => r.studentId);
+    // Ota-onaga Telegram orqali xabar yuborish (Keldi, Kechikdi va Kelmadi holatlari uchun!)
+    if (dto.records.length > 0) {
+      const studentIds = dto.records.map((r) => r.studentId);
       const students = await this.prisma.student.findMany({
         where: { id: { in: studentIds } },
       });
 
       for (const student of students) {
-        const record = absentOrLateRecords.find((r) => r.studentId === student.id);
+        const record = dto.records.find((r) => r.studentId === student.id);
         if (record && student.parentChatId) {
           this.telegramService
             .sendAttendanceAlert(

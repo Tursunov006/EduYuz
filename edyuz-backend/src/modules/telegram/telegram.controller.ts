@@ -14,8 +14,14 @@ export class TelegramController {
   ) {
     const success = await this.telegramService.sendMessage(
       chatId,
-      message || '🔔 EdYuz platformasidan sinov xabari!',
+      message || '🔔 EduYuz platformasidan sinov xabari!',
     );
     return { success, message: success ? 'Xabar yuborildi' : 'Xabar yuborishda xatolik' };
+  }
+
+  @Public()
+  @Post('set-token')
+  async setBotToken(@Body('token') token: string) {
+    return this.telegramService.updateBotToken(token);
   }
 }
