@@ -30,10 +30,14 @@ export default function LoginPage() {
 
       // Login kiritilganda (masalan, admin yoki superadmin), tizimdagi mos hisobga yo'naltirish
       let accountLogin = login.trim();
+      const lowerLogin = accountLogin.toLowerCase();
+      const isSuperAdminLogin = lowerLogin === 'superadmin' || lowerLogin === 'dasturchi';
+
       if (
-        accountLogin.toLowerCase() === 'admin' || 
-        accountLogin.toLowerCase() === 'superadmin' || 
-        accountLogin.toLowerCase() === 'admin123'
+        lowerLogin === 'admin' || 
+        lowerLogin === 'superadmin' || 
+        lowerLogin === 'dasturchi' ||
+        lowerLogin === 'admin123'
       ) {
         accountLogin = '+998901234567';
       }
@@ -55,8 +59,8 @@ export default function LoginPage() {
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       
-      // Yangi token bilan to'g'ridan-to'g'ri Boshqaruv Paneliga yo'naltirish
-      window.location.href = '/';
+      // Agar "superadmin" yoki "dasturchi" deb kirilgan bo'lsa -> Dasturchi Paneliga (/superadmin), aks holda Boshqaruv Paneliga (/)
+      window.location.href = isSuperAdminLogin ? '/superadmin' : '/';
     } catch (err: any) {
       setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
     } finally {

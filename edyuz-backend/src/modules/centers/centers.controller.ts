@@ -45,6 +45,25 @@ export class CentersController {
   }
 
   @Public()
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: 'active' | 'trial' | 'expired',
+    @Body('days') days?: number,
+  ) {
+    return this.centersService.updateStatus(id, status, days ?? 30);
+  }
+
+  @Public()
+  @Post(':id/reset-password')
+  resetPassword(
+    @Param('id') id: string,
+    @Body('password') password?: string,
+  ) {
+    return this.centersService.resetDirectorPassword(id, password || 'admin123');
+  }
+
+  @Public()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.centersService.remove(id);
