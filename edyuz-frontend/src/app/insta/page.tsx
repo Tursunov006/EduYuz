@@ -247,9 +247,9 @@ export default function InstagramBioPage() {
             <div className="relative flex-shrink-0">
               <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 shadow-lg shadow-pink-500/20">
                 <img
-                  src="/eduyuz-logo-b.jpg"
+                  src="/logo-icon-transparent.png"
                   alt="EduYuz CRM"
-                  className="w-full h-full rounded-full object-cover bg-slate-950 p-0.5"
+                  className="w-full h-full rounded-full object-contain bg-white p-1.5"
                 />
               </div>
               <span className="absolute -bottom-1 -right-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-950">
