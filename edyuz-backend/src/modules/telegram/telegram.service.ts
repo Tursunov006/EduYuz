@@ -373,9 +373,8 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
             });
             await this.prisma.smsLog.create({
               data: {
-                centerId: center.id,
-                recipientPhone: `+${cleanPhone}`,
-                messageText: payload,
+                phone: `+${cleanPhone}`,
+                message: payload,
                 status: 'lead_new',
               },
             });
@@ -408,9 +407,8 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
           });
           await this.prisma.smsLog.create({
             data: {
-              centerId: center.id,
-              recipientPhone: linkedStudent?.parentPhone || linkedStudent?.phone || `TG:${chatId}`,
-              messageText: payload,
+              phone: linkedStudent?.parentPhone || linkedStudent?.phone || `TG:${chatId}`,
+              message: payload,
               status: 'lead_new',
             },
           });
