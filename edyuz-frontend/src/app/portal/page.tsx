@@ -19,7 +19,9 @@ import {
   Sparkles,
   User,
   Gamepad2,
-  Bot
+  Bot,
+  Copy,
+  Check
 } from 'lucide-react';
 import Link from 'next/link';
 import AiStudentTutorChat from '@/components/ai/AiStudentTutorChat';
@@ -76,6 +78,15 @@ function PortalContent() {
   const [studentData, setStudentData] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'attendance' | 'lms' | 'games' | 'ai' | 'payments' | 'certificates'>('attendance');
   const [loading, setLoading] = useState(true);
+  const [copiedCard, setCopiedCard] = useState(false);
+
+  const copyCardNumber = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText('9860120135408280');
+    }
+    setCopiedCard(true);
+    setTimeout(() => setCopiedCard(false), 2500);
+  };
 
   // Talabaning darslari, davomati va to'lovlari
   const [attendances, setAttendances] = useState<any[]>([]);
@@ -491,6 +502,47 @@ function PortalContent() {
                   ID raqamingiz: <span className="font-bold text-white">{selectedStudentId.split('-')[0]}</span>
                 </p>
 
+                {/* To'lov uchun Karta Raqami (Humo / UzCard) */}
+                <div className="w-full bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-3.5 space-y-2 relative z-10 shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400 flex items-center gap-1.5">
+                      <CreditCard size={13} /> O'quv Markazi Rasmiy Kartasi
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                      HUMO
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-black text-sm sm:text-base text-white tracking-widest selection:bg-emerald-500">
+                        9860 1201 3540 8280
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={copyCardNumber}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold rounded-lg text-[11px] transition shadow-md shadow-emerald-500/20 cursor-pointer"
+                    >
+                      {copiedCard ? (
+                        <>
+                          <Check size={14} className="text-slate-950" />
+                          <span>Nusxalandi!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={14} />
+                          <span>Nusxalash</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 text-left">
+                    💡 <i>To'lov o'tkazishda izohga o'quvchi ID sini (<span className="text-white font-mono">{selectedStudentId.split('-')[0]}</span>) yoki to'liq ismini yozing.</i>
+                  </p>
+                </div>
+
                 <div className="flex gap-2 w-full pt-2 relative z-10">
                   <a 
                     href={`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`}
@@ -501,9 +553,11 @@ function PortalContent() {
                     Click
                   </a>
                   <button 
+                    type="button"
+                    onClick={copyCardNumber}
                     className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-500/20"
                   >
-                    ATMOS (UzCard)
+                    {copiedCard ? 'Karta Nusxalandi ✅' : 'Kartaga To'lash (Humo)'}
                   </button>
                 </div>
               </div>
