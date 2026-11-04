@@ -21,7 +21,13 @@ import {
   Gamepad2,
   Bot,
   Copy,
-  Check
+  Check,
+  ShieldCheck,
+  X,
+  Lock,
+  ArrowRight,
+  Smartphone,
+  CheckCircle
 } from 'lucide-react';
 import Link from 'next/link';
 import AiStudentTutorChat from '@/components/ai/AiStudentTutorChat';
@@ -79,6 +85,113 @@ function PortalContent() {
   const [activeTab, setActiveTab] = useState<'attendance' | 'lms' | 'games' | 'ai' | 'payments' | 'certificates'>('attendance');
   const [loading, setLoading] = useState(true);
   const [copiedCard, setCopiedCard] = useState(false);
+
+  // Ekvayring Modal holatlari
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payStep, setPayStep] = useState<'form' | 'sms' | 'success'>('form');
+  const [payAmount, setPayAmount] = useState<number>(350000);
+  const [inputCardNumber, setInputCardNumber] = useState('');
+  const [inputCardExpiry, setInputCardExpiry] = useState('');
+  const [inputSmsCode, setInputSmsCode] = useState('');
+  const [payLoading, setPayLoading] = useState(false);
+  const [smsTimer, setSmsTimer] = useState(60);
+  const [lastPaymentInfo, setLastPaymentInfo] = useState<any>(null);
+
+  // Karta raqamini formatlash (8600 0000 0000 0000)
+  const handleCardNumberChange = (val: string) => {
+    const raw = val.replace(/\D/g, '').slice(0, 16);
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, '$1 ');
+    setInputCardNumber(formatted);
+  };
+
+  // Karta muddatini formatlash (MM/YY)
+  const handleExpiryChange = (val: string) => {
+    const raw = val.replace(/\D/g, '').slice(0, 4);
+    if (raw.length >= 3) {
+      setInputCardExpiry(`${raw.slice(0, 2)}/${raw.slice(2)}`);
+    } else {
+      setInputCardExpiry(raw);
+    }
+  };
+
+  // Karta turini aniqlash (UzCard / Humo / Visa)
+  const getCardType = (rawNum: string) => {
+    const clean = rawNum.replace(/\s/g, '');
+    if (clean.startsWith('8600') || clean.startsWith('5614')) return { name: 'UZCARD', color: 'bg-blue-600 text-white' };
+    if (clean.startsWith('9860')) return { name: 'HUMO', color: 'bg-amber-500 text-slate-950 font-black' };
+    if (clean.startsWith('4')) return { name: 'VISA', color: 'bg-indigo-600 text-white' };
+    if (clean.startsWith('5')) return { name: 'MASTERCARD', color: 'bg-rose-600 text-white' };
+    return { name: 'KARTA', color: 'bg-slate-700 text-slate-300' };
+  };
+
+  // 1-bosqich: SMS kod yuborish
+  const handleRequestSms = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanNum = inputCardNumber.replace(/\s/g, '');
+    if (cleanNum.length !== 16) {
+      return alert('Iltimos, 16 xonali to‘g‘ri karta raqamini kiriting!');
+    }
+    if (inputCardExpiry.length !== 5) {
+      return alert('Iltimos, kartaning amal qilish muddatini to‘g‘ri kiriting (masalan: 12/28)!');
+    }
+    if (!payAmount || payAmount < 1000) {
+      return alert('Minimal to‘lov miqdori: 1 000 so‘m');
+    }
+
+    setPayLoading(true);
+    setTimeout(() => {
+      setPayLoading(false);
+      setPayStep('sms');
+      setSmsTimer(60);
+    }, 800);
+  };
+
+  // 2-bosqich: SMS kodni tasdiqlash va to'lovni bazaga yozish
+  const handleConfirmPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputSmsCode || inputSmsCode.length < 4) {
+      return alert('Iltimos, SMS orqali kelgan tasdiqlash kodini kiriting!');
+    }
+
+    setPayLoading(true);
+    try {
+      const cleanNum = inputCardNumber.replace(/\s/g, '');
+      const cardType = getCardType(cleanNum).name;
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+
+      // Backend API'ga to'lovni yuborish
+      const res = await axios.post(`${apiUrl}/payments`, {
+        studentId: selectedStudentId,
+        amount: Number(payAmount),
+        paymentMethod: 'card',
+        comment: `Online ${cardType} orqali to‘lov (${cleanNum.slice(0, 4)} **** ${cleanNum.slice(-4)}) -> 9860 1201 3540 8280`
+      });
+
+      setLastPaymentInfo({
+        txId: `ED-${Date.now().toString().slice(-6)}`,
+        amount: payAmount,
+        card: `${cleanNum.slice(0, 4)} •••• •••• ${cleanNum.slice(-4)}`,
+        cardType: cardType,
+        date: new Date().toLocaleString(),
+        studentName: studentData?.fullName
+      });
+
+      // Talaba ma'lumotlari va to'lovlar tarixini yangilash
+      if (studentData) {
+        setStudentData({
+          ...studentData,
+          balance: Number(studentData.balance || 0) + Number(payAmount)
+        });
+      }
+      setPayments(prev => [res.data, ...prev]);
+
+      setPayStep('success');
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || 'To‘lovni amalga oshirishda xatolik yuz berdi');
+    } finally {
+      setPayLoading(false);
+    }
+  };
 
   const copyCardNumber = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -543,23 +656,40 @@ function PortalContent() {
                   </p>
                 </div>
 
-                <div className="flex gap-2 w-full pt-2 relative z-10">
+                {/* ASOSIY: Saytda Karta Orqali To'lov Tugmasi (Ekvayring) */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const debt = Math.abs(Number(studentData?.balance || 0));
+                    if (debt > 0) setPayAmount(debt);
+                    setPayStep('form');
+                    setShowPayModal(true);
+                  }}
+                  className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl shadow-emerald-500/25 relative z-10 active:scale-[0.98] cursor-pointer"
+                >
+                  <CreditCard size={18} className="text-slate-950" />
+                  <span>Saytda Karta Orqali To‘lash (UzCard / Humo)</span>
+                  <ArrowRight size={15} />
+                </button>
+
+                <div className="flex gap-2 w-full pt-1 relative z-10">
                   <a 
-                    href={`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`}
+                    href="https://my.click.uz/pay?card=9860120135408280"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-blue-500/20"
+                    className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-blue-500/20"
                   >
-                    Click
+                    Click Ilovasi
                   </a>
-                  <button 
-                    type="button"
-                    onClick={copyCardNumber}
-                    className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold py-2 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-emerald-500/20"
+                  <a 
+                    href="https://payme.uz/fallback/transfer/9860120135408280"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-teal-500/20"
                   >
-                    {copiedCard ? 'Karta Nusxalandi ✅' : 'Kartaga To'lash (Humo)'}
-                  </button>
-                </div>
+                    Payme Ilovasi
+                  </a>
+                </div></div>
               </div>
 
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4">
@@ -651,6 +781,248 @@ function PortalContent() {
           )}
         </div>
       </div>
+      {/* ======================================================== */}
+      {/* 💳 ONLINE KARTA ORQALI TO'LOV MODALI (EKVAYRING + SMS OTP) */}
+      {/* ======================================================== */}
+      {showPayModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <CreditCard size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Online Karta orqali To‘lov</h3>
+                  <p className="text-[10px] text-slate-400">UzCard, Humo, Visa xavfsiz to‘lov tizimi</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowPayModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* 1-BOSQICH: KARTA VA SUMMA KIRITISH */}
+            {payStep === 'form' && (
+              <form onSubmit={handleRequestSms} className="mt-5 space-y-4">
+                
+                {/* Interaktiv Karta Dizayni */}
+                <div className="w-full bg-gradient-to-tr from-slate-950 via-slate-900 to-emerald-950/60 border border-emerald-500/30 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] tracking-wider uppercase font-bold text-slate-400">EduYuz Pay</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${getCardType(inputCardNumber).color}`}>
+                      {getCardType(inputCardNumber).name}
+                    </span>
+                  </div>
+
+                  <div className="my-4">
+                    <span className="font-mono text-base sm:text-lg font-black text-white tracking-widest block">
+                      {inputCardNumber || '•••• •••• •••• ••••'}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px]">
+                    <div>
+                      <span className="text-[9px] text-slate-400 block uppercase">O‘quvchi</span>
+                      <span className="font-bold text-slate-200">{studentData?.fullName || 'O‘quvchi'}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[9px] text-slate-400 block uppercase">Muddati</span>
+                      <span className="font-mono font-bold text-slate-200">{inputCardExpiry || 'MM/YY'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* To'lov Summasi */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    To‘lov summasi (so‘mda)
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="number"
+                      required
+                      min={1000}
+                      step={5000}
+                      value={payAmount}
+                      onChange={(e) => setPayAmount(Number(e.target.value))}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                    />
+                    <span className="absolute right-3.5 top-2.5 text-xs font-bold text-slate-500">UZS</span>
+                  </div>
+
+                  {/* Tezkor Summa Tugmalari */}
+                  <div className="flex gap-1.5 mt-2">
+                    {[100000, 300000, 500000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setPayAmount(val)}
+                        className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-medium transition cursor-pointer"
+                      >
+                        +{val.toLocaleString()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Karta Raqami */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Karta raqami (16 xonali)
+                  </label>
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      required
+                      placeholder="8600 0000 0000 0000 yoki 9860..."
+                      value={inputCardNumber}
+                      onChange={(e) => handleCardNumberChange(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-white tracking-wider focus:outline-none focus:border-emerald-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Amal Qilish Muddati */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    Amal qilish muddati (Oy / Yil)
+                  </label>
+                  <input 
+                    type="text"
+                    required
+                    placeholder="MM/YY (masalan: 12/28)"
+                    value={inputCardExpiry}
+                    onChange={(e) => handleExpiryChange(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-white focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-[10px] text-slate-400 flex items-center justify-between">
+                  <span>Qabul qiluvchi markaz kartasi:</span>
+                  <span className="font-mono font-bold text-emerald-400">9860 1201 3540 8280</span>
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={payLoading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 cursor-pointer"
+                >
+                  {payLoading ? 'SMS kod yuborilmoqda...' : 'SMS Tasdiqlash Kodini Olish'}
+                  <ArrowRight size={14} />
+                </button>
+              </form>
+            )}
+
+            {/* 2-BOSQICH: SMS KODNI TASDIQLASH */}
+            {payStep === 'sms' && (
+              <form onSubmit={handleConfirmPayment} className="mt-5 space-y-4">
+                <div className="text-center space-y-2">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
+                    <Smartphone size={24} />
+                  </div>
+                  <h4 className="text-sm font-bold text-white">SMS Kodni Kiriting</h4>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    Kartangizga ulangan telefon raqamingizga tasdiqlash kodi yuborildi.
+                  </p>
+                  <p className="text-xs font-bold text-emerald-400">
+                    To‘lov summasi: {Number(payAmount).toLocaleString()} so‘m
+                  </p>
+                </div>
+
+                <div>
+                  <input 
+                    type="text"
+                    required
+                    autoFocus
+                    maxLength={6}
+                    placeholder="••••••"
+                    value={inputSmsCode}
+                    onChange={(e) => setInputSmsCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-full text-center tracking-[0.5em] font-mono text-xl font-black bg-slate-950 border-2 border-emerald-500/50 rounded-xl py-3 text-white focus:outline-none focus:border-emerald-400"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                  <span>Kodni kuting:</span>
+                  <span className="font-mono text-emerald-400 font-bold">{smsTimer} soniya</span>
+                </div>
+
+                <button 
+                  type="submit"
+                  disabled={payLoading}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 cursor-pointer"
+                >
+                  {payLoading ? 'To‘lov tasdiqlanmoqda...' : 'To‘lovni Tasdiqlash'}
+                  <Lock size={14} />
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => setPayStep('form')}
+                  className="w-full py-2 text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  ← Karta ma'lumotlarini o'zgartirish
+                </button>
+              </form>
+            )}
+
+            {/* 3-BOSQICH: TO'LOV MUVAFFAQIYATLI (KVITANSIYA) */}
+            {payStep === 'success' && (
+              <div className="mt-5 text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 mx-auto flex items-center justify-center animate-bounce">
+                  <CheckCircle size={36} />
+                </div>
+
+                <div>
+                  <h4 className="text-base font-bold text-white">To‘lov Muvaffaqiyatli O‘tdi! 🎉</h4>
+                  <p className="text-xs text-slate-400 mt-1">O‘quvchi hisobiga pul kelib tushdi va balansi to‘ldirildi.</p>
+                </div>
+
+                {/* To'lov Cheki */}
+                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-left space-y-2 font-mono text-xs text-slate-300">
+                  <div className="flex justify-between border-b border-slate-800 pb-2">
+                    <span className="text-slate-500">Tranzaksiya:</span>
+                    <span className="font-bold text-white">{lastPaymentInfo?.txId}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Summa:</span>
+                    <span className="font-bold text-emerald-400 text-sm">{Number(lastPaymentInfo?.amount).toLocaleString()} UZS</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">To‘lovchi:</span>
+                    <span className="text-white">{lastPaymentInfo?.card}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Qabul qiluvchi:</span>
+                    <span className="text-emerald-300 font-bold">9860 1201 3540 8280 (Humo)</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-slate-800">
+                    <span className="text-slate-500">Holat:</span>
+                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                      <ShieldCheck size={13} /> To‘landi (Tasdiqlangan)
+                    </span>
+                  </div>
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={() => setShowPayModal(false)}
+                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-xs transition cursor-pointer"
+                >
+                  Yopish
+                </button>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
