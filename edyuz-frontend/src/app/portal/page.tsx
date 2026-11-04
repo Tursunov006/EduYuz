@@ -490,11 +490,11 @@ function PortalContent() {
                 </p>
                 
                 {/* QR KOD RASMI */}
-                <div className="p-2 bg-white rounded-xl shadow-lg relative z-10 mx-auto">
+                <div className="p-2 bg-white rounded-2xl shadow-xl relative z-10 mx-auto max-w-[200px] border border-white/20">
                   <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://my.click.uz/services/pay?service_id=12345&merchant_id=54321&amount=${Math.abs(Number(studentData?.balance || 0))}&transaction_param=${selectedStudentId}`)}`}
-                    alt="To'lov QR Kodi"
-                    className="w-32 h-32 object-contain"
+                    src="/payment-qr.png"
+                    alt="To'lov QR va Shtrix Kodi"
+                    className="w-full h-auto object-contain rounded-xl"
                   />
                 </div>
 
