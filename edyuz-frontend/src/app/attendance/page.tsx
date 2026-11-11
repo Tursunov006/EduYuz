@@ -1,307 +1,255 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import { CalendarCheck, Check, X, Clock, Save, CheckCheck } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { CheckCheck, Save } from 'lucide-react';
+import { api, apiFetch } from '@/lib/api';
+
+type Status = 'PRESENT' | 'ABSENT' | 'LATE';
 
 interface Student {
   id: string;
   fullName: string;
-  phone: string;
+  phone?: string;
 }
 
-interface Group {
-  id: string;
-  name: string;
-}
-
-type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE';
+const STATUS_META: Record<Status, { label: string; active: string }> = {
+  PRESENT: { label: 'Keldi', active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' },
+  ABSENT: { label: 'Kelmadi', active: 'bg-rose-500/10 text-rose-600 border-rose-500/30' },
+  LATE: { label: 'Kechikdi', active: 'bg-amber-500/10 text-amber-600 border-amber-500/30' },
+};
 
 export default function AttendancePage() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<string>('');
-  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [groupId, setGroupId] = useState('');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [students, setStudents] = useState<Student[]>([]);
-  const [attendance, setAttendance] = useState<Record<string, AttendanceStatus>>({});
+  const [marks, setMarks] = useState<Record<string, Status>>({});
+  const [saved, setSaved] = useState<Record<string, Status>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const getHeaders = () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  };
-
-  // 1. Guruhlarni yuklab olish
+  // Guruhlar ro'yxati. ?groupId=... bilan kelinsa (bosh sahifadagi "Davomat" tugmasi) o'sha tanlanadi.
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        const res = await axios.get('http://localhost:3000/api/v1/groups', {
-          headers: getHeaders(),
-        });
-        setGroups(res.data);
-        if (res.data.length > 0) {
-          setSelectedGroup(res.data[0].id);
-        }
-      } catch (err) {
-        console.error('Guruhlarni yuklashda xatolik:', err);
-      }
-    };
-    fetchGroups();
+    apiFetch('/groups')
+      .then((list) => {
+        const arr = Array.isArray(list) ? list : [];
+        setGroups(arr);
+        const fromUrl = new URLSearchParams(window.location.search).get('groupId');
+        if (fromUrl && arr.some((g: any) => g.id === fromUrl)) setGroupId(fromUrl);
+      })
+      .catch(() => setGroups([]));
   }, []);
 
-  // 2. Tanlangan guruh o'quvchilarini va o'sha kungi mavjud davomatni yuklash
-  const fetchGroupStudents = async () => {
-    if (!selectedGroup) return;
-    try {
-      setLoading(true);
-      const [groupRes, studentsRes, prevAttendanceRes] = await Promise.all([
-        axios.get(`http://localhost:3000/api/v1/groups/${selectedGroup}`, { headers: getHeaders() }).catch(() => null),
-        axios.get('http://localhost:3000/api/v1/students', { headers: getHeaders() }).catch(() => ({ data: [] })),
-        axios.get(`http://localhost:3000/api/v1/attendance/group/${selectedGroup}?date=${date}`, { headers: getHeaders() }).catch(() => ({ data: [] })),
-      ]);
-
-      let studentList: Student[] = [];
-      if (groupRes?.data?.students && groupRes.data.students.length > 0) {
-        studentList = groupRes.data.students.map((item: any) => item.student);
-      } else {
-        studentList = studentsRes.data;
-      }
-      setStudents(studentList);
-
-      // Agar avval saqlangan davomat bo'lsa, o'shani ochamiz
-      const initial: Record<string, AttendanceStatus> = {};
-      const savedMap: Record<string, AttendanceStatus> = {};
-      (prevAttendanceRes.data || []).forEach((rec: any) => {
-        savedMap[rec.studentId] = rec.status.toUpperCase() as AttendanceStatus;
-      });
-
-      studentList.forEach((s: Student) => {
-        initial[s.id] = savedMap[s.id] || 'PRESENT';
-      });
-      setAttendance(initial);
-    } catch (err) {
-      console.error("O'quvchilarni yuklashda xatolik:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Tanlangan guruh a'zolari va shu kungi saqlangan davomat
   useEffect(() => {
-    fetchGroupStudents();
-  }, [selectedGroup, date]);
+    if (!groupId) {
+      setStudents([]);
+      setMarks({});
+      setSaved({});
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const [group, prev] = await Promise.all([
+          apiFetch(`/groups/${groupId}`),
+          apiFetch(`/attendance/group/${groupId}?date=${date}`).catch(() => []),
+        ]);
+        if (cancelled) return;
+        // Faqat shu guruhga biriktirilgan o'quvchilar (boshqa o'quvchilarga davomat qo'yib bo'lmaydi)
+        const members: Student[] = (group?.students || []).map((gs: any) => gs.student).filter(Boolean);
+        const savedMap: Record<string, Status> = {};
+        (Array.isArray(prev) ? prev : []).forEach((r: any) => {
+          savedMap[r.studentId] = String(r.status).toUpperCase() as Status;
+        });
+        const initial: Record<string, Status> = {};
+        members.forEach((s) => {
+          initial[s.id] = savedMap[s.id] || 'PRESENT';
+        });
+        setStudents(members);
+        setSaved(savedMap);
+        setMarks(initial);
+      } catch (err: any) {
+        if (!cancelled) alert(err?.message || 'Guruh ma’lumotlarini yuklab bo‘lmadi');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [groupId, date]);
 
-  const handleStatusChange = (studentId: string, status: AttendanceStatus) => {
-    setAttendance((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
-  };
+  const counts = useMemo(() => {
+    const v = Object.values(marks);
+    return {
+      present: v.filter((s) => s === 'PRESENT').length,
+      absent: v.filter((s) => s === 'ABSENT').length,
+      late: v.filter((s) => s === 'LATE').length,
+    };
+  }, [marks]);
+  const alreadySaved = Object.keys(saved).length > 0;
+  const changed = students.some((s) => saved[s.id] !== marks[s.id]);
 
-  const markAllPresent = () => {
-    const allPresent: Record<string, AttendanceStatus> = {};
-    students.forEach((s) => {
-      allPresent[s.id] = 'PRESENT';
-    });
-    setAttendance(allPresent);
-  };
+  function markAll() {
+    const all: Record<string, Status> = {};
+    students.forEach((s) => (all[s.id] = 'PRESENT'));
+    setMarks(all);
+  }
 
-  // 3. Davomatni saqlash
-  const handleSaveAttendance = async () => {
+  async function save() {
+    if (!groupId || students.length === 0) return;
+    setSaving(true);
     try {
-      setSaving(true);
-      const payload = {
-        groupId: selectedGroup,
-        date: date,
-        records: Object.entries(attendance).map(([studentId, status]) => ({
-          studentId,
-          status,
-        })),
-      };
-
-      await axios.post('http://localhost:3000/api/v1/attendance/mark', payload, {
-        headers: getHeaders(),
+      await api.post('/attendance/mark', {
+        groupId,
+        date,
+        records: students.map((s) => ({ studentId: s.id, status: marks[s.id] || 'PRESENT' })),
       });
-      alert('Davomat muvaffaqiyatli saqlandi!');
+      setSaved({ ...marks });
+      alert('Davomat saqlandi');
     } catch (err: any) {
-      console.error('Davomat saqlashda xatolik:', err);
-      const msg = err.response?.data?.error || err.response?.data?.message || 'Davomat saqlashda xatolik yuz berdi!';
-      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+      alert(err?.message || 'Davomatni saqlab bo‘lmadi');
     } finally {
       setSaving(false);
     }
-  };
+  }
 
-  // Statistika hisobi
-  const totalCount = students.length;
-  const presentCount = Object.values(attendance).filter((s) => s === 'PRESENT').length;
-  const absentCount = Object.values(attendance).filter((s) => s === 'ABSENT').length;
-  const lateCount = Object.values(attendance).filter((s) => s === 'LATE').length;
+  const selectedGroup = groups.find((g) => g.id === groupId);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-100 flex items-center gap-2">
-            <CalendarCheck className="text-indigo-500" /> Kunlik Davomat
-          </h1>
-          <p className="text-sm text-slate-400">Guruh bo‘yicha davomatni belgilash va saqlash</p>
-        </div>
+      <div>
+        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Davomat</h1>
+        <p className="text-sm text-slate-500 mt-1">Guruh bo‘yicha davomat belgilash</p>
+      </div>
 
-        <div className="flex items-center gap-3">
+      {/* Asboblar paneli */}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+        <select
+          value={groupId}
+          onChange={(e) => setGroupId(e.target.value)}
+          className="h-10 w-full lg:w-72 px-3.5 rounded-xl bg-white border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-400"
+          aria-label="Guruhni tanlang"
+        >
+          <option value="">Guruhni tanlang</option>
+          {groups.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name} {g.startTime ? `• ${g.startTime}` : ''}
+            </option>
+          ))}
+        </select>
+        <input
+          type="date"
+          value={date}
+          max={new Date().toISOString().split('T')[0]}
+          onChange={(e) => setDate(e.target.value)}
+          className="h-10 w-full lg:w-48 px-3.5 rounded-xl bg-white border border-slate-200 text-sm font-medium text-slate-800 focus:outline-none focus:border-indigo-400"
+          aria-label="Sana"
+        />
+        <div className="lg:ml-auto flex gap-2.5">
           <button
-            onClick={markAllPresent}
+            onClick={markAll}
             disabled={students.length === 0}
-            className="flex items-center gap-2 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-50 transition"
           >
-            <CheckCheck size={18} className="text-emerald-400" /> Hammani "Keldi" qilish
+            <CheckCheck size={16} /> Hammasini «Keldi»
           </button>
-
           <button
-            onClick={handleSaveAttendance}
-            disabled={saving || students.length === 0}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition shadow-lg shadow-indigo-600/20"
+            onClick={save}
+            disabled={saving || students.length === 0 || (alreadySaved && !changed)}
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-50 transition"
           >
-            <Save size={18} /> {saving ? 'Saqlanmoqda...' : 'Davomatni saqlash'}
+            <Save size={16} /> {saving ? 'Saqlanmoqda...' : alreadySaved && !changed ? 'Saqlangan' : 'Saqlash'}
           </button>
         </div>
       </div>
 
-      {/* Guruh, Sana va Jonli Statistika */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl md:col-span-1">
-          <label className="block text-xs font-medium text-slate-400 mb-1.5">Guruhni tanlang</label>
-          <select
-            value={selectedGroup}
-            onChange={(e) => setSelectedGroup(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
-          >
-            {groups.length === 0 ? (
-              <option value="">Guruhlar topilmadi</option>
-            ) : (
-              groups.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))
-            )}
-          </select>
+      {/* Qisqa hisob */}
+      {students.length > 0 && (
+        <div className="flex flex-wrap gap-2.5 text-sm">
+          <span className="inline-flex items-center h-8 px-3 rounded-full bg-white border border-slate-200 text-slate-600">
+            Jami: <b className="ml-1 text-slate-800">{students.length}</b>
+          </span>
+          <span className="inline-flex items-center h-8 px-3 rounded-full bg-emerald-500/10 text-emerald-600">Keldi: <b className="ml-1">{counts.present}</b></span>
+          <span className="inline-flex items-center h-8 px-3 rounded-full bg-rose-500/10 text-rose-600">Kelmadi: <b className="ml-1">{counts.absent}</b></span>
+          <span className="inline-flex items-center h-8 px-3 rounded-full bg-amber-500/10 text-amber-600">Kechikdi: <b className="ml-1">{counts.late}</b></span>
+          {alreadySaved && (
+            <span className="inline-flex items-center h-8 px-3 rounded-full bg-indigo-500/10 text-indigo-700">
+              Bu kun uchun davomat avval saqlangan
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Jadval */}
+      <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
+        <div className="hidden sm:grid grid-cols-[1.6fr_1fr_repeat(3,0.8fr)] gap-2 px-5 h-11 items-center bg-slate-50 text-xs font-semibold text-slate-500">
+          <span>O‘quvchi</span>
+          <span>Holat</span>
+          <span className="text-center">Keldi</span>
+          <span className="text-center">Kelmadi</span>
+          <span className="text-center">Kechikdi</span>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl md:col-span-1">
-          <label className="block text-xs font-medium text-slate-400 mb-1.5">Sana</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-indigo-500"
-          />
-        </div>
-
-        {/* Jonli hisob-kitoblar */}
-        <div className="bg-slate-900 border border-slate-800 p-4 rounded-2xl md:col-span-2 flex items-center justify-around text-center">
-          <div>
-            <span className="text-xs text-slate-400">Jami</span>
-            <p className="text-xl font-bold text-white">{totalCount}</p>
+        {!groupId ? (
+          <div className="py-24 px-4 text-center">
+            <p className="text-[15px] font-semibold text-slate-600">Guruh tanlanmagan</p>
+            <p className="text-xs text-slate-500 mt-1">Avval yuqoridan guruhni tanlang, o‘quvchilar ro‘yxati shu yerda chiqadi</p>
           </div>
-          <div className="border-r border-slate-800 h-8"></div>
-          <div>
-            <span className="text-xs text-emerald-400">Keldi</span>
-            <p className="text-xl font-bold text-emerald-400">{presentCount}</p>
+        ) : loading ? (
+          <div className="py-24 text-center text-sm text-slate-500">Yuklanmoqda...</div>
+        ) : students.length === 0 ? (
+          <div className="py-24 px-4 text-center">
+            <p className="text-[15px] font-semibold text-slate-600">Bu guruhda o‘quvchi yo‘q</p>
+            <p className="text-xs text-slate-500 mt-1">
+              «{selectedGroup?.name}» guruhiga o‘quvchi biriktiring, keyin davomat belgilash mumkin bo‘ladi
+            </p>
+            <Link href={`/groups/${groupId}`} className="mt-3 inline-block text-xs font-semibold text-indigo-600 hover:underline">
+              Guruhga o‘tish
+            </Link>
           </div>
-          <div className="border-r border-slate-800 h-8"></div>
-          <div>
-            <span className="text-xs text-rose-400">Kelmadi</span>
-            <p className="text-xl font-bold text-rose-400">{absentCount}</p>
-          </div>
-          <div className="border-r border-slate-800 h-8"></div>
-          <div>
-            <span className="text-xs text-amber-400">Kechikdi</span>
-            <p className="text-xl font-bold text-amber-400">{lateCount}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Davomat jadvali */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400">
-                <th className="p-4 font-medium">O‘quvchi</th>
-                <th className="p-4 font-medium">Telefon</th>
-                <th className="p-4 font-medium text-right">Holatni belgilash</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 text-slate-300">
-              {loading ? (
-                <tr>
-                  <td colSpan={3} className="p-12 text-center text-slate-500">
-                    O'quvchilar yuklanmoqda...
-                  </td>
-                </tr>
-              ) : students.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="p-12 text-center text-slate-500">
-                    Ushbu guruhda o‘quvchilar mavjud emas
-                  </td>
-                </tr>
-              ) : (
-                students.map((student) => {
-                  const currentStatus = attendance[student.id] || 'PRESENT';
-                  return (
-                    <tr key={student.id} className="hover:bg-slate-800/40 transition">
-                      <td className="p-4 font-medium text-slate-100">{student.fullName}</td>
-                      <td className="p-4 text-slate-400">{student.phone || '-'}</td>
-                      <td className="p-4 text-right">
-                        <div className="inline-flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                          {/* Keldi */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(student.id, 'PRESENT')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                              currentStatus === 'PRESENT'
-                                ? 'bg-emerald-500 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-slate-200'
-                            }`}
-                          >
-                            <Check size={14} /> Keldi
-                          </button>
-
-                          {/* Kelmadi */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(student.id, 'ABSENT')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                              currentStatus === 'ABSENT'
-                                ? 'bg-rose-500 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-slate-200'
-                            }`}
-                          >
-                            <X size={14} /> Kelmadi
-                          </button>
-
-                          {/* Sababli / Kechikdi */}
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(student.id, 'LATE')}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                              currentStatus === 'LATE'
-                                ? 'bg-amber-500 text-white shadow-sm'
-                                : 'text-slate-400 hover:text-slate-200'
-                            }`}
-                          >
-                            <Clock size={14} /> Kechikdi
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        ) : (
+          <ul>
+            {students.map((s) => {
+              const current = marks[s.id] || 'PRESENT';
+              return (
+                <li
+                  key={s.id}
+                  className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_repeat(3,0.8fr)] gap-2 sm:items-center px-5 py-3.5 border-t border-slate-200"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-slate-800 truncate">{s.fullName}</p>
+                    {s.phone && <p className="text-xs text-slate-500">{s.phone}</p>}
+                  </div>
+                  <div>
+                    <span className={`inline-flex items-center h-6 px-2.5 rounded-full border text-xs font-semibold ${STATUS_META[current].active}`}>
+                      {STATUS_META[current].label}
+                    </span>
+                  </div>
+                  <div className="flex sm:contents gap-2">
+                    {(['PRESENT', 'ABSENT', 'LATE'] as Status[]).map((st) => (
+                      <div key={st} className="sm:flex sm:justify-center flex-1">
+                        <button
+                          onClick={() => setMarks((m) => ({ ...m, [s.id]: st }))}
+                          aria-pressed={current === st}
+                          className={`w-full sm:w-24 h-9 rounded-lg border text-xs font-semibold transition ${
+                            current === st ? STATUS_META[st].active : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                          }`}
+                        >
+                          {STATUS_META[st].label}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
     </div>
   );

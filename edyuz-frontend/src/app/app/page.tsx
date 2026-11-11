@@ -97,16 +97,16 @@ function MiniWebAppContent() {
   const groupInfo = student?.groups?.[0]?.group;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-blue-600">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans selection:bg-blue-600">
       {/* Telegram WebApp script */}
       <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
 
       {/* Main Mobile Screen Wrapper (Phone viewport on desktop, full on mobile) */}
-      <div className="w-full max-w-md mx-auto min-h-screen flex flex-col justify-between bg-slate-950 shadow-2xl relative">
+      <div className="w-full max-w-md mx-auto min-h-screen flex flex-col justify-between bg-slate-50 shadow-sm relative">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 px-4 py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 flex items-center justify-between">
+        <header className="sticky top-0 z-30 px-4 py-3 bg-white backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 overflow-hidden">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-white shadow-md overflow-hidden bg-indigo-600">
               <Image
                 src="/eduyuz-logo.jpg"
                 alt="EduYuz"
@@ -119,11 +119,11 @@ function MiniWebAppContent() {
               />
             </div>
             <div>
-              <div className="text-xs font-black tracking-tight text-white flex items-center gap-1">
-                <span>Edu<span className="text-blue-400">Yuz</span></span>
-                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300 font-bold">App</span>
+              <div className="text-xs font-bold tracking-tight text-slate-900 flex items-center gap-1">
+                <span>Edu<span className="text-blue-600">Yuz</span></span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-700 font-bold">App</span>
               </div>
-              <p className="text-[10px] text-slate-400 leading-none">{t('nav.portal', 'O‘quvchi portali')}</p>
+              <p className="text-[10px] text-slate-500 leading-none">{t('nav.portal', 'O‘quvchi portali')}</p>
             </div>
           </div>
 
@@ -134,11 +134,11 @@ function MiniWebAppContent() {
             {/* Top Coins & Ranking Pill */}
             <Link
               href="/leaderboard"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-black text-xs active:scale-95 transition"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 font-bold text-xs active:scale-95 transition"
             >
-              <Coins className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+              <Coins className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
               <span>{student?.coins || 0}</span>
-              <span className="text-[9px] text-amber-400/80 font-normal">Coin</span>
+              <span className="text-[9px] text-amber-600/80 font-normal">Coin</span>
             </Link>
           </div>
         </header>
@@ -148,14 +148,14 @@ function MiniWebAppContent() {
           {loading ? (
             <div className="py-36 text-center space-y-3">
               <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto" />
-              <p className="text-xs text-slate-400 font-semibold">Ilova yuklanmoqda...</p>
+              <p className="text-xs text-slate-500 font-semibold">Ilova yuklanmoqda...</p>
             </div>
           ) : !student ? (
             <div className="py-28 px-4 text-center space-y-3">
-              <div className="text-3xl">🔒</div>
-              <h1 className="text-sm font-bold text-white">Shaxsiy havola kerak</h1>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Ilovani EduYuz Telegram botidagi «📱 Mini Ilova» tugmasi yoki o‘quv markazingiz
+              <div className="text-3xl"></div>
+              <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Shaxsiy havola kerak</h1>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Ilovani EduYuz Telegram botidagi «Mini Ilova» tugmasi yoki o‘quv markazingiz
                 bergan shaxsiy havola orqali oching.
               </p>
             </div>
@@ -183,48 +183,48 @@ function MiniWebAppContent() {
               {/* Tab 3: O'yinlar Arenasi (Games) */}
               {activeTab === 'games' && (
                 <div className="space-y-4 pb-6">
-                  <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-slate-900 border border-rose-800/40 space-y-3 shadow-xl">
+                  <div className="p-5 rounded-2xl border border-rose-200 space-y-3 shadow-sm bg-rose-50">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
-                        <Flame className="w-3.5 h-3.5 text-rose-400 fill-rose-400" />
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30 flex items-center gap-1">
+                        <Flame className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
                         <span>Mavzuli Viktorina Arenasi</span>
                       </span>
-                      <span className="text-xs font-black text-amber-300">+25 EduCoin</span>
+                      <span className="text-xs font-bold text-amber-700">+25 EduCoin</span>
                     </div>
 
-                    <h2 className="text-base font-black text-white">
+                    <h2 className="text-base font-bold text-slate-900">
                       Darslarni o‘yin orqali mustahkamlang!
                     </h2>
-                    <p className="text-xs text-slate-300 leading-relaxed">
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       15 soniyalik harakatlanuvchi savollar, Combo ballar va ovoz effektlari bilan bilimingizni sinang.
                     </p>
                   </div>
 
                   <div className="space-y-2.5">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1">
                       Guruh Darslari Bo‘yicha O‘yinlar
                     </h3>
 
                     {lessons.length === 0 ? (
-                      <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 text-center text-xs text-slate-500">
+                      <div className="p-6 rounded-2xl bg-white border border-slate-200 text-center text-xs text-slate-500">
                         Hozircha darslar yuklanmagan
                       </div>
                     ) : (
                       lessons.map((ls, idx) => (
                         <div
                           key={ls.id || idx}
-                          className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between gap-3 shadow-sm"
+                          className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-sm"
                         >
                           <div className="space-y-1 min-w-0 flex-1">
-                            <h4 className="text-xs font-bold text-white truncate">{ls.title}</h4>
-                            <span className="text-[10px] text-amber-400 font-semibold block">
+                            <h4 className="text-xs font-bold text-slate-900 truncate">{ls.title}</h4>
+                            <span className="text-[10px] text-amber-600 font-semibold block">
                               +25 gacha EduCoin mukofoti
                             </span>
                           </div>
 
                           <Link
                             href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/20 active:scale-95 transition shrink-0"
+                            className="px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition shrink-0 bg-rose-600 hover:bg-rose-500"
                           >
                             <Gamepad2 className="w-3.5 h-3.5" />
                             <span>O‘ynash</span>
@@ -273,7 +273,7 @@ function MiniWebAppContent() {
 
 export default function MiniWebAppPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 text-white flex items-center justify-center text-xs">Yuklanmoqda...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center text-xs">Yuklanmoqda...</div>}>
       <MiniWebAppContent />
     </Suspense>
   );

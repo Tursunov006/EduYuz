@@ -1,534 +1,359 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { 
-  Users, BookOpen, CreditCard, TrendingUp, Calendar, ArrowUpRight, 
-  AlertCircle, Plus, MessageSquare, FileSpreadsheet, Target, CheckCircle2,
-  Clock, Award, Sparkles, Filter, ChevronRight
-} from 'lucide-react';
-import { 
-  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, 
-  PieChart, Pie, Cell, BarChart, Bar
-} from 'recharts';
-import { apiFetch } from '@/lib/api';
-import axios from 'axios';
-import { useTranslation } from '@/lib/i18n/LanguageContext';
-import { exportToExcel } from '@/lib/excelExport';
+import { MessageSquare } from 'lucide-react';
+import { api, apiFetch } from '@/lib/api';
 
-const DAY_NAMES = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
-const METHOD_LABELS: Record<string, { name: string; color: string }> = {
-  cash: { name: 'Naqd pul', color: '#10b981' },
-  card: { name: 'Bank kartasi', color: '#8b5cf6' },
-  click: { name: 'Click', color: '#06b6d4' },
-  payme: { name: 'Payme', color: '#f59e0b' },
+// Figma: "EduYuz Dashboard v2"
+const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+const DAY_SHORT = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
+const METHOD_LABELS: Record<string, string> = { cash: 'Naqd', card: 'Karta', click: 'Click', payme: 'Payme' };
+const TARGET_KEY = 'eduyuz_revenue_target';
+
+const fmt = (n: number) => Math.round(n).toLocaleString('uz-UZ').replace(/,/g, ' ');
+
+// Guruh kunlari turli ko'rinishda saqlangan: ["Dushanba", ...], "Dush-Chor-Jum", "toq kunlar", "har kuni"
+function hasLessonOn(group: any, day: number) {
+  const raw = (Array.isArray(group.days) ? group.days.join(' ') : String(group.days || '')).toLowerCase();
+  if (!raw) return false;
+  if (raw.includes('har kuni')) return true;
+  if (raw.includes('toq')) return [1, 3, 5].includes(day);
+  if (raw.includes('juft')) return [2, 4, 6].includes(day);
+  return raw.includes(DAY_SHORT[day].toLowerCase());
+}
+const minutes = (t: string) => {
+  const [h, m] = String(t || '0:0').split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
 };
 
-export default function DashboardPage() {
-  const { t } = useTranslation();
-  const [stats, setStats] = useState({
-    studentsCount: 0,
-    groupsCount: 0,
-    coursesCount: 0,
-    paymentsTotal: 0,
-  });
-  const [recentPayments, setRecentPayments] = useState<any[]>([]);
-  const [debtors, setDebtors] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [weeklyData, setWeeklyData] = useState<{ day: string; revenue: number }[]>([]);
-  const [methodData, setMethodData] = useState<{ name: string; value: number; color: string }[]>([]);
-  const [monthGrowth, setMonthGrowth] = useState<number | null>(null);
+function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <div className={`bg-white border border-slate-200 rounded-2xl ${className}`}>{children}</div>;
+}
+function Pill({ children, tone }: { children: React.ReactNode; tone: 'indigo' | 'green' | 'violet' | 'rose' }) {
+  const tones = {
+    indigo: 'bg-indigo-50 text-indigo-600',
+    green: 'bg-emerald-50 text-emerald-600',
+    violet: 'bg-violet-50 text-violet-600',
+    rose: 'bg-rose-50 text-rose-600',
+  };
+  return <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium ${tones[tone]}`}>{children}</span>;
+}
+function Empty({ title, hint }: { title: string; hint: string }) {
+  return (
+    <div className="flex-1 min-h-[160px] rounded-xl bg-slate-50 flex flex-col items-center justify-center text-center px-4 gap-1.5">
+      <p className="text-sm font-semibold text-slate-700">{title}</p>
+      <p className="text-xs text-slate-500">{hint}</p>
+    </div>
+  );
+}
 
-  // Reja ko'rsatkichlari (Plan vs Actual)
-  const targetRevenue = 25000000; // 25 mln so'm oylik reja
-  const currentRevenue = stats.paymentsTotal;
-  const revenuePercent = Math.min(Math.round((currentRevenue / targetRevenue) * 100), 100);
+export default function DashboardPage() {
+  const [students, setStudents] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [target, setTarget] = useState(0);
+  const [initial, setInitial] = useState('A');
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [students, groups, courses, payments] = await Promise.all([
-          apiFetch('/students').catch(() => []),
-          apiFetch('/groups').catch(() => []),
-          apiFetch('/courses').catch(() => []),
-          apiFetch('/payments').catch(() => []),
-        ]);
-
-        const positivePayments = (payments || []).filter((p: any) => Number(p.amount) > 0);
-        const totalPay = positivePayments.reduce((acc: number, p: any) => acc + Number(p.amount || 0), 0);
-        const debtList = (students || []).filter((s: any) => Number(s.balance) < 0);
-
-        setStats({
-          studentsCount: students?.length || 0,
-          groupsCount: groups?.length || 0,
-          coursesCount: courses?.length || 0,
-          paymentsTotal: totalPay,
-        });
-        setRecentPayments(positivePayments.slice(0, 5));
-        setDebtors(debtList);
-
-        // Oxirgi 7 kun tushumi (kunlar bo'yicha)
-        const now = new Date();
-        const days: { day: string; revenue: number; key: string }[] = [];
-        for (let i = 6; i >= 0; i--) {
-          const d = new Date(now);
-          d.setDate(now.getDate() - i);
-          days.push({ day: DAY_NAMES[d.getDay()], revenue: 0, key: d.toDateString() });
-        }
-        positivePayments.forEach((p: any) => {
-          const key = new Date(p.paidAt).toDateString();
-          const slot = days.find((d) => d.key === key);
-          if (slot) slot.revenue += Number(p.amount || 0);
-        });
-        setWeeklyData(days.map(({ day, revenue }) => ({ day, revenue })));
-
-        // To'lov usullari bo'yicha taqsimot
-        const byMethod: Record<string, number> = {};
-        positivePayments.forEach((p: any) => {
-          const k = p.paymentMethod || 'cash';
-          byMethod[k] = (byMethod[k] || 0) + Number(p.amount || 0);
-        });
-        const methodTotal = Object.values(byMethod).reduce((x, y) => x + y, 0);
-        setMethodData(
-          Object.entries(byMethod).map(([k, v]) => ({
-            name: METHOD_LABELS[k]?.name || k,
-            value: methodTotal > 0 ? Math.round((v / methodTotal) * 100) : 0,
-            color: METHOD_LABELS[k]?.color || '#64748b',
-          })),
-        );
-
-        // Joriy oy va o'tgan oy tushumi o'rtasidagi o'zgarish
-        const thisMonth = now.getMonth();
-        const thisYear = now.getFullYear();
-        let cur = 0;
-        let prev = 0;
-        positivePayments.forEach((p: any) => {
-          const d = new Date(p.paidAt);
-          const amt = Number(p.amount || 0);
-          if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) cur += amt;
-          const pm = thisMonth === 0 ? 11 : thisMonth - 1;
-          const py = thisMonth === 0 ? thisYear - 1 : thisYear;
-          if (d.getFullYear() === py && d.getMonth() === pm) prev += amt;
-        });
-        setMonthGrowth(prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
+    try {
+      const u = JSON.parse(localStorage.getItem('user') || '{}');
+      setInitial((u.fullName || 'A').trim()[0]?.toUpperCase() || 'A');
+      setTarget(Number(localStorage.getItem(TARGET_KEY)) || 0);
+    } catch {}
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    (async () => {
+      const [st, gr, pa] = await Promise.all([
+        apiFetch('/students').catch(() => []),
+        apiFetch('/groups').catch(() => []),
+        apiFetch('/payments').catch(() => []),
+      ]);
+      setStudents(Array.isArray(st) ? st : []);
+      setGroups(Array.isArray(gr) ? gr : []);
+      setPayments(Array.isArray(pa) ? pa : []);
+      setLoading(false);
+    })();
+    return () => clearInterval(timer);
   }, []);
 
-  function handleExportDebtors() {
-    if (debtors.length === 0) return alert('Qarzdorlar ro‘yxati bo‘sh');
-    const totalDebtSum = debtors.reduce((acc, s) => acc + Math.abs(Number(s.balance || 0)), 0);
-    exportToExcel(
-      `EduYuz_Qarzdorlar_${new Date().toISOString().split('T')[0]}`,
-      [
-        { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
-        { header: t('students.phone', 'Telefon'), key: 'phone', width: 160, align: 'center' },
-        { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
-        {
-          header: 'Qarzdorlik summasi',
-          key: 'balance',
-          width: 190,
-          isCurrency: true,
-          format: (val) => `-${Math.abs(Number(val) || 0).toLocaleString('uz-UZ')} so'm`,
-        },
-      ],
-      debtors,
-      {
-        title: "EduYuz CRM — Qarzdor O'quvchilar Ro'yxati",
-        summaryLabel: 'JAMI QARZDORLIK:',
-        summaryValue: `-${totalDebtSum.toLocaleString('uz-UZ')} so'm`,
-      }
-    );
+  const income = useMemo(() => payments.filter((p) => Number(p.amount) > 0), [payments]);
+  const debtors = useMemo(
+    () => students.filter((s) => Number(s.balance) < 0).sort((a, b) => Number(a.balance) - Number(b.balance)),
+    [students],
+  );
+  const activeStudents = students.filter((s) => s.status !== 'inactive');
+  const studentsInGroups = activeStudents.filter((s) => (s.groups || []).length > 0).length;
+
+  const month = useMemo(() => {
+    const y = now.getFullYear();
+    const m = now.getMonth();
+    const py = m === 0 ? y - 1 : y;
+    const pm = m === 0 ? 11 : m - 1;
+    let cur = 0;
+    let prev = 0;
+    income.forEach((p) => {
+      const d = new Date(p.paidAt);
+      if (d.getFullYear() === y && d.getMonth() === m) cur += Number(p.amount);
+      if (d.getFullYear() === py && d.getMonth() === pm) prev += Number(p.amount);
+    });
+    return { cur, delta: prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null };
+  }, [income, now]);
+
+  const week = useMemo(() => {
+    const days: { key: string; label: string; value: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      days.push({ key: d.toDateString(), label: DAY_SHORT[d.getDay()], value: 0 });
+    }
+    income.forEach((p) => {
+      const slot = days.find((d) => d.key === new Date(p.paidAt).toDateString());
+      if (slot) slot.value += Number(p.amount);
+    });
+    return days;
+  }, [income, now]);
+  const weekMax = Math.max(...week.map((d) => d.value), 0);
+
+  const lessons = useMemo(() => {
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    return groups
+      .filter((g) => hasLessonOn(g, now.getDay()))
+      .map((g) => ({ ...g, start: minutes(g.startTime), done: nowMin >= minutes(g.endTime), live: nowMin >= minutes(g.startTime) && nowMin < minutes(g.endTime) }))
+      .sort((a, b) => a.start - b.start);
+  }, [groups, now]);
+
+  function editTarget() {
+    const v = prompt('Oylik kassa rejasini kiriting (so‘mda):', target ? String(target) : '');
+    if (v === null) return;
+    const n = Number(v.replace(/\D/g, ''));
+    setTarget(n);
+    try {
+      localStorage.setItem(TARGET_KEY, String(n));
+    } catch {}
   }
 
+  async function sendSms(d: any) {
+    if (!d.parentPhone) return alert('Ota-ona telefon raqami kiritilmagan');
+    if (!confirm(`${d.fullName}ning ota-onasiga qarzdorlik haqida SMS yuborilsinmi?`)) return;
+    try {
+      await api.post('/sms/send', {
+        phone: d.parentPhone,
+        message: `EduYuz: Hurmatli ota-ona! Farzandingiz ${d.fullName}ning ${fmt(Math.abs(Number(d.balance)))} so'm qarzdorligi mavjud. Iltimos, to'lovni amalga oshiring.`,
+      });
+      alert('SMS yuborildi');
+    } catch (err: any) {
+      alert(err?.message || 'SMS yuborishda xatolik');
+    }
+  }
+
+  const dateLabel = `${now.getDate()}-${MONTHS[now.getMonth()]}, ${now.getFullYear()}`;
+  const progress = target > 0 ? Math.round((month.cur / target) * 100) : null;
+
   return (
-    <div className="space-y-6 sm:space-y-8 pb-12">
-      
-      {/* 1. HERO BANNER & TEZKOR AMALLAR (Responsive Desktop & Mobile) */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-indigo-950/60 border border-slate-800/80 p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-1/4 -mb-10 w-64 h-64 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="space-y-6 max-w-[1400px] mx-auto">
+      {/* Sarlavha */}
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Boshqaruv paneli</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Markaz holati va asosiy ko‘rsatkichlar</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline-flex items-center h-10 px-3.5 rounded-[10px] bg-white border border-slate-200 text-[13px] font-medium text-slate-700">
+            {dateLabel}
+          </span>
+          <span className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[15px] font-bold">
+            {initial}
+          </span>
+        </div>
+      </div>
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              EduYuz 2.0 • Real-vaqt Boshqaruv Markazi
-            </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-white">
-              Boshqaruv <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400">Paneli</span>
-            </h1>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-xl">
-              Markazingizning davomat, moliya va o'quvchilar oqimi tahlili bitta ekranda.
+      {/* Ko'rsatkichlar */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <button onClick={editTarget} className="text-left" title="Oylik rejani o‘zgartirish">
+          <Card className="h-full px-5 py-[18px] space-y-1.5 hover:border-indigo-300 transition">
+            <p className="text-[13px] font-medium text-slate-500">Oylik kassa rejasi</p>
+            <p className="flex items-baseline gap-1.5">
+              <span className="text-[30px] font-bold text-slate-900 leading-tight">{fmt(target)}</span>
+              <span className="text-[13px] text-slate-500">so‘m</span>
             </p>
-          </div>
+            {target > 0 ? <Pill tone="indigo">Reja belgilangan</Pill> : <Pill tone="indigo">Rejani belgilash</Pill>}
+          </Card>
+        </button>
 
-          {/* Tezkor Tugmalar (Kompyuterda qatorda, telefonda 2 ustunda) */}
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
-            <Link
-              href="/leads"
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-500/40 text-cyan-300 px-3.5 sm:px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-lg shadow-cyan-500/10 hover:scale-[1.02] active:scale-95"
-            >
-              <Target size={14} className="text-cyan-400" /> Lidlar Voronkasi
-            </Link>
-            <Link
-              href="/students"
-              className="flex items-center justify-center gap-2 bg-slate-850 hover:bg-slate-800 border border-slate-750 text-slate-200 px-3.5 sm:px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all hover:scale-[1.02] active:scale-95"
-            >
-              <Plus size={14} className="text-indigo-400" /> O'quvchi
-            </Link>
-            <Link
-              href="/groups"
-              className="flex items-center justify-center gap-2 bg-slate-850 hover:bg-slate-800 border border-slate-750 text-slate-200 px-3.5 sm:px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all hover:scale-[1.02] active:scale-95"
-            >
-              <Plus size={14} className="text-indigo-400" /> Guruh
-            </Link>
-            <Link
-              href="/payments"
-              className="col-span-2 sm:col-auto flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-4 sm:px-5 py-2.5 rounded-2xl text-xs font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
-            >
-              <Plus size={14} /> To'lov qabul qilish
-            </Link>
-          </div>
-        </div>
+        <Card className="px-5 py-[18px] space-y-1.5">
+          <p className="text-[13px] font-medium text-slate-500">Joriy oy tushumi</p>
+          <p className="flex items-baseline gap-1.5">
+            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : fmt(month.cur)}</span>
+            <span className="text-[13px] text-slate-500">so‘m</span>
+          </p>
+          {month.cur === 0 ? (
+            <Pill tone="green">Hali to‘lov qabul qilinmagan</Pill>
+          ) : progress !== null ? (
+            <Pill tone="green">Rejaning {progress}% bajarildi</Pill>
+          ) : month.delta !== null ? (
+            <Pill tone={month.delta >= 0 ? 'green' : 'rose'}>{month.delta >= 0 ? '+' : ''}{month.delta}% o‘tgan oyga nisbatan</Pill>
+          ) : (
+            <Pill tone="green">{income.filter((p) => new Date(p.paidAt).getMonth() === now.getMonth()).length} ta to‘lov</Pill>
+          )}
+        </Card>
+
+        <Card className="px-5 py-[18px] space-y-1.5">
+          <p className="text-[13px] font-medium text-slate-500">Faol o‘quvchilar</p>
+          <p className="flex items-baseline gap-1.5">
+            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : activeStudents.length}</span>
+            <span className="text-[13px] text-slate-500">nafar</span>
+          </p>
+          {studentsInGroups > 0 ? (
+            <Pill tone="violet">{studentsInGroups} nafari {groups.length} ta guruhda</Pill>
+          ) : (
+            <Pill tone="violet">Guruhga biriktirilgan o‘quvchi yo‘q</Pill>
+          )}
+        </Card>
       </div>
 
-      {/* 2. REJA VA HAQIQAT (PLAN VS FACT) — KATTA CRM STRUKTURASI */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        
-        {/* Reja / Maqsad (Target) */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
-            <span className="flex items-center gap-2">
-              <Target size={16} className="text-cyan-400" /> Oylik Reja (Kassa)
-            </span>
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
-              Maqsad
-            </span>
-          </div>
-          <div className="my-3">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-white tracking-tight">
-              {targetRevenue.toLocaleString('uz-UZ')} <span className="text-xs font-semibold text-slate-400">so'm</span>
-            </div>
-            <div className="text-xs text-slate-400 mt-1">Belgilangan oylik kassa rejasi</div>
-          </div>
-          <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-            <div className="flex justify-between text-xs text-slate-400">
-              <span>Bajarilish:</span>
-              <span className="text-cyan-400 font-bold">{revenuePercent}%</span>
-            </div>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-1000"
-                style={{ width: `${revenuePercent}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Amalda yig'ilgan (Fact) */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 size={16} className="text-emerald-400" /> Amalda Yig'ildi
-            </span>
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
-              Fakt
-            </span>
-          </div>
-          <div className="my-3">
-            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-400 tracking-tight">
-              {stats.paymentsTotal.toLocaleString('uz-UZ')} <span className="text-xs font-semibold text-emerald-500/80">so'm</span>
-            </div>
-            <div className="text-xs text-slate-400 mt-1">Joriy oy tushumlar jamg'armasi</div>
-          </div>
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
-            <span className="text-slate-400">O'tgan oyga nisbatan:</span>
-            <span className={`font-bold flex items-center gap-0.5 ${monthGrowth !== null && monthGrowth < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {monthGrowth === null ? '—' : `${monthGrowth >= 0 ? '+' : ''}${monthGrowth}%`} <TrendingUp size={12} />
-            </span>
-          </div>
-        </div>
-
-        {/* Faol O'quvchilar va Guruhlar */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
-          <div className="flex items-center justify-between text-slate-400 text-xs font-semibold uppercase tracking-wider">
-            <span className="flex items-center gap-2">
-              <Users size={16} className="text-purple-400" /> O'quvchilar Oqimi
-            </span>
-            <span className="text-[11px] px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20 font-bold">
-              Faol
-            </span>
-          </div>
-          <div className="my-3 flex items-baseline justify-between">
+      {/* Grafik va tezkor amallar */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5">
+        <Card className="px-6 py-[22px] flex flex-col">
+          <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-white">
-                {loading ? '...' : stats.studentsCount} <span className="text-xs font-normal text-slate-400">nafar</span>
-              </div>
-              <div className="text-xs text-slate-400 mt-1">{stats.groupsCount} ta faol guruhda ta'lim olmoqda</div>
+              <h2 className="text-base font-semibold text-slate-900">Haftalik tushum</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Oxirgi 7 kun, so‘mda</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg shadow-purple-500/20">
-              <BookOpen size={22} />
-            </div>
+            <span className="inline-flex items-center h-[26px] px-2.5 rounded-full bg-indigo-50 text-xs font-medium text-indigo-600">Tushum</span>
           </div>
-          <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
-            <span className="text-slate-400">Qarzdor o'quvchilar:</span>
-            <span className="text-rose-300 font-bold">{debtors.length} ta</span>
+          <div className="mt-4 h-[220px] flex items-end gap-3.5">
+            {week.map((d) => {
+              const h = weekMax > 0 ? Math.max(6, Math.round((d.value / weekMax) * 170)) : 6;
+              return (
+                <div key={d.key} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
+                  {d.value > 0 && <span className="text-[11px] font-medium text-slate-500">{fmt(d.value / 1000)} ming</span>}
+                  <div
+                    className={`w-full rounded ${d.value > 0 && d.value === weekMax ? 'bg-indigo-600' : 'bg-indigo-200'}`}
+                    style={{ height: h }}
+                    title={`${fmt(d.value)} so‘m`}
+                  />
+                  <span className="text-xs text-slate-500">{d.label}</span>
+                </div>
+              );
+            })}
           </div>
-        </div>
+          {weekMax === 0 && <p className="mt-3.5 text-xs text-slate-500">Tushum bo‘lganda ustunlar shu yerda chiqadi</p>}
+        </Card>
 
-      </div>
-
-      {/* 3. INTERAKTIV GRAFIKLAR BLOKI (Line Chart + Donut Chart) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Chapdagi Katta Grafik: 7 Kunlik Davomat va Tushum Dinamikasi */}
-        <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800/60">
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <TrendingUp size={18} className="text-cyan-400" />
-                Haftalik Tushum Dinamikasi
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Oxirgi 7 kundagi kunlik tushumlar</p>
-            </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-purple-400 font-semibold">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Tushum (so'm)
-              </span>
-            </div>
-          </div>
-
-          {/* Area Chart */}
-          <div className="h-64 sm:h-72 w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="day" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderColor: '#334155', 
-                    borderRadius: '16px',
-                    color: '#fff',
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
-                  }} 
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#a855f7" strokeWidth={2} fillOpacity={1} fill="url(#revenueGradient)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* O'ngdagi Donut Chart: To'lov Turlari Taqsimoti */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl backdrop-blur-md flex flex-col justify-between">
-          <div className="pb-2 border-b border-slate-800/60">
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <CreditCard size={18} className="text-purple-400" />
-              To'lov Usullari Taqsimoti
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">Qaysi usulda ko'p to'lanmoqda</p>
-          </div>
-
-          <div className="h-48 w-full flex items-center justify-center my-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={methodData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={75}
-                  paddingAngle={5}
-                  dataKey="value"
-                >
-                  {methodData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#0f172a', 
-                    borderColor: '#334155', 
-                    borderRadius: '12px',
-                    color: '#fff'
-                  }} 
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="space-y-2 pt-2 border-t border-slate-800/80">
-            {methodData.length === 0 && (
-              <div className="text-center text-xs text-slate-500 py-2">Hali to‘lovlar yo‘q</div>
-            )}
-            {methodData.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-2 text-slate-300">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>
-                  {item.name}
-                </span>
-                <span className="font-bold text-white font-mono">{item.value}%</span>
-              </div>
+        <Card className="px-[22px] py-[22px]">
+          <h2 className="text-base font-semibold text-slate-900">Tezkor amallar</h2>
+          <div className="mt-3.5 space-y-2.5">
+            {[
+              { label: 'To‘lov qabul qilish', href: '/payments', primary: true },
+              { label: 'O‘quvchi qo‘shish', href: '/students' },
+              { label: 'Guruh yaratish', href: '/groups' },
+              { label: 'Davomat belgilash', href: '/attendance' },
+            ].map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                className={`flex items-center gap-3 h-[52px] px-3.5 rounded-xl text-sm font-semibold transition ${
+                  a.primary
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-500'
+                    : 'bg-slate-50 border border-slate-200 text-slate-900 hover:border-indigo-300'
+                }`}
+              >
+                <span className={`w-2 h-2 rounded-full ${a.primary ? 'bg-white' : 'bg-indigo-600'}`} />
+                {a.label}
+              </Link>
             ))}
           </div>
-        </div>
-
+        </Card>
       </div>
 
-      {/* 4. SO'NGGI TO'LOVLAR & QARZDORLAR (Zamonaviy Tablitsa va Tezkor Amallar) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* So'nggi to'lovlar jadvali (2 ustun) */}
-        <div className="lg:col-span-2 bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 backdrop-blur-md">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-            <div>
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <CreditCard size={18} className="text-cyan-400" />
-                So'nggi qabul qilingan to'lovlar
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Real vaqtdagi kassa tushumlari</p>
-            </div>
-            <Link 
-              href="/payments" 
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 transition flex items-center gap-1"
-            >
-              Barchasi <ArrowUpRight size={14} />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="text-[11px] uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800/80">
-                <tr>
-                  <th className="py-3 px-3">O'quvchi</th>
-                  <th className="py-3 px-3">Miqdor</th>
-                  <th className="py-3 px-3">Usul</th>
-                  <th className="py-3 px-3">Sana</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/40">
-                {recentPayments.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="py-10 text-center text-slate-500 text-xs">Hozircha to'lovlar kiritilmagan</td>
-                  </tr>
-                ) : (
-                  recentPayments.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-800/50 transition">
-                      <td className="py-3.5 px-3 font-semibold text-white flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold shrink-0">
-                          {p.student?.fullName?.[0] || 'O'}
-                        </div>
-                        <span className="truncate max-w-[130px] sm:max-w-none">{p.student?.fullName || 'Noma\'lum'}</span>
-                      </td>
-                      <td className="py-3.5 px-3 text-emerald-400 font-extrabold font-mono text-xs sm:text-sm">
-                        +{Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so'm
-                      </td>
-                      <td className="py-3.5 px-3">
-                        <span className="px-2.5 py-0.5 bg-slate-800/80 text-cyan-300 rounded-lg text-[10px] sm:text-[11px] font-bold border border-slate-700/60 uppercase">
-                          {p.paymentMethod}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-slate-400 text-xs font-medium">
-                        {new Date(p.paidAt).toLocaleDateString('uz-UZ')}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Qarzdor o'quvchilar ro'yxati (1 ustun) */}
-        <div className="bg-slate-900/90 border border-slate-800/80 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4 backdrop-blur-md flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/60">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <AlertCircle size={18} className="text-rose-400" />
-                  Qarzdorlar
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">Nazorat talab etiladi</p>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <button
-                  onClick={handleExportDebtors}
-                  title="Qarzdorlarni Excelga yuklash"
-                  className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center gap-1 transition active:scale-95"
-                >
-                  <FileSpreadsheet size={13} />
-                  <span>Excel</span>
-                </button>
-                <span className="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded-full border border-rose-500/20 font-bold">
-                  {debtors.length} ta
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-2.5 pt-3">
-              {debtors.length === 0 ? (
-                <div className="py-12 text-center">
-                  <span className="text-2xl">🎉</span>
-                  <p className="text-xs text-slate-400 mt-2">Hamma to'lovlar joyida! Qarzdorlar yo'q.</p>
-                </div>
-              ) : (
-                debtors.slice(0, 5).map((d) => (
-                  <div key={d.id} className="p-3 bg-slate-950/70 border border-slate-800/80 rounded-2xl flex items-center justify-between hover:border-slate-700 transition">
-                    <div>
-                      <h4 className="text-xs font-bold text-white truncate max-w-[120px]">{d.fullName}</h4>
-                      <p className="text-[11px] text-slate-400 mt-0.5">{d.parentPhone || d.phone}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-extrabold text-rose-400 font-mono">
-                        {Math.abs(Number(d.balance)).toLocaleString('uz-UZ')}
-                      </span>
-                      <button
-                        onClick={async () => {
-                          if (!d.parentPhone) return alert("Ota-ona telefon raqami kiritilmagan");
-                          try {
-                            await axios.post('http://localhost:3000/api/v1/sms/send', {
-                              phone: d.parentPhone,
-                              message: `EduYuz: Hurmatli ota-ona! Farzandingiz ${d.fullName}ning ${Math.abs(Number(d.balance)).toLocaleString('uz-UZ')} so'm qarzdorligi mavjud. Iltimos, to'lovni amalga oshirishingizni so'raymiz.`,
-                            });
-                            alert(`✅ ${d.fullName}ning ota-onasiga SMS eslatma jo'natildi!`);
-                          } catch (err: any) {
-                            alert('SMS yuborishda xatolik');
-                          }
-                        }}
-                        title="SMS yuborish"
-                        className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <MessageSquare size={13} />
-                      </button>
-                    </div>
+      {/* Bugungi darslar, qarzdorlar, so'nggi to'lovlar */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <Card className="px-[22px] py-5 flex flex-col gap-3 min-h-[250px]">
+          <h2 className="text-base font-semibold text-slate-900">Bugungi darslar</h2>
+          {lessons.length === 0 ? (
+            <Empty title="Bugun rejalashtirilgan dars yo‘q" hint="Guruh va jadval qo‘shilgach shu yerda ko‘rinadi" />
+          ) : (
+            <ul className="space-y-2">
+              {lessons.slice(0, 4).map((l) => (
+                <li key={l.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50">
+                  <span className={`w-14 h-10 rounded-lg flex items-center justify-center text-[13px] font-semibold shrink-0 ${l.live ? 'bg-indigo-600 text-white' : 'bg-white text-slate-900 border border-slate-200'}`}>
+                    {l.startTime}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{l.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{l.teacher?.fullName || 'O‘qituvchi yo‘q'} • {l._count?.students ?? 0} o‘quvchi</p>
                   </div>
-                ))
+                  {l.live ? (
+                    <Link href={`/attendance?groupId=${l.id}`} className="text-xs font-semibold text-indigo-600 hover:underline shrink-0">Davomat</Link>
+                  ) : l.done ? (
+                    <span className="text-xs text-slate-400 shrink-0">Tugadi</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+
+        <Card className="px-[22px] py-5 flex flex-col gap-3 min-h-[250px]">
+          <h2 className="text-base font-semibold text-slate-900">Qarzdor o‘quvchilar</h2>
+          {debtors.length === 0 ? (
+            <Empty title="Qarzdorlik yo‘q" hint="Balansi manfiy o‘quvchilar shu yerda chiqadi" />
+          ) : (
+            <>
+              <ul className="space-y-2">
+                {debtors.slice(0, 4).map((d) => (
+                  <li key={d.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-900 truncate">{d.fullName}</p>
+                      <p className="text-xs font-medium text-rose-600">-{fmt(Math.abs(Number(d.balance)))} so‘m</p>
+                    </div>
+                    <button
+                      onClick={() => sendSms(d)}
+                      title="Ota-onaga SMS eslatma"
+                      className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:border-indigo-300 shrink-0"
+                    >
+                      <MessageSquare size={13} /> SMS
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {debtors.length > 4 && (
+                <Link href="/payments" className="text-xs font-semibold text-indigo-600 hover:underline">
+                  Barcha {debtors.length} ta qarzdorni ko‘rish
+                </Link>
               )}
-            </div>
-          </div>
+            </>
+          )}
+        </Card>
 
-          <Link
-            href="/reports"
-            className="w-full text-center py-2.5 rounded-2xl bg-slate-800/70 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-750 transition block mt-4"
-          >
-            Batafsil Moliya Hisobotlari →
-          </Link>
-        </div>
-
+        <Card className="px-[22px] py-5 flex flex-col gap-3 min-h-[250px]">
+          <h2 className="text-base font-semibold text-slate-900">So‘nggi to‘lovlar</h2>
+          {income.length === 0 ? (
+            <Empty title="Hali to‘lovlar yo‘q" hint="Birinchi to‘lov qabul qilingach ro‘yxat shu yerda chiqadi" />
+          ) : (
+            <ul className="space-y-2">
+              {income.slice(0, 4).map((p) => {
+                const d = new Date(p.paidAt);
+                const when =
+                  d.toDateString() === now.toDateString()
+                    ? d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
+                    : `${d.getDate()}-${MONTHS[d.getMonth()]}`;
+                return (
+                  <li key={p.id} className="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-900 truncate">{p.student?.fullName || 'O‘quvchi'}</p>
+                      <p className="text-xs text-slate-500">{METHOD_LABELS[p.paymentMethod] || p.paymentMethod} • {when}</p>
+                    </div>
+                    <span className="text-sm font-semibold text-emerald-600 shrink-0">+{fmt(Number(p.amount))}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
       </div>
-
     </div>
   );
 }

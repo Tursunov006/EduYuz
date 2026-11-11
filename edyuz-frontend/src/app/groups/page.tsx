@@ -35,18 +35,18 @@ interface TeacherItem {
 const getCourseBadge = (title: string = '') => {
   const t = title.toLowerCase();
   if (t.includes('front') || t.includes('react') || t.includes('web')) {
-    return { icon: '⚛️', color: 'from-cyan-500/20 to-blue-500/20 text-cyan-300 border-cyan-500/30' };
+    return { icon: '', color: 'from-cyan-500/20 to-blue-500/20 text-cyan-700 border-cyan-500/30' };
   }
   if (t.includes('python') || t.includes('back')) {
-    return { icon: '🐍', color: 'from-emerald-500/20 to-teal-500/20 text-emerald-300 border-emerald-500/30' };
+    return { icon: '', color: 'from-emerald-500/20 to-teal-500/20 text-emerald-700 border-emerald-500/30' };
   }
   if (t.includes('ingliz') || t.includes('ielts') || t.includes('english')) {
-    return { icon: '🇬🇧', color: 'from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30' };
+    return { icon: '', color: 'from-purple-500/20 to-pink-500/20 text-purple-700 border-purple-500/30' };
   }
   if (t.includes('matem') || t.includes('fizik')) {
-    return { icon: '📐', color: 'from-amber-500/20 to-orange-500/20 text-amber-300 border-amber-500/30' };
+    return { icon: '', color: 'from-amber-500/20 to-orange-500/20 text-amber-700 border-amber-500/30' };
   }
-  return { icon: '📚', color: 'from-indigo-500/20 to-blue-500/20 text-indigo-300 border-indigo-500/30' };
+  return { icon: '', color: 'from-indigo-500/20 to-blue-500/20 text-indigo-700 border-indigo-500/30' };
 };
 
 export default function GroupsPage() {
@@ -202,19 +202,13 @@ export default function GroupsPage() {
     <div className="space-y-6 sm:space-y-8 pb-12">
       
       {/* 1. Header & Hero Bar */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-indigo-950/60 border border-slate-800/80 p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="relative">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-purple-600/15 rounded-full hidden pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Jami {groups.length} ta faol guruh • {courses.length} ta fan yo'nalishi
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              <BookOpen className="text-cyan-400" /> Guruhlar va Dars Jadvali
-            </h1>
-            <p className="text-slate-400 text-xs sm:text-sm">
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Guruhlar va jadval</h1>
+            <p className="text-slate-500 text-xs sm:text-sm">
               Markazdagi barcha dars guruhlari, fan yo'nalishlari va Toq / Juft kunlar shaxmatkasi
             </p>
           </div>
@@ -222,13 +216,13 @@ export default function GroupsPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setIsCourseModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-slate-800/90 hover:bg-slate-750 text-cyan-300 border border-cyan-500/30 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-750 text-cyan-700 border border-cyan-500/30 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95"
             >
               <GraduationCap size={16} /> + Yangi Fan (Kurs)
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
+              className="flex items-center justify-center gap-2 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02] active:scale-95 bg-indigo-600 hover:bg-indigo-500"
             >
               <Plus size={16} /> Yangi Guruh Ochish
             </button>
@@ -238,39 +232,39 @@ export default function GroupsPage() {
 
       {/* 2. Ichki Tablar (Guruhlar vs Dars Jadvali Shaxmatkasi) va Qidiruv */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 p-1.5 bg-slate-900/90 border border-slate-800 rounded-2xl w-fit">
+        <div className="flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-2xl w-fit">
           <button
             onClick={() => setActiveTab('cards')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'cards'
-                ? 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-indigo-600/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                ? 'text-white shadow-sm bg-indigo-600'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <BookOpen size={16} />
-            <span>📚 Barcha Guruhlar ({filteredGroups.length})</span>
+            <span>Barcha Guruhlar ({filteredGroups.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('timetable')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'timetable'
-                ? 'bg-gradient-to-r from-indigo-600 to-cyan-600 text-white shadow-lg shadow-indigo-600/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                ? 'text-white shadow-sm bg-indigo-600'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             <Calendar size={16} />
-            <span>🗓 Dars Jadvali (Shaxmatka)</span>
+            <span>Dars Jadvali (Shaxmatka)</span>
           </button>
         </div>
 
         <div className="relative flex-1 max-w-md">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="Guruh nomi, fan yoki o'qituvchini qidirish..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 transition"
+            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-500/80 transition"
           />
         </div>
       </div>
@@ -279,23 +273,23 @@ export default function GroupsPage() {
       {loading ? (
         <div className="p-16 text-center text-slate-500 text-sm">Guruhlar yuklanmoqda...</div>
       ) : activeTab === 'timetable' ? (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="p-5 sm:p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/50">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
             <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
-                <Calendar className="text-cyan-400" size={20} />
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                <Calendar className="text-cyan-600" size={20} />
                 Haftalik Dars Jadvali (Toq va Juft kunlar Shaxmatkasi)
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 Bo‘sh vaqt katakchalarini bosib, o‘sha soatga 1-klikda yangi guruh biriktirishingiz mumkin
               </p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-bold">
-                🟦 Toq kunlar: Dush / Chor / Jum
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">
+                Toq kunlar: Dush / Chor / Jum
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-bold">
-                🟩 Juft kunlar: Sesh / Pay / Shan
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 font-bold">
+                Juft kunlar: Sesh / Pay / Shan
               </span>
             </div>
           </div>
@@ -303,26 +297,26 @@ export default function GroupsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[780px]">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-950/80 text-xs font-extrabold uppercase tracking-wider text-slate-400">
-                  <th className="py-4 px-5 w-52 border-r border-slate-800">🕒 Dars Vaqti (Smena)</th>
-                  <th className="py-4 px-5 w-1/2 border-r border-slate-800 text-indigo-300">
-                    📅 Toq kunlar (Dushanba • Chorshanba • Juma)
+                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <th className="py-4 px-5 w-52 border-r border-slate-200">Dars Vaqti (Smena)</th>
+                  <th className="py-4 px-5 w-1/2 border-r border-slate-200 text-indigo-700">
+                    Toq kunlar (Dushanba • Chorshanba • Juma)
                   </th>
-                  <th className="py-4 px-5 w-1/2 text-emerald-300">
-                    📅 Juft kunlar (Seshanba • Payshanba • Shanba)
+                  <th className="py-4 px-5 w-1/2 text-emerald-700">
+                    Juft kunlar (Seshanba • Payshanba • Shanba)
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/80 text-sm">
+              <tbody className="divide-y divide-slate-100/80 text-sm">
                 {TIME_SLOTS.map((slot) => {
                   const oddGroups = getGroupsForSlot(slot.start, 'odd');
                   const evenGroups = getGroupsForSlot(slot.start, 'even');
 
                   return (
-                    <tr key={slot.start} className="hover:bg-slate-800/20 transition">
+                    <tr key={slot.start} className="hover:bg-slate-50 transition">
                       {/* Vaqt ustuni */}
-                      <td className="p-4 sm:p-5 border-r border-slate-800 align-top bg-slate-950/30">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 font-mono text-xs font-extrabold">
+                      <td className="p-4 sm:p-5 border-r border-slate-200 align-top bg-slate-50">
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 font-mono text-xs font-bold">
                           <Clock size={14} />
                           {slot.start} — {slot.end}
                         </div>
@@ -330,7 +324,7 @@ export default function GroupsPage() {
                       </td>
 
                       {/* Toq kunlar ustuni */}
-                      <td className="p-4 border-r border-slate-800 align-top">
+                      <td className="p-4 border-r border-slate-200 align-top">
                         <div className="space-y-2.5">
                           {oddGroups.map((g) => {
                             const badge = getCourseBadge(g.course?.title || g.name);
@@ -338,20 +332,20 @@ export default function GroupsPage() {
                               <Link
                                 key={g.id}
                                 href={`/groups/${g.id}`}
-                                className="block p-3.5 rounded-2xl bg-slate-950/90 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 transition group"
+                                className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-indigo-500/50 transition group"
                               >
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-extrabold text-white group-hover:text-cyan-400 transition text-sm">
+                                  <span className="font-bold text-slate-900 group-hover:text-cyan-600 transition text-sm">
                                     {badge.icon} {g.name}
                                   </span>
-                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-700 border border-indigo-500/20">
                                     {g.startTime}–{g.endTime}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between text-xs text-slate-400">
-                                  <span>👨‍🏫 {g.teacher?.fullName || 'Ustoz'}</span>
-                                  <span className="text-slate-300 font-semibold">
-                                    👥 {g._count?.students || 0} o‘quvchi
+                                <div className="flex items-center justify-between text-xs text-slate-500">
+                                  <span>{g.teacher?.fullName || 'Ustoz'}</span>
+                                  <span className="text-slate-600 font-semibold">
+                                    {g._count?.students || 0} o‘quvchi
                                   </span>
                                 </div>
                               </Link>
@@ -359,7 +353,7 @@ export default function GroupsPage() {
                           })}
                           <button
                             onClick={() => openModalForSlot(slot.start, slot.end, 'Dush-Chor-Jum')}
-                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-800 hover:border-indigo-500/50 text-slate-500 hover:text-indigo-300 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-200 hover:border-indigo-500/50 text-slate-500 hover:text-indigo-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <Plus size={14} /> Shu vaqtga guruh qo‘shish
                           </button>
@@ -375,20 +369,20 @@ export default function GroupsPage() {
                               <Link
                                 key={g.id}
                                 href={`/groups/${g.id}`}
-                                className="block p-3.5 rounded-2xl bg-slate-950/90 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 transition group"
+                                className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-500/50 transition group"
                               >
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-extrabold text-white group-hover:text-emerald-400 transition text-sm">
+                                  <span className="font-bold text-slate-900 group-hover:text-emerald-600 transition text-sm">
                                     {badge.icon} {g.name}
                                   </span>
-                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                                     {g.startTime}–{g.endTime}
                                   </span>
                                 </div>
-                                <div className="flex items-center justify-between text-xs text-slate-400">
-                                  <span>👨‍🏫 {g.teacher?.fullName || 'Ustoz'}</span>
-                                  <span className="text-slate-300 font-semibold">
-                                    👥 {g._count?.students || 0} o‘quvchi
+                                <div className="flex items-center justify-between text-xs text-slate-500">
+                                  <span>{g.teacher?.fullName || 'Ustoz'}</span>
+                                  <span className="text-slate-600 font-semibold">
+                                    {g._count?.students || 0} o‘quvchi
                                   </span>
                                 </div>
                               </Link>
@@ -396,7 +390,7 @@ export default function GroupsPage() {
                           })}
                           <button
                             onClick={() => openModalForSlot(slot.start, slot.end, 'Sesh-Pay-Shan')}
-                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-800 hover:border-emerald-500/50 text-slate-500 hover:text-emerald-300 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-200 hover:border-emerald-500/50 text-slate-500 hover:text-emerald-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <Plus size={14} /> Shu vaqtga guruh qo‘shish
                           </button>
@@ -410,9 +404,9 @@ export default function GroupsPage() {
           </div>
         </div>
       ) : filteredGroups.length === 0 ? (
-        <div className="p-16 text-center bg-slate-900/50 border border-slate-800 rounded-3xl space-y-3">
-          <BookOpen className="mx-auto text-slate-600" size={40} />
-          <p className="text-slate-300 font-bold">Guruhlar topilmadi</p>
+        <div className="p-16 text-center bg-white border border-slate-200 rounded-2xl space-y-3">
+          <BookOpen className="mx-auto text-slate-400" size={40} />
+          <p className="text-slate-600 font-bold">Guruhlar topilmadi</p>
           <p className="text-xs text-slate-500">Qidiruv so'zini o'zgartiring yoki yangi guruh yarating</p>
         </div>
       ) : (
@@ -426,16 +420,16 @@ export default function GroupsPage() {
             return (
               <div
                 key={group.id}
-                className="bg-slate-900/90 border border-slate-800 hover:border-slate-700/80 rounded-3xl p-5 sm:p-6 transition-all duration-300 shadow-xl hover:shadow-2xl hover:-translate-y-1 backdrop-blur-md flex flex-col justify-between space-y-4 group"
+                className="bg-white border border-slate-200 hover:border-slate-300/80 rounded-2xl p-5 sm:p-6 transition-all duration-300 shadow-sm hover:shadow-sm hover:-translate-y-1 backdrop-blur-md flex flex-col justify-between space-y-4 group"
               >
                 {/* Tepasi: Fan Belgisi va O'quvchilar soni */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-gradient-to-r ${badge.color} border text-xs font-bold`}>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl ${badge.color} border text-xs font-bold`}>
                       <span>{badge.icon}</span>
                       <span className="truncate max-w-[140px]">{group.course?.title || 'Umumiy Kurs'}</span>
                     </span>
-                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 border border-slate-700/80">
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl bg-slate-100 text-slate-600 border border-slate-300/80">
                       {studentCount}/{maxCapacity} o'quvchi
                     </span>
                   </div>
@@ -443,12 +437,12 @@ export default function GroupsPage() {
                   {/* Guruh Nomi va Narxi */}
                   <div className="flex items-baseline justify-between gap-2">
                     <Link href={`/groups/${group.id}`} className="block flex-1 min-w-0">
-                      <h3 className="text-lg font-extrabold text-white group-hover:text-cyan-400 transition truncate">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-cyan-600 transition truncate">
                         {group.name}
                       </h3>
                     </Link>
                     {group.course?.price ? (
-                      <span className="text-xs font-extrabold text-emerald-400 font-mono shrink-0">
+                      <span className="text-xs font-bold text-emerald-600 font-mono shrink-0">
                         {Number(group.course.price).toLocaleString('uz-UZ')} so'm
                       </span>
                     ) : null}
@@ -456,16 +450,16 @@ export default function GroupsPage() {
 
                   {/* O'quvchilar sig'imi progress bari */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-400 font-medium">
+                    <div className="flex justify-between text-[10px] text-slate-500 font-medium">
                       <span>Guruh to'laligi:</span>
-                      <span className={fillPercent >= 80 ? 'text-emerald-400 font-bold' : 'text-slate-300 font-bold'}>
+                      <span className={fillPercent >= 80 ? 'text-emerald-600 font-bold' : 'text-slate-600 font-bold'}>
                         {fillPercent}%
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-500 ${
-                          fillPercent >= 80 ? 'bg-emerald-400' : 'bg-gradient-to-r from-cyan-500 to-blue-500'
+                          fillPercent >= 80 ? 'bg-emerald-400' : 'bg-cyan-600'
                         }`}
                         style={{ width: `${fillPercent}%` }}
                       ></div>
@@ -474,23 +468,23 @@ export default function GroupsPage() {
                 </div>
 
                 {/* Markazi: Kunlar, Vaqt va Ustoz */}
-                <div className="space-y-2 pt-3 border-t border-slate-800/80 text-xs text-slate-300">
+                <div className="space-y-2 pt-3 border-t border-slate-200/80 text-xs text-slate-600">
                   <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-cyan-400 shrink-0" />
-                    <span className="font-semibold text-slate-200">
+                    <Calendar size={14} className="text-cyan-600 shrink-0" />
+                    <span className="font-semibold text-slate-700">
                       {Array.isArray(group.days) ? group.days.join(', ') : group.days}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-amber-400 shrink-0" />
-                    <span className="font-semibold text-slate-200">
+                    <Clock size={14} className="text-amber-600 shrink-0" />
+                    <span className="font-semibold text-slate-700">
                       {group.startTime} — {group.endTime}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <User size={14} className="text-purple-400 shrink-0" />
-                    <span className="text-slate-400 truncate">
-                      Ustoz: <strong className="text-slate-200 font-bold">{group.teacher?.fullName || 'Biriktirilmagan'}</strong>
+                    <User size={14} className="text-purple-600 shrink-0" />
+                    <span className="text-slate-500 truncate">
+                      Ustoz: <strong className="text-slate-700 font-bold">{group.teacher?.fullName || 'Biriktirilmagan'}</strong>
                     </span>
                   </div>
                 </div>
@@ -499,13 +493,13 @@ export default function GroupsPage() {
                 <div className="flex items-center gap-2 pt-2">
                   <Link
                     href={`/groups/${group.id}`}
-                    className="flex-1 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-750 text-slate-200 text-xs font-bold border border-slate-700/80 text-center transition active:scale-95"
+                    className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-750 text-slate-700 text-xs font-bold border border-slate-300/80 text-center transition active:scale-95"
                   >
                     Jurnal & O'quvchilar
                   </Link>
                   <Link
                     href="/attendance"
-                    className="py-2.5 px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 text-xs font-bold transition active:scale-95"
+                    className="py-2.5 px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 border border-cyan-500/20 text-xs font-bold transition active:scale-95"
                     title="Davomatga o'tish"
                   >
                     Davomat
@@ -520,14 +514,14 @@ export default function GroupsPage() {
       {/* 4. Yangi guruh qo'shish modali (Kurs va O'qituvchi tanlash bilan) */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
-                <BookOpen size={18} className="text-cyan-400" /> Yangi guruh ochish
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-sm space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <BookOpen size={18} className="text-cyan-600" /> Yangi guruh ochish
               </h2>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
               </button>
@@ -535,28 +529,28 @@ export default function GroupsPage() {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Guruh nomi / kodi</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Guruh nomi / kodi</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Frontend DI-88 yoki IELTS 6.5"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 transition"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 transition"
                 />
               </div>
 
               {/* Fan / Kurs tanlash */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-300">Fan yo'nalishi (Kurs)</label>
+                  <label className="text-xs font-bold text-slate-600">Fan yo'nalishi (Kurs)</label>
                   <button
                     type="button"
                     onClick={() => {
                       setIsModalOpen(false);
                       setIsCourseModalOpen(true);
                     }}
-                    className="text-[11px] text-cyan-400 hover:underline font-semibold"
+                    className="text-[11px] text-cyan-600 hover:underline font-semibold"
                   >
                     + Yangi fan qo'shish
                   </button>
@@ -564,7 +558,7 @@ export default function GroupsPage() {
                 <select
                   value={formData.courseId}
                   onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 >
                   {courses.length === 0 ? (
                     <option value="">Standart Kurs (Avtomatik yaratiladi)</option>
@@ -580,11 +574,11 @@ export default function GroupsPage() {
 
               {/* O'qituvchi tanlash */}
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Mas'ul O'qituvchi (Ustoz)</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Mas'ul O'qituvchi (Ustoz)</label>
                 <select
                   value={formData.teacherId}
                   onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 >
                   {teachers.length === 0 ? (
                     <option value="">Bosh O'qituvchi (Avtomatik)</option>
@@ -600,31 +594,31 @@ export default function GroupsPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Boshlanish vaqti</label>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">Boshlanish vaqti</label>
                   <input
                     type="time"
                     value={formData.startTime}
                     onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Tugash vaqti</label>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">Tugash vaqti</label>
                   <input
                     type="time"
                     value={formData.endTime}
                     onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Dars kunlari</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Dars kunlari</label>
                 <select
                   value={formData.days}
                   onChange={(e) => setFormData({ ...formData, days: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 >
                   <option value="Dush-Chor-Jum">Dushanba / Chorshanba / Juma (Toq kunlar)</option>
                   <option value="Sesh-Pay-Shan">Seshanba / Payshanba / Shanba (Juft kunlar)</option>
@@ -633,17 +627,17 @@ export default function GroupsPage() {
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-bold transition"
+                  className="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-750 text-slate-600 text-xs font-bold transition"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white text-xs font-bold transition shadow-lg shadow-purple-600/30"
+                  className="px-6 py-2.5 rounded-2xl text-white text-xs font-bold transition shadow-sm bg-indigo-600 hover:bg-indigo-500"
                 >
                   Guruhni Saqlash
                 </button>
@@ -656,14 +650,14 @@ export default function GroupsPage() {
       {/* 5. Yangi Fan (Kurs) Qo'shish Modali */}
       {isCourseModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h2 className="text-base font-extrabold text-white flex items-center gap-2">
-                <GraduationCap size={18} className="text-cyan-400" /> Yangi fan (kurs) qo'shish
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 shadow-sm space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <GraduationCap size={18} className="text-cyan-600" /> Yangi fan (kurs) qo'shish
               </h2>
               <button 
                 onClick={() => setIsCourseModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
               </button>
@@ -671,40 +665,40 @@ export default function GroupsPage() {
 
             <form onSubmit={handleCreateCourse} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Fan / Kurs nomi</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Fan / Kurs nomi</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Ingliz tili (IELTS) yoki Python"
                   value={courseForm.title}
                   onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Oylik to'lov narxi (so'm)</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Oylik to'lov narxi (so'm)</label>
                 <input
                   required
                   type="number"
                   step="10000"
                   value={courseForm.price}
                   onChange={(e) => setCourseForm({ ...courseForm, price: Number(e.target.value) })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsCourseModalOpen(false)}
-                  className="px-4 py-2.5 rounded-2xl bg-slate-800 text-slate-300 text-xs font-bold"
+                  className="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold"
                 >
                   Yopish
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-lg shadow-cyan-600/20"
+                  className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm"
                 >
                   Qo'shish
                 </button>

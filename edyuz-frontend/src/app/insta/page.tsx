@@ -33,7 +33,7 @@ function Instagram({ size = 16, className = '' }: { size?: number; className?: s
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -42,7 +42,7 @@ function Instagram({ size = 16, className = '' }: { size?: number; className?: s
       className={className}
     >
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <path d="M16 11.37A4 4 0 1 12.63 8 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
     </svg>
   );
@@ -84,7 +84,7 @@ export default function InstagramBioPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'bot',
-      text: "Assalomu alaykum! 👋 Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Moliya, Lidlar voronkasi yoki 14 kunlik BEPUL DEMO bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
+      text: "Assalomu alaykum! Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Moliya, Lidlar voronkasi yoki 14 kunlik BEPUL DEMO bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
       time: 'Hozir',
     },
   ]);
@@ -204,7 +204,7 @@ export default function InstagramBioPage() {
       const lower = text.toLowerCase();
       const phoneMatch = text.match(/(?:\+?998[\s-]?)?(?:\d{2}[\s-]?\d{3}[\s-]?\d{2}[\s-]?\d{2}|\d{9})/);
       let reply =
-        "✨ EduYuz CRM orqali Kunlik Davomat, Moliya, Kassir va Lidlarni bitta ekranda boshqarasiz. 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib yuboring!";
+        "EduYuz CRM orqali Kunlik Davomat, Moliya, Kassir va Lidlarni bitta ekranda boshqarasiz. 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib yuboring!";
 
       if (phoneMatch) {
         const phone = phoneMatch[0];
@@ -218,13 +218,13 @@ export default function InstagramBioPage() {
           createdAt: new Date().toLocaleDateString('uz-UZ'),
           note: `Instagram AI Chat: "${text}"`,
         });
-        reply = `✅ Rahmat! Raqamingiz (${phone}) EduYuz CRM Lidlar voronkasiga qo'shildi. Mutaxassisimiz tez orada siz bilan bog'lanib, 7 kunlik BEPUL DEMO yoqib beradi!`;
+        reply = `Rahmat! Raqamingiz (${phone}) EduYuz CRM Lidlar voronkasiga qo'shildi. Mutaxassisimiz tez orada siz bilan bog'lanib, 7 kunlik BEPUL DEMO yoqib beradi!`;
       } else if (lower.includes('narx') || lower.includes('qancha')) {
         reply =
-          "💎 Tariflarimiz:\n• Start: 199 000 so'm/oy (Davomat, Kassa, Lidlar, 200 o'quvchi)\n• Pro: 349 000 so'm/oy (Cheksiz o'quvchi, Telegram Bot, SMS va Analitika)\n\n🎁 7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib qoldiring!";
+          "Tariflarimiz:\n• Start: 199 000 so'm/oy (Davomat, Kassa, Lidlar, 200 o'quvchi)\n• Pro: 349 000 so'm/oy (Cheksiz o'quvchi, Telegram Bot, SMS va Analitika)\n\n7 kunlik BEPUL DEMO olish uchun telefon raqamingizni yozib qoldiring!";
       } else if (lower.includes('davomat') || lower.includes('bot') || lower.includes('sms')) {
         reply =
-          "📅 Kunlik Davomat va Avto-Xabarnoma: O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram/SMS xabar boradi!\n\nSinab ko'rish uchun telefon raqamingizni qoldiring!";
+          "Kunlik Davomat va Avto-Xabarnoma: O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram/SMS xabar boradi!\n\nSinab ko'rish uchun telefon raqamingizni qoldiring!";
       }
 
       setMessages((prev) => [...prev, { role: 'bot', text: reply, time: now }]);
@@ -234,74 +234,72 @@ export default function InstagramBioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-start py-6 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-start py-6 px-4 relative overflow-hidden">
       {/* Orqa fon neon nur effektlari */}
-      <div className="fixed -top-24 -left-24 w-96 h-96 bg-pink-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed top-1/3 -right-24 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed -bottom-24 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed -top-24 -left-24 w-96 h-96 bg-pink-600/15 rounded-full hidden pointer-events-none" />
+      <div className="fixed top-1/3 -right-24 w-96 h-96 bg-indigo-600/15 rounded-full hidden pointer-events-none" />
+      <div className="fixed -bottom-24 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full hidden pointer-events-none" />
 
       <div className="w-full max-w-lg relative z-10 space-y-5">
         {/* 1. INSTAGRAM PROFILE HEADER (@eduyuzcrmuz) */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 shadow-2xl backdrop-blur-xl">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-sm backdrop-blur-xl">
           <div className="flex items-center gap-4">
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 rounded-full p-[3px] bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 shadow-lg shadow-pink-500/20">
+              <div className="w-20 h-20 rounded-full p-[3px] shadow-sm bg-amber-600">
                 <img
                   src="/logo-icon-transparent.png"
                   alt="EduYuz CRM"
                   className="w-full h-full rounded-full object-contain bg-white p-1.5"
                 />
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-950">
+              <span className="absolute -bottom-1 -right-1 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-indigo-600">
                 CRM 2.0
               </span>
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <h1 className="text-lg sm:text-xl font-extrabold text-white tracking-tight truncate">
-                  eduyuzcrmuz
-                </h1>
+                <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">eduyuzcrmuz</h1>
                 <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-sky-500 text-white text-[10px] font-bold">
                   ✓
                 </span>
               </div>
-              <p className="text-xs font-semibold text-indigo-400 mt-0.5">
+              <p className="text-xs font-semibold text-indigo-600 mt-0.5">
                 EduYuz CRM Platform • Rasmiy Sahifa
               </p>
-              <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+              <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-500">
                 <span>
-                  <strong className="text-white">100+</strong> Markazlar
+                  <strong className="text-slate-900">100+</strong> Markazlar
                 </span>
                 <span>•</span>
                 <span>
-                  <strong className="text-white">1.7K+</strong> Obunachi
+                  <strong className="text-slate-900">1.7K+</strong> Obunachi
                 </span>
                 <span>•</span>
-                <span className="text-emerald-400 font-semibold">● Online</span>
+                <span className="text-emerald-600 font-semibold">● Online</span>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 pt-3.5 border-t border-slate-800/80 text-xs text-slate-300 space-y-1 leading-relaxed">
-            <p>🎓 O&apos;quv markazlar uchun #1 CRM tizim</p>
-            <p>📅 Onlayn Davomat • 💰 Aniq Moliya • 🎯 Lidlar Voronkasi</p>
+          <div className="mt-4 pt-3.5 border-t border-slate-200/80 text-xs text-slate-600 space-y-1 leading-relaxed">
+            <p>O&apos;quv markazlar uchun #1 CRM tizim</p>
+            <p>Onlayn Davomat • Aniq Moliya • Lidlar Voronkasi</p>
           </div>
 
           {/* OBUNACHI YIG'ISH ALGORITMI: FOLLOW-TO-UNLOCK & VIRAL SHARE */}
-          <div className="mt-3.5 p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/30 space-y-2.5">
+          <div className="mt-3.5 p-3 rounded-2xl border border-pink-500/30 space-y-2.5 bg-indigo-50">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-300 flex-shrink-0">
-                  {isFollowed ? <Unlock size={15} className="text-emerald-400" /> : <Lock size={15} />}
+                <div className="w-8 h-8 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-700 flex-shrink-0">
+                  {isFollowed ? <Unlock size={15} className="text-emerald-600" /> : <Lock size={15} />}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-extrabold text-white truncate">
+                  <div className="text-xs font-bold text-slate-900 truncate">
                     {isFollowed
-                      ? '🔓 VIP Bonus Ochildi: EDUYUZ100 (-100 000 so‘m)'
-                      : '🔒 Obunachilar uchun 100 000 so‘m Vaucher'}
+                      ? 'VIP Bonus Ochildi: EDUYUZ100 (-100 000 so‘m)'
+                      : 'Obunachilar uchun 100 000 so‘m Vaucher'}
                   </div>
-                  <p className="text-[10px] text-slate-400 truncate">
+                  <p className="text-[10px] text-slate-500 truncate">
                     {isFollowed
                       ? 'Arizangizga avtomatik 100 000 so‘m bonus biriktirildi!'
                       : '1-qadam: @eduyuzcrmuz sahifasiga obuna bo‘lib qulfni oching'}
@@ -312,28 +310,28 @@ export default function InstagramBioPage() {
               {!isFollowed ? (
                 <button
                   onClick={handleFollowUnlock}
-                  className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white text-[11px] font-extrabold whitespace-nowrap shadow-md shadow-pink-600/20 flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-xl text-white text-[11px] font-bold whitespace-nowrap shadow-md flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500"
                 >
                   <Instagram size={12} /> + Obuna bo&apos;lish
                 </button>
               ) : (
-                <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[10px] font-bold whitespace-nowrap">
+                <span className="px-2.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 text-[10px] font-bold whitespace-nowrap">
                   ✓ Faol
                 </span>
               )}
             </div>
 
             {/* Viral Referral Share */}
-            <div className="pt-2 border-t border-slate-800/70 flex items-center justify-between gap-2">
-              <span className="text-[11px] text-slate-300 flex items-center gap-1.5">
-                <Gift size={13} className="text-amber-400 flex-shrink-0" />
+            <div className="pt-2 border-t border-slate-200/70 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-slate-600 flex items-center gap-1.5">
+                <Gift size={13} className="text-amber-600 flex-shrink-0" />
                 {sharedBonus
-                  ? '🎉 Havola nusxalandi! Do‘stingizga yuboring (+15 kun bonus)'
+                  ? 'Havola nusxalandi! Do‘stingizga yuboring (+15 kun bonus)'
                   : 'Do‘stingizga ulashing va +15 kun BEPUL CRM oling:'}
               </span>
               <button
                 onClick={handleViralShare}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-[11px] font-bold text-cyan-300 flex items-center gap-1 whitespace-nowrap transition"
+                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-cyan-700 flex items-center gap-1 whitespace-nowrap transition"
               >
                 <Share2 size={12} /> Ulashish
               </button>
@@ -341,13 +339,13 @@ export default function InstagramBioPage() {
           </div>
 
           {/* 4-Tab Switcher */}
-          <div className="grid grid-cols-4 gap-1 bg-slate-950 p-1.5 rounded-2xl border border-slate-800/80 mt-4">
+          <div className="grid grid-cols-4 gap-1 bg-slate-50 p-1.5 rounded-2xl border border-slate-200/80 mt-4">
             <button
               onClick={() => setActiveTab('calc')}
               className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'calc'
-                  ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white shadow-sm bg-indigo-600'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <Calculator size={13} /> Kalkulyator
@@ -356,8 +354,8 @@ export default function InstagramBioPage() {
               onClick={() => setActiveTab('form')}
               className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'form'
-                  ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white shadow-sm bg-indigo-600'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <Sparkles size={13} /> Demo Olish
@@ -366,8 +364,8 @@ export default function InstagramBioPage() {
               onClick={() => setActiveTab('chat')}
               className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'chat'
-                  ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white shadow-sm bg-indigo-600'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <MessageCircle size={13} /> AI Chat
@@ -376,8 +374,8 @@ export default function InstagramBioPage() {
               onClick={() => setActiveTab('features')}
               className={`py-2.5 px-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
                 activeTab === 'features'
-                  ? 'bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/25'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white shadow-sm bg-indigo-600'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <ShieldCheck size={13} /> Tizim
@@ -387,24 +385,24 @@ export default function InstagramBioPage() {
 
         {/* 2. TAB 1: INTERAKTIV FOYDA VA YO'QOTISH KALKULYATORI (LEAD MAGNET) */}
         {activeTab === 'calc' && (
-          <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-5">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm backdrop-blur-xl space-y-5">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full">
-                🧮 O&apos;quv Markaz Rahbarlari Uchun Tahlil
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-cyan-700 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-full">
+                O&apos;quv Markaz Rahbarlari Uchun Tahlil
               </span>
-              <h2 className="text-lg sm:text-xl font-extrabold text-white mt-2">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 mt-2">
                 Markazingiz Oyiga Qancha Pul Yo&apos;qotyapti?
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-500 mt-0.5">
                 O&apos;quvchilaringiz sonini belgilang va EduYuz CRM sizga oyiga qancha qo&apos;shimcha sof foyda keltirishini ko&apos;ring:
               </p>
             </div>
 
             {/* Slayder 1: O'quvchilar soni */}
-            <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-4 space-y-2.5">
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300">O&apos;quvchilaringiz soni:</span>
-                <span className="text-sm font-extrabold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-0.5 rounded-xl">
+                <span className="text-xs font-bold text-slate-600">O&apos;quvchilaringiz soni:</span>
+                <span className="text-sm font-bold text-cyan-600 bg-cyan-500/10 border border-cyan-500/20 px-3 py-0.5 rounded-xl">
                   {studentCount} ta o&apos;quvchi
                 </span>
               </div>
@@ -415,7 +413,7 @@ export default function InstagramBioPage() {
                 step={10}
                 value={studentCount}
                 onChange={(e) => setStudentCount(Number(e.target.value))}
-                className="w-full accent-pink-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+                className="w-full accent-pink-500 cursor-pointer h-2 bg-slate-100 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
                 <span>30 ta</span>
@@ -426,10 +424,10 @@ export default function InstagramBioPage() {
             </div>
 
             {/* Slayder 2: O'rtacha kurs narxi */}
-            <div className="bg-slate-950/90 border border-slate-800/80 rounded-2xl p-4 space-y-2.5">
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300">O&apos;rtacha oylik kurs narxi:</span>
-                <span className="text-sm font-extrabold text-purple-400 bg-purple-500/10 border border-purple-500/20 px-3 py-0.5 rounded-xl">
+                <span className="text-xs font-bold text-slate-600">O&apos;rtacha oylik kurs narxi:</span>
+                <span className="text-sm font-bold text-purple-600 bg-purple-500/10 border border-purple-500/20 px-3 py-0.5 rounded-xl">
                   {coursePrice.toLocaleString('uz-UZ')} so&apos;m
                 </span>
               </div>
@@ -440,7 +438,7 @@ export default function InstagramBioPage() {
                 step={50000}
                 value={coursePrice}
                 onChange={(e) => setCoursePrice(Number(e.target.value))}
-                className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-800 rounded-lg"
+                className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-100 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
                 <span>200 ming</span>
@@ -452,74 +450,74 @@ export default function InstagramBioPage() {
 
             {/* Natija Kartochkalari */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-rose-950/30 border border-rose-500/30 rounded-2xl p-4 space-y-1">
-                <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold">
+              <div className="bg-rose-50 border border-rose-500/30 rounded-2xl p-4 space-y-1">
+                <div className="flex items-center gap-1.5 text-rose-600 text-xs font-bold">
                   <AlertTriangle size={14} /> CRM-siz oylik yo&apos;qotish:
                 </div>
-                <div className="text-lg sm:text-xl font-extrabold text-rose-400">
+                <div className="text-lg sm:text-xl font-bold text-rose-600">
                   -{monthlyLossWithoutCrm.toLocaleString('uz-UZ')} so&apos;m
                 </div>
-                <p className="text-[11px] text-slate-400 leading-snug">
+                <p className="text-[11px] text-slate-500 leading-snug">
                   Unutilgan qarzlar, kechikkan to&apos;lovlar va javobsiz qolgan Instagram lidlar hisobiga (~16%)
                 </p>
               </div>
 
-              <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-4 space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-400 text-xs font-bold">
+              <div className="bg-emerald-50 border border-emerald-500/30 rounded-2xl p-4 space-y-1">
+                <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
                   <TrendingUp size={14} /> EduYuz bilan oylik o&apos;sish:
                 </div>
-                <div className="text-lg sm:text-xl font-extrabold text-emerald-400">
+                <div className="text-lg sm:text-xl font-bold text-emerald-600">
                   +{extraProfitWithEduYuz.toLocaleString('uz-UZ')} so&apos;m
                 </div>
-                <p className="text-[11px] text-slate-400 leading-snug">
+                <p className="text-[11px] text-slate-500 leading-snug">
                   Avto-SMS eslatma, Kanban voronka va Ota-onalar Boti orqali saqlab qolingan o&apos;quvchilar (+22%)
                 </p>
               </div>
             </div>
 
-            <div className="bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-3 flex items-center justify-between text-xs">
-              <span className="text-slate-300 flex items-center gap-2">
-                <Clock size={15} className="text-indigo-400" />
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 flex items-center justify-between text-xs">
+              <span className="text-slate-600 flex items-center gap-2">
+                <Clock size={15} className="text-indigo-600" />
                 Admin va rahbar tejaydigan vaqt:
               </span>
-              <strong className="text-indigo-400 font-extrabold">
+              <strong className="text-indigo-600 font-bold">
                 Oyiga {savedHoursPerMonth} soat
               </strong>
             </div>
 
             <button
               onClick={handleClaimFromCalculator}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl text-white font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
             >
-              🔥 Yo&apos;qotishni To&apos;xtatish — 14 Kun Bepul Sinab Ko&apos;rish <ArrowRight size={16} />
+              Yo&apos;qotishni To&apos;xtatish — 14 Kun Bepul Sinab Ko&apos;rish <ArrowRight size={16} />
             </button>
           </div>
         )}
 
         {/* 3. TAB 2: BEPUL 14-KUNLIK DEMO ARIZA FORMASI */}
         {activeTab === 'form' && (
-          <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-6 shadow-2xl backdrop-blur-xl">
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm backdrop-blur-xl">
             {submitted ? (
               <div className="text-center py-6 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-600">
                   <CheckCircle2 size={36} />
                 </div>
-                <h2 className="text-xl font-extrabold text-white">
-                  Arizangiz Qabul Qilindi! 🎉
+                <h2 className="text-xl font-bold text-slate-900">
+                  Arizangiz Qabul Qilindi! 
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-300 max-w-sm mx-auto leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
                   Ma&apos;lumotlaringiz <strong>EduYuz CRM</strong> tizimiga tushdi. Mutaxassisimiz tez orada siz bilan bog&apos;lanib, <strong>14 kunlik BEPUL VIP-DEMO</strong> kabinetingizni ochib beradi!
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center">
                   <button
                     onClick={() => setActiveTab('chat')}
-                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition"
+                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition"
                   >
-                    🤖 AI Konsultant bilan suhbatlashish
+                    AI Konsultant bilan suhbatlashish
                   </button>
                   <Link
                     href="/login"
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-xs font-bold text-white transition flex items-center justify-center gap-1.5"
+                    className="px-4 py-2.5 rounded-xl text-xs font-bold text-white transition flex items-center justify-center gap-1.5 bg-indigo-600"
                   >
                     Tizimga kirish <ArrowRight size={14} />
                   </Link>
@@ -529,20 +527,20 @@ export default function InstagramBioPage() {
               <form onSubmit={handleFormSubmit} className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-pink-400 bg-pink-500/10 border border-pink-500/20 px-2.5 py-1 rounded-full">
-                      🎁 @eduyuzcrmuz obunachilari uchun
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-pink-600 bg-pink-500/10 border border-pink-500/20 px-2.5 py-1 rounded-full">
+                      @eduyuzcrmuz obunachilari uchun
                     </span>
-                    <h2 className="text-lg font-extrabold text-white mt-2">
+                    <h2 className="text-lg font-bold text-slate-900 mt-2">
                       14 Kunlik Bepul Demo Olish
                     </h2>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Raqamingizni qoldiring — 10 daqiqada markazingiz uchun tizimni yoqib beramiz.
                     </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                     Ismingiz *
                   </label>
                   <div className="relative">
@@ -553,13 +551,13 @@ export default function InstagramBioPage() {
                       placeholder="Masalan: Sardorbek Aliyev"
                       value={form.fullName}
                       onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-pink-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                     Telefon raqamingiz *
                   </label>
                   <div className="relative">
@@ -570,14 +568,14 @@ export default function InstagramBioPage() {
                       placeholder="+998 90 123 45 67"
                       value={form.phone}
                       onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-pink-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-pink-500"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                       Markaz yo&apos;nalishi
                     </label>
                     <div className="relative">
@@ -585,7 +583,7 @@ export default function InstagramBioPage() {
                       <select
                         value={form.course}
                         onChange={(e) => setForm({ ...form, course: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-pink-500"
                       >
                         <option value="Ko'p tarmoqli o'quv markaz">Ko&apos;p tarmoqli markaz</option>
                         <option value="Ingliz tili / IELTS Markazi">Ingliz tili / IELTS</option>
@@ -597,7 +595,7 @@ export default function InstagramBioPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                       Instagram Username (ixtiyoriy)
                     </label>
                     <div className="relative">
@@ -607,14 +605,14 @@ export default function InstagramBioPage() {
                         placeholder="@username"
                         value={form.igUsername}
                         onChange={(e) => setForm({ ...form, igUsername: e.target.value })}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-pink-500"
                       />
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                     O&apos;quv markazingiz nomi yoki savolingiz
                   </label>
                   <input
@@ -622,16 +620,16 @@ export default function InstagramBioPage() {
                     placeholder="Masalan: EverBest Education, 150 ta o'quvchi bor..."
                     value={form.note}
                     onChange={(e) => setForm({ ...form, note: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-pink-500"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-purple-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-3.5 rounded-2xl text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 bg-indigo-600 hover:bg-indigo-500"
                 >
-                  {submitting ? 'Yuborilmoqda...' : <>🚀 14 Kunlik Bepul Demo Olish</>}
+                  {submitting ? 'Yuborilmoqda...' : <>14 Kunlik Bepul Demo Olish</>}
                 </button>
               </form>
             )}
@@ -640,35 +638,35 @@ export default function InstagramBioPage() {
 
         {/* 4. TAB 3: INSTAGRAM DIRECT AI KONSULTANT (24/7 CHAT) */}
         {activeTab === 'chat' && (
-          <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-xl flex flex-col h-[500px]">
-            <div className="px-4 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+          <div className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden shadow-sm backdrop-blur-xl flex flex-col h-[500px]">
+            <div className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-pink-500 to-indigo-600 flex items-center justify-center text-white">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white bg-indigo-600">
                   <Bot size={16} />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-white flex items-center gap-1">
+                  <div className="text-xs font-bold text-slate-900 flex items-center gap-1">
                     @eduyuzcrmuz AI Menejer
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
                   </div>
-                  <p className="text-[10px] text-slate-400">Instagram Direct 24/7 Avto-Javob</p>
+                  <p className="text-[10px] text-slate-500">Instagram Direct 24/7 Avto-Javob</p>
                 </div>
               </div>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 font-semibold">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-semibold">
                 Tezkor javob
               </span>
             </div>
 
-            <div className="px-3 py-2 bg-slate-950/40 border-b border-slate-800/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200/60 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {[
-                { label: '💎 Narxlar qancha?', q: 'EduYuz CRM narxlari va tariflari qancha?' },
-                { label: '📅 Davomat va SMS', q: 'Kunlik davomat va ota-onalar Telegram boti qanday ishlaydi?' },
-                { label: '🎁 Bepul Demo olish', q: '7 kunlik bepul demo qanday olaman?' },
+                { label: 'Narxlar qancha?', q: 'EduYuz CRM narxlari va tariflari qancha?' },
+                { label: 'Davomat va SMS', q: 'Kunlik davomat va ota-onalar Telegram boti qanday ishlaydi?' },
+                { label: 'Bepul Demo olish', q: '7 kunlik bepul demo qanday olaman?' },
               ].map((btn, i) => (
                 <button
                   key={i}
                   onClick={() => handleSendChat(btn.q)}
-                  className="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-slate-200 transition"
+                  className="whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-50 hover:bg-slate-200 border border-slate-300 text-[11px] font-semibold text-slate-700 transition"
                 >
                   {btn.label}
                 </button>
@@ -684,14 +682,14 @@ export default function InstagramBioPage() {
                   <div
                     className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed whitespace-pre-line ${
                       m.role === 'user'
-                        ? 'bg-gradient-to-r from-pink-600 to-indigo-600 text-white rounded-br-sm'
-                        : 'bg-slate-800/90 border border-slate-700/70 text-slate-100 rounded-bl-sm'
+                        ? 'text-white rounded-br-sm bg-indigo-600'
+                        : 'bg-slate-50 border border-slate-300/70 text-slate-800 rounded-bl-sm'
                     }`}
                   >
                     {m.text}
                     <div
                       className={`text-[9px] mt-1 ${
-                        m.role === 'user' ? 'text-pink-200 text-right' : 'text-slate-400'
+                        m.role === 'user' ? 'text-pink-700 text-right' : 'text-slate-500'
                       }`}
                     >
                       {m.time}
@@ -701,7 +699,7 @@ export default function InstagramBioPage() {
               ))}
               {chatLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-slate-800/90 border border-slate-700/70 rounded-2xl px-4 py-2.5 text-xs text-slate-400 animate-pulse">
+                  <div className="bg-slate-50 border border-slate-300/70 rounded-2xl px-4 py-2.5 text-xs text-slate-500">
                     Yozmoqda...
                   </div>
                 </div>
@@ -713,19 +711,19 @@ export default function InstagramBioPage() {
                 e.preventDefault();
                 handleSendChat();
               }}
-              className="p-3 bg-slate-950/90 border-t border-slate-800 flex items-center gap-2"
+              className="p-3 bg-slate-50 border-t border-slate-200 flex items-center gap-2"
             >
               <input
                 type="text"
                 placeholder="Savolingizni yoki telefon raqamingizni yozing..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
-                className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-pink-500"
+                className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-pink-500"
               />
               <button
                 type="submit"
                 disabled={chatLoading}
-                className="p-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-indigo-600 text-white hover:opacity-90 transition disabled:opacity-50"
+                className="p-2.5 rounded-xl text-white hover:opacity-90 transition disabled:opacity-50 bg-indigo-600"
               >
                 <Send size={16} />
               </button>
@@ -740,56 +738,56 @@ export default function InstagramBioPage() {
               {
                 icon: ShieldCheck,
                 title: 'Avtomatik Davomat va SMS/Telegram',
-                desc: "O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram va SMS xabar boradi.",
+                desc: "O'qituvchi 1 tugma bilan davomat qiladi va darsga kelmagan o'quvchining ota-onasiga darhol Telegram SMS xabar boradi.",
                 badge: 'Eng mashhur',
-                color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20',
+                color: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/20',
               },
               {
                 icon: CreditCard,
                 title: 'Aniq Moliya, Kassa va Qarzdorlar',
                 desc: "Oylik kurs to'lovlarini avtomatik yechish, kvitansiyalar, o'qituvchilar KPI maoshi va qarzdorlar ro'yxati.",
                 badge: '100% Aniq',
-                color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+                color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20',
               },
               {
                 icon: Users,
                 title: 'Lidlar Voronkasi (Kanban) & Instagram',
                 desc: "Instagram va Telegramdan kelgan har bir murojaatni 'Yangi -> Sinov darsi -> O'quvchi' bosqichlarida boshqaring.",
                 badge: 'Sotuv +45%',
-                color: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
+                color: 'text-pink-600 bg-pink-500/10 border-pink-500/20',
               },
               {
                 icon: Bot,
                 title: 'Ota-onalar Portali va Gamifikatsiya',
                 desc: "O'quvchilar darsda EduCoins tangalar yig'adi, testlar yechadi va sertifikat oladi.",
                 badge: 'Next-Gen EdTech',
-                color: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+                color: 'text-purple-600 bg-purple-500/10 border-purple-500/20',
               },
             ].map((f, i) => (
               <div
                 key={i}
-                className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 flex items-start gap-3.5 shadow-lg"
+                className="bg-white border border-slate-200/90 rounded-2xl p-4 flex items-start gap-3.5 shadow-sm"
               >
                 <div className={`p-3 rounded-xl border ${f.color} flex-shrink-0`}>
                   <f.icon size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <h3 className="text-sm font-bold text-white">{f.title}</h3>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold whitespace-nowrap">
+                    <h3 className="text-sm font-bold text-slate-900">{f.title}</h3>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-semibold whitespace-nowrap">
                       {f.badge}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1 leading-relaxed">{f.desc}</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{f.desc}</p>
                 </div>
               </div>
             ))}
 
             <button
               onClick={() => setActiveTab('form')}
-              className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600 text-white font-extrabold text-sm shadow-xl shadow-purple-600/30 transition"
+              className="w-full py-3.5 rounded-2xl text-white font-bold text-sm shadow-sm transition bg-indigo-600"
             >
-              🎁 7 Kunlik Bepul Demo Olish
+              7 Kunlik Bepul Demo Olish
             </button>
           </div>
         )}
@@ -799,7 +797,7 @@ export default function InstagramBioPage() {
           <span>© 2026 EduYuz CRM (@eduyuzcrmuz)</span>
           <Link
             href="/login"
-            className="text-indigo-400 hover:text-indigo-300 font-semibold inline-flex items-center gap-1"
+            className="text-indigo-600 hover:text-indigo-700 font-semibold inline-flex items-center gap-1"
           >
             CRM Tizimga kirish <ExternalLink size={12} />
           </Link>

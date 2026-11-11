@@ -16,7 +16,7 @@ export default function AcademicHubNav() {
   const pathname = usePathname();
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-1.5 mb-6 shadow-lg backdrop-blur-md">
+    <div className="bg-white border border-slate-200 rounded-2xl p-1.5 mb-6 shadow-sm backdrop-blur-md">
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
         {TABS.map((tab) => {
           const Icon = tab.icon;
@@ -25,10 +25,10 @@ export default function AcademicHubNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`py-2.5 px-3 rounded-xl text-xs font-extrabold transition-all flex items-center justify-center gap-2 ${
+              className={`py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
                 isActive
-                  ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white shadow-lg shadow-purple-600/25'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'text-white shadow-sm bg-indigo-600'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               <Icon size={15} />

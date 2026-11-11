@@ -21,7 +21,6 @@ import {
   X
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
-import { useTheme } from '@/lib/theme/ThemeContext';
 import AcademicHubNav from '@/components/AcademicHubNav';
 
 export interface Announcement {
@@ -74,8 +73,6 @@ const initialAnnouncements: Announcement[] = [
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,9 +133,9 @@ export default function AnnouncementsPage() {
 
     // Trigger toast
     if (sendTelegram) {
-      showToast('E‘lon saqlandi va Telegram orqali xabarnoma yuborildi! 🚀');
+      showToast('E‘lon saqlandi va Telegram orqali xabarnoma yuborildi! ');
     } else {
-      showToast('Yangi e‘lon muvaffaqiyatli chop etildi! ✅');
+      showToast('Yangi e‘lon muvaffaqiyatli chop etildi! ');
     }
   };
 
@@ -158,7 +155,7 @@ export default function AnnouncementsPage() {
   };
 
   const handleSendTelegram = (ann: Announcement) => {
-    showToast(`"${ann.title}" e‘loni Telegram bot orqali o‘quvchilar va guruhlarga yuborildi! 📲`);
+    showToast(`"${ann.title}" e‘loni Telegram bot orqali o‘quvchilar va guruhlarga yuborildi! `);
   };
 
   const showToast = (msg: string) => {
@@ -193,8 +190,8 @@ export default function AnnouncementsPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-emerald-400/30 animate-bounce">
-          <CheckCircle2 className="w-5 h-5 text-emerald-200" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 text-white px-5 py-3.5 rounded-2xl shadow-sm border border-emerald-400/30 animate-bounce bg-emerald-600">
+          <CheckCircle2 className="w-5 h-5 text-emerald-700" />
           <span className="text-sm font-semibold">{toastMessage}</span>
         </div>
       )}
@@ -206,18 +203,16 @@ export default function AnnouncementsPage() {
             <div className="p-2 rounded-xl bg-indigo-600/10 text-indigo-500 border border-indigo-500/20">
               <Megaphone className="w-6 h-6" />
             </div>
-            <h1 className={`text-2xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}`}>
-              E‘lonlar va Yangiliklar Markazi
-            </h1>
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">E’lonlar</h1>
           </div>
-          <p className={`text-sm mt-1 ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>
+          <p className={`text-sm mt-1 text-slate-500`}>
             O‘quv markazining barcha muhim xabarlari, dam olish kunlari va yangiliklarini boshqaring
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition active:scale-95 cursor-pointer"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white font-semibold text-sm shadow-sm transition active:scale-95 cursor-pointer bg-indigo-600 hover:bg-indigo-500"
         >
           <Plus className="w-4 h-4" />
           <span>Yangi E‘lon Berish</span>
@@ -226,79 +221,65 @@ export default function AnnouncementsPage() {
 
       {/* Statistika Kartochkalari */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-2xl border transition-all ${
-          isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between text-slate-400 text-xs">
+        <div className={`p-4 rounded-2xl border transition-all bg-white border-slate-200 shadow-sm`}>
+          <div className="flex items-center justify-between text-slate-500 text-xs">
             <span>Jami E‘lonlar</span>
-            <Bell className="w-4 h-4 text-indigo-400" />
+            <Bell className="w-4 h-4 text-indigo-600" />
           </div>
-          <div className={`text-2xl font-bold mt-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{totalCount}</div>
+          <div className={`text-2xl font-bold mt-2 text-slate-900`}>{totalCount}</div>
           <div className="text-[11px] text-slate-500 mt-1">Platformada faol</div>
         </div>
 
-        <div className={`p-4 rounded-2xl border transition-all ${
-          isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between text-slate-400 text-xs">
+        <div className={`p-4 rounded-2xl border transition-all bg-white border-slate-200 shadow-sm`}>
+          <div className="flex items-center justify-between text-slate-500 text-xs">
             <span>Shoshilinch Xabarlar</span>
             <AlertCircle className="w-4 h-4 text-rose-500" />
           </div>
-          <div className={`text-2xl font-bold mt-2 ${isLight ? 'text-rose-600' : 'text-rose-400'}`}>{urgentCount}</div>
+          <div className={`text-2xl font-bold mt-2 text-rose-600`}>{urgentCount}</div>
           <div className="text-[11px] text-slate-500 mt-1">Yuqori muhimlikda</div>
         </div>
 
-        <div className={`p-4 rounded-2xl border transition-all ${
-          isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between text-slate-400 text-xs">
+        <div className={`p-4 rounded-2xl border transition-all bg-white border-slate-200 shadow-sm`}>
+          <div className="flex items-center justify-between text-slate-500 text-xs">
             <span>O‘quvchilar Uchun</span>
-            <Users className="w-4 h-4 text-emerald-400" />
+            <Users className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className={`text-2xl font-bold mt-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{studentCount}</div>
+          <div className={`text-2xl font-bold mt-2 text-slate-900`}>{studentCount}</div>
           <div className="text-[11px] text-slate-500 mt-1">Mobil ilovada ko‘rinadi</div>
         </div>
 
-        <div className={`p-4 rounded-2xl border transition-all ${
-          isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between text-slate-400 text-xs">
+        <div className={`p-4 rounded-2xl border transition-all bg-white border-slate-200 shadow-sm`}>
+          <div className="flex items-center justify-between text-slate-500 text-xs">
             <span>O‘qituvchilar Uchun</span>
-            <GraduationCap className="w-4 h-4 text-amber-400" />
+            <GraduationCap className="w-4 h-4 text-amber-600" />
           </div>
-          <div className={`text-2xl font-bold mt-2 ${isLight ? 'text-slate-900' : 'text-white'}`}>{teacherCount}</div>
+          <div className={`text-2xl font-bold mt-2 text-slate-900`}>{teacherCount}</div>
           <div className="text-[11px] text-slate-500 mt-1">Mentorlar kabinetida</div>
         </div>
       </div>
 
       {/* Qidiruv va Filterlar */}
-      <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 ${
-        isLight ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-900/60 border-slate-800'
-      }`}>
+      <div className={`p-4 rounded-2xl border flex flex-col md:flex-row items-center justify-between gap-4 bg-white border-slate-200 shadow-sm`}>
         <div className="relative w-full md:w-80">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="E‘lonlarni qidirish..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full pl-10 pr-4 py-2 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/40 ${
-              isLight 
-                ? 'bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400' 
-                : 'bg-slate-800/80 border-slate-700 text-white placeholder-slate-500'
-            }`}
+            className={`w-full pl-10 pr-4 py-2 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/40 bg-slate-50 border-slate-200 text-slate-800 placeholder-slate-400`}
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Auditoriya filteri */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-800/40 border border-slate-700/50 text-xs">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-50 border border-slate-300/50 text-xs">
             <button
               onClick={() => setTargetFilter('all')}
               className={`px-3 py-1.5 rounded-lg font-medium transition ${
                 targetFilter === 'all' 
                   ? 'bg-indigo-600 text-white shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               Barchasi
@@ -308,7 +289,7 @@ export default function AnnouncementsPage() {
               className={`px-3 py-1.5 rounded-lg font-medium transition ${
                 targetFilter === 'students' 
                   ? 'bg-indigo-600 text-white shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               O‘quvchilarga
@@ -318,7 +299,7 @@ export default function AnnouncementsPage() {
               className={`px-3 py-1.5 rounded-lg font-medium transition ${
                 targetFilter === 'teachers' 
                   ? 'bg-indigo-600 text-white shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-200'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               O‘qituvchilarga
@@ -329,14 +310,12 @@ export default function AnnouncementsPage() {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value as any)}
-            className={`px-3 py-2 rounded-xl text-xs font-medium border focus:outline-none ${
-              isLight ? 'bg-slate-50 border-slate-200 text-slate-700' : 'bg-slate-800 border-slate-700 text-slate-300'
-            }`}
+            className={`px-3 py-2 rounded-xl text-xs font-medium border focus:outline-none bg-slate-50 border-slate-200 text-slate-700`}
           >
             <option value="all">Barcha muhimlik</option>
-            <option value="high">🔴 Shoshilinch</option>
-            <option value="medium">🟡 Muhim</option>
-            <option value="low">🔵 Oddiy</option>
+            <option value="high">Shoshilinch</option>
+            <option value="medium">Muhim</option>
+            <option value="low">Oddiy</option>
           </select>
         </div>
       </div>
@@ -344,11 +323,9 @@ export default function AnnouncementsPage() {
       {/* E‘lonlar Ro‘yxati */}
       <div className="space-y-4">
         {filtered.length === 0 ? (
-          <div className={`p-12 text-center rounded-3xl border ${
-            isLight ? 'bg-white border-slate-200' : 'bg-slate-900/40 border-slate-800'
-          }`}>
+          <div className={`p-12 text-center rounded-2xl border bg-white border-slate-200`}>
             <Megaphone className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
-            <h3 className={`text-base font-semibold ${isLight ? 'text-slate-700' : 'text-slate-300'}`}>
+            <h3 className={`text-base font-semibold text-slate-700`}>
               E‘lonlar topilmadi
             </h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
@@ -365,12 +342,8 @@ export default function AnnouncementsPage() {
                 key={ann.id}
                 className={`p-5 md:p-6 rounded-2xl border transition-all duration-200 relative overflow-hidden group ${
                   ann.isPinned
-                    ? isLight 
-                      ? 'bg-indigo-50/70 border-indigo-200 shadow-md shadow-indigo-100' 
-                      : 'bg-indigo-950/20 border-indigo-500/40 shadow-lg shadow-indigo-950/20'
-                    : isLight
-                      ? 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
-                      : 'bg-slate-900/70 border-slate-800 hover:border-slate-700'
+                    ? 'bg-indigo-50/70 border-indigo-200 shadow-md'
+                    : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
                 }`}
               >
                 {/* Tepada qadalganlik indikatori */}
@@ -390,8 +363,8 @@ export default function AnnouncementsPage() {
                         isHigh
                           ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20'
                           : isMedium
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                            ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                            : 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
                       }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${
                           isHigh ? 'bg-rose-500' : isMedium ? 'bg-amber-400' : 'bg-blue-400'
@@ -400,13 +373,11 @@ export default function AnnouncementsPage() {
                       </span>
 
                       {/* Target Badge */}
-                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium ${
-                        isLight ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-300'
-                      }`}>
-                        {ann.target === 'all' && '👥 Barcha uchun'}
-                        {ann.target === 'students' && '🎓 O‘quvchilarga'}
-                        {ann.target === 'teachers' && '👨‍🏫 O‘qituvchilarga'}
-                        {ann.target === 'parents' && '👨‍👩‍👧 Ota-onalarga'}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-400`}>
+                        {ann.target === 'all' && 'Barcha uchun'}
+                        {ann.target === 'students' && 'O‘quvchilarga'}
+                        {ann.target === 'teachers' && 'O‘qituvchilarga'}
+                        {ann.target === 'parents' && 'Ota-onalarga'}
                       </span>
 
                       {/* Sana */}
@@ -417,17 +388,17 @@ export default function AnnouncementsPage() {
                     </div>
 
                     {/* Sarlavha */}
-                    <h2 className={`text-lg font-bold ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    <h2 className={`text-lg font-bold text-slate-900`}>
                       {ann.title}
                     </h2>
 
                     {/* Matn */}
-                    <p className={`text-sm leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                    <p className={`text-sm leading-relaxed text-slate-400`}>
                       {ann.content}
                     </p>
 
                     <div className="pt-2 text-xs text-slate-500 flex items-center gap-4">
-                      <span>Muallif: <b className={isLight ? 'text-slate-700' : 'text-slate-400'}>{ann.author}</b></span>
+                      <span>Muallif: <b className={'text-slate-700'}>{ann.author}</b></span>
                       {ann.viewsCount !== undefined && (
                         <span>Ko‘rishlar: <b>{ann.viewsCount} ta</b></span>
                       )}
@@ -435,24 +406,22 @@ export default function AnnouncementsPage() {
                   </div>
 
                   {/* Amallar tugmalari */}
-                  <div className="flex items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-800 shrink-0">
+                  <div className="flex items-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200 shrink-0">
                     <button
                       onClick={() => togglePin(ann.id)}
                       className={`p-2 rounded-xl border text-xs transition ${
                         ann.isPinned
-                          ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30'
-                          : isLight 
-                            ? 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200' 
-                            : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:text-white'
+                          ? 'bg-indigo-600/20 text-indigo-600 border-indigo-500/30'
+                          : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'
                       }`}
                       title={ann.isPinned ? 'Qadalishni bekor qilish' : 'Tepaga qadash'}
                     >
-                      <Pin className={`w-4 h-4 ${ann.isPinned ? 'fill-indigo-400' : ''}`} />
+                      <Pin className={`w-4 h-4 ${ann.isPinned ? 'fill-indigo-600' : ''}`} />
                     </button>
 
                     <button
                       onClick={() => handleSendTelegram(ann)}
-                      className="p-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 text-xs transition"
+                      className="p-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-600 text-xs transition"
                       title="Telegram orqali tarqatish"
                     >
                       <Send className="w-4 h-4" />
@@ -460,7 +429,7 @@ export default function AnnouncementsPage() {
 
                     <button
                       onClick={() => handleDelete(ann.id)}
-                      className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 text-xs transition"
+                      className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-600 text-xs transition"
                       title="O‘chirish"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -476,19 +445,15 @@ export default function AnnouncementsPage() {
       {/* Yangi E‘lon Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className={`w-full max-w-lg rounded-3xl border shadow-2xl overflow-hidden ${
-            isLight ? 'bg-white border-slate-200 text-slate-900' : 'bg-slate-900 border-slate-800 text-white'
-          }`}>
-            <div className={`p-5 border-b flex items-center justify-between ${
-              isLight ? 'border-slate-200' : 'border-slate-800'
-            }`}>
+          <div className={`w-full max-w-lg rounded-2xl border shadow-sm overflow-hidden bg-white border-slate-200 text-slate-900`}>
+            <div className={`p-5 border-b flex items-center justify-between border-slate-200`}>
               <div className="flex items-center gap-2 font-bold text-base">
                 <Megaphone className="w-5 h-5 text-indigo-500" />
                 <span>Yangi E‘lon Chop Etish</span>
               </div>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-200"
+                className="p-1 rounded-lg text-slate-500 hover:text-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -496,7 +461,7 @@ export default function AnnouncementsPage() {
 
             <form onSubmit={handleCreateAnnouncement} className="p-5 space-y-4">
               <div>
-                <label className="block text-xs font-semibold mb-1 text-slate-400">
+                <label className="block text-xs font-semibold mb-1 text-slate-500">
                   E‘lon Sarlavhasi *
                 </label>
                 <input
@@ -505,51 +470,45 @@ export default function AnnouncementsPage() {
                   placeholder="Masalan: Navro‘z bayrami munosabati bilan dam olish..."
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${
-                    isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-slate-800/80 border-slate-700 text-white'
-                  }`}
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 border-slate-300 text-slate-900`}
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold mb-1 text-slate-400">
+                  <label className="block text-xs font-semibold mb-1 text-slate-500">
                     Kimlar Uchun (Auditoriya)
                   </label>
                   <select
                     value={newTarget}
                     onChange={(e) => setNewTarget(e.target.value as any)}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs border focus:outline-none ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-slate-800/80 border-slate-700 text-white'
-                    }`}
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs border focus:outline-none bg-slate-50 border-slate-300 text-slate-900`}
                   >
-                    <option value="all">👥 Barcha (Umumiy)</option>
-                    <option value="students">🎓 Faqat O‘quvchilar</option>
-                    <option value="teachers">👨‍🏫 Faqat O‘qituvchilar</option>
-                    <option value="parents">👨‍👩‍👧 Faqat Ota-onalar</option>
+                    <option value="all">Barcha (Umumiy)</option>
+                    <option value="students">Faqat O‘quvchilar</option>
+                    <option value="teachers">Faqat O‘qituvchilar</option>
+                    <option value="parents">Faqat Ota-onalar</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold mb-1 text-slate-400">
+                  <label className="block text-xs font-semibold mb-1 text-slate-500">
                     Muhimlik Darajasi
                   </label>
                   <select
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value as any)}
-                    className={`w-full px-3 py-2.5 rounded-xl text-xs border focus:outline-none ${
-                      isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-slate-800/80 border-slate-700 text-white'
-                    }`}
+                    className={`w-full px-3 py-2.5 rounded-xl text-xs border focus:outline-none bg-slate-50 border-slate-300 text-slate-900`}
                   >
-                    <option value="medium">🟡 Muhim</option>
-                    <option value="high">🔴 Shoshilinch</option>
-                    <option value="low">🔵 Oddiy xabar</option>
+                    <option value="medium">Muhim</option>
+                    <option value="high">Shoshilinch</option>
+                    <option value="low">Oddiy xabar</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold mb-1 text-slate-400">
+                <label className="block text-xs font-semibold mb-1 text-slate-500">
                   Batafsil Matn / Xabar *
                 </label>
                 <textarea
@@ -558,9 +517,7 @@ export default function AnnouncementsPage() {
                   placeholder="E‘lonning to‘liq matnini shu yerga yozing..."
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  className={`w-full p-3.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none ${
-                    isLight ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-slate-800/80 border-slate-700 text-white'
-                  }`}
+                  className={`w-full p-3.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none bg-slate-50 border-slate-300 text-slate-900`}
                 />
               </div>
 
@@ -570,27 +527,25 @@ export default function AnnouncementsPage() {
                   id="telegramCheck"
                   checked={sendTelegram}
                   onChange={(e) => setSendTelegram(e.target.checked)}
-                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-700 bg-slate-800"
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 bg-slate-100"
                 />
-                <label htmlFor="telegramCheck" className="text-xs text-slate-400 cursor-pointer select-none">
+                <label htmlFor="telegramCheck" className="text-xs text-slate-500 cursor-pointer select-none">
                   Telegram Bot orqali ota-onalar va o‘quvchilarga ham darhol yetkazilsin
                 </label>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800/60">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/60">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className={`px-4 py-2 rounded-xl text-xs font-semibold ${
-                    isLight ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700`}
                 >
                   Bekor qilish
                 </button>
 
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 active:scale-95 transition"
+                  className="px-5 py-2.5 rounded-xl text-white text-xs font-bold shadow-sm active:scale-95 transition bg-indigo-600 hover:bg-indigo-500"
                 >
                   E‘lonni Chop Etish
                 </button>

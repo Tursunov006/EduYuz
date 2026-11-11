@@ -177,27 +177,27 @@ function GameArenaContent() {
   const progressPercent = Math.max(0, (timeLeft / maxTime) * 100);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-between selection:bg-rose-500 selection:text-white relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between selection:bg-rose-500 selection:text-slate-900 relative overflow-hidden font-sans">
       {/* Background glow effects */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-rose-600/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-rose-600/10 rounded-full hidden pointer-events-none"></div>
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full hidden pointer-events-none"></div>
 
       {/* Top Navigation Bar */}
-      <header className="px-6 py-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md flex items-center justify-between z-10">
+      <header className="px-6 py-4 border-b border-slate-200/80 bg-white backdrop-blur-md flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
           <Link
             href="/lms"
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
           >
             <Home className="w-5 h-5" />
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold border border-rose-500/30">
-                🎮 EduYuz Arena
+              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-600 font-bold border border-rose-500/30">
+                EduYuz Arena
               </span>
-              <span className="text-xs text-slate-400">Mavzu:</span>
-              <strong className="text-xs text-white truncate max-w-xs">{topic}</strong>
+              <span className="text-xs text-slate-500">Mavzu:</span>
+              <strong className="text-xs text-slate-900 truncate max-w-xs">{topic}</strong>
             </div>
           </div>
         </div>
@@ -205,23 +205,23 @@ function GameArenaContent() {
         {/* Live Score & Streak */}
         <div className="flex items-center gap-4">
           {streak >= 2 && (
-            <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-orange-500/40 text-orange-400 text-xs font-bold animate-pulse">
+            <div className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-orange-500/40 text-orange-600 text-xs font-bold bg-amber-50">
               <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
               <span>x{streak} On Fire!</span>
             </div>
           )}
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-bold text-amber-400">{score}</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300">
+            <Trophy className="w-4 h-4 text-amber-600" />
+            <span className="text-sm font-bold text-amber-600">{score}</span>
           </div>
 
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition"
             title={soundEnabled ? 'Tovushni o‘chirish' : 'Tovushni yoqish'}
           >
-            {soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-400" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
+            {soundEnabled ? <Volume2 className="w-5 h-5 text-emerald-600" /> : <VolumeX className="w-5 h-5 text-slate-500" />}
           </button>
         </div>
       </header>
@@ -230,54 +230,54 @@ function GameArenaContent() {
       <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-5xl mx-auto w-full z-10">
         {loading && (
           <div className="py-24 text-center space-y-4">
-            <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mx-auto text-blue-400 animate-bounce">
+            <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center mx-auto text-blue-600 animate-bounce">
               <Sparkles className="w-7 h-7" />
             </div>
-            <h2 className="text-lg font-bold text-white">AI Savollarni Shakllantirmoqda...</h2>
-            <p className="text-xs text-slate-400">"{topic}" mavzusi bo‘yicha interaktiv viktorina tayyorlanyapti</p>
+            <h2 className="text-lg font-bold text-slate-900">AI Savollarni Shakllantirmoqda...</h2>
+            <p className="text-xs text-slate-500">"{topic}" mavzusi bo‘yicha interaktiv viktorina tayyorlanyapti</p>
           </div>
         )}
 
         {/* Finished / Victory Screen */}
         {!loading && isFinished && (
-          <div className="w-full max-w-lg bg-slate-900/90 border border-slate-800 p-8 rounded-3xl text-center space-y-6 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in duration-300">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center text-slate-950 mx-auto shadow-xl shadow-amber-500/20">
+          <div className="w-full max-w-lg bg-white border border-slate-200 p-8 rounded-2xl text-center space-y-6 shadow-sm backdrop-blur-md animate-in fade-in zoom-in duration-300">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-slate-900 mx-auto shadow-sm bg-amber-600">
               <Trophy className="w-10 h-10" />
             </div>
 
             <div>
-              <h2 className="text-2xl font-black text-white">O‘yin Yakunlandi! 🎉</h2>
-              <p className="text-sm text-slate-400 mt-1">"{topic}" mavzusi bo‘yicha natijangiz</p>
+              <h2 className="text-2xl font-bold text-slate-900">O‘yin Yakunlandi! </h2>
+              <p className="text-sm text-slate-500 mt-1">"{topic}" mavzusi bo‘yicha natijangiz</p>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-                <span className="text-[11px] text-slate-400">To‘g‘ri</span>
-                <p className="text-xl font-bold text-emerald-400 mt-1">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300/60">
+                <span className="text-[11px] text-slate-500">To‘g‘ri</span>
+                <p className="text-xl font-bold text-emerald-600 mt-1">
                   {correctCount}/{questions.length}
                 </p>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-                <span className="text-[11px] text-slate-400">Umumiy Ball</span>
-                <p className="text-xl font-bold text-amber-400 mt-1">{score}</p>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300/60">
+                <span className="text-[11px] text-slate-500">Umumiy Ball</span>
+                <p className="text-xl font-bold text-amber-600 mt-1">{score}</p>
               </div>
-              <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/60">
-                <span className="text-[11px] text-slate-400">Aniqlik</span>
-                <p className="text-xl font-bold text-sky-400 mt-1">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-300/60">
+                <span className="text-[11px] text-slate-500">Aniqlik</span>
+                <p className="text-xl font-bold text-sky-600 mt-1">
                   {Math.round((correctCount / (questions.length || 1)) * 100)}%
                 </p>
               </div>
             </div>
 
             {/* EduCoins Award Banner */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-500/40 text-amber-300 space-y-2">
+            <div className="p-5 rounded-2xl border border-amber-500/40 text-amber-700 space-y-2 bg-amber-50">
               <div className="flex items-center justify-center gap-2">
-                <Award className="w-6 h-6 text-amber-400" />
-                <span className="text-lg font-black text-white">
+                <Award className="w-6 h-6 text-amber-600" />
+                <span className="text-lg font-bold text-slate-900">
                   +{rewardResult?.earnedCoins || 20} EduCoin Yutib Oldingiz!
                 </span>
               </div>
-              <p className="text-xs text-amber-200/80">
+              <p className="text-xs text-amber-700/80">
                 {rewardResult?.message || 'Tangalar balansingizga muvaffaqiyatli o‘tkazildi!'}
               </p>
             </div>
@@ -285,14 +285,14 @@ function GameArenaContent() {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => loadQuestions(topic)}
-                className="flex-1 py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold text-xs flex items-center justify-center gap-2 transition"
+                className="flex-1 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-900 font-semibold text-xs flex items-center justify-center gap-2 transition"
               >
                 <RotateCcw className="w-4 h-4" />
                 Qayta O‘ynash
               </button>
               <Link
                 href="/leaderboard"
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition"
+                className="flex-1 py-3 px-4 rounded-xl text-slate-900 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition bg-amber-600 hover:bg-amber-500"
               >
                 <Trophy className="w-4 h-4" />
                 Reytingni Ko‘rish
@@ -306,23 +306,23 @@ function GameArenaContent() {
           <div className="w-full flex flex-col items-center space-y-6">
             {/* Timer & Question Counter Bar */}
             <div className="w-full max-w-3xl space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold text-slate-400 px-1">
+              <div className="flex items-center justify-between text-xs font-semibold text-slate-500 px-1">
                 <span>
-                  Savol <strong className="text-white">{currentIndex + 1}</strong> / {questions.length}
+                  Savol <strong className="text-slate-900">{currentIndex + 1}</strong> / {questions.length}
                 </span>
-                <span className="flex items-center gap-1.5 text-slate-300">
-                  <Clock className="w-3.5 h-3.5 text-rose-400" />
-                  <strong className={timeLeft <= 5 ? 'text-rose-500 animate-ping' : 'text-white'}>
+                <span className="flex items-center gap-1.5 text-slate-600">
+                  <Clock className="w-3.5 h-3.5 text-rose-600" />
+                  <strong className={timeLeft <= 5 ? 'text-rose-500 animate-ping' : 'text-slate-900'}>
                     {timeLeft}s
                   </strong>
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div className="h-2 w-full bg-slate-800 rounded-full overflow-hidden p-0.5">
+              <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
                 <div
                   className={`h-full rounded-full transition-all duration-1000 ${
-                    timeLeft <= 5 ? 'bg-rose-500' : 'bg-gradient-to-r from-blue-500 to-emerald-400'
+                    timeLeft <= 5 ? 'bg-rose-500' : 'bg-indigo-600'
                   }`}
                   style={{ width: `${progressPercent}%` }}
                 />
@@ -330,8 +330,8 @@ function GameArenaContent() {
             </div>
 
             {/* Question Card */}
-            <div className="w-full max-w-3xl p-6 sm:p-8 bg-slate-900/90 border border-slate-800 rounded-3xl text-center shadow-xl backdrop-blur-md">
-              <h2 className="text-xl sm:text-2xl font-bold text-white leading-relaxed">
+            <div className="w-full max-w-3xl p-6 sm:p-8 bg-white border border-slate-200 rounded-2xl text-center shadow-sm backdrop-blur-md">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 leading-relaxed">
                 {currentQ.question}
               </h2>
             </div>
@@ -351,7 +351,7 @@ function GameArenaContent() {
                   } else if (isSelected) {
                     cardClass = 'bg-rose-700/60 border-rose-500/40 opacity-70';
                   } else {
-                    cardClass = 'bg-slate-800/40 border-slate-800 opacity-40';
+                    cardClass = 'bg-slate-50 border-slate-200 opacity-40';
                   }
                 }
 
@@ -360,20 +360,20 @@ function GameArenaContent() {
                     key={idx}
                     disabled={isAnswered}
                     onClick={() => handleSelectOption(idx)}
-                    className={`p-5 sm:p-6 rounded-2xl border text-left flex items-center justify-between text-white font-bold text-sm sm:text-base shadow-lg transition transform active:scale-95 ${cardClass}`}
+                    className={`p-5 sm:p-6 rounded-2xl border text-left flex items-center justify-between text-slate-900 font-bold text-sm sm:text-base shadow-sm transition transform active:scale-95 ${cardClass}`}
                   >
                     <div className="flex items-center gap-3 flex-1">
-                      <span className="w-8 h-8 rounded-xl bg-black/20 flex items-center justify-center text-sm font-black shrink-0">
+                      <span className="w-8 h-8 rounded-xl bg-black/20 flex items-center justify-center text-sm font-bold shrink-0">
                         {style.shape}
                       </span>
                       <span className="leading-snug">{opt}</span>
                     </div>
 
                     {isAnswered && isCorrect && (
-                      <CheckCircle className="w-6 h-6 text-white shrink-0 ml-2" />
+                      <CheckCircle className="w-6 h-6 text-slate-900 shrink-0 ml-2" />
                     )}
                     {isAnswered && isSelected && !isCorrect && (
-                      <XCircle className="w-6 h-6 text-white shrink-0 ml-2" />
+                      <XCircle className="w-6 h-6 text-slate-900 shrink-0 ml-2" />
                     )}
                   </button>
                 );
@@ -382,28 +382,28 @@ function GameArenaContent() {
 
             {/* Answer Feedback Banner */}
             {isAnswered && (
-              <div className="w-full max-w-3xl p-5 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-2">
+              <div className="w-full max-w-3xl p-5 rounded-2xl bg-white border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-bottom-2">
                 <div className="space-y-1 text-center sm:text-left">
                   <div className="flex items-center justify-center sm:justify-start gap-2">
                     {selectedOption === currentQ.correctIndex ? (
-                      <span className="text-emerald-400 font-bold text-sm flex items-center gap-1">
+                      <span className="text-emerald-600 font-bold text-sm flex items-center gap-1">
                         <CheckCircle className="w-4 h-4" /> Ajoyib! To‘g‘ri javob!
                       </span>
                     ) : (
-                      <span className="text-rose-400 font-bold text-sm flex items-center gap-1">
+                      <span className="text-rose-600 font-bold text-sm flex items-center gap-1">
                         <XCircle className="w-4 h-4" />
                         {timeLeft === 0 ? 'Vaqt tugadi!' : 'Noto‘g‘ri javob!'}
                       </span>
                     )}
                   </div>
                   {currentQ.explanation && (
-                    <p className="text-xs text-slate-400">{currentQ.explanation}</p>
+                    <p className="text-xs text-slate-500">{currentQ.explanation}</p>
                   )}
                 </div>
 
                 <button
                   onClick={handleNextQuestion}
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-100 transition shadow-lg shrink-0"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-slate-900 font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-100 transition shadow-sm shrink-0"
                 >
                   <span>{currentIndex + 1 < questions.length ? 'Keyingi Savol' : 'Natijani Ko‘rish'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -415,7 +415,7 @@ function GameArenaContent() {
       </main>
 
       {/* Footer */}
-      <footer className="py-3 text-center text-xs text-slate-600 border-t border-slate-900 z-10">
+      <footer className="py-3 text-center text-xs text-slate-400 border-t border-slate-200 z-10">
         EduYuz AI Interaktiv Ta'lim Arenasi • Bilim va O‘yin birgalikda
       </footer>
     </div>
@@ -424,7 +424,7 @@ function GameArenaContent() {
 
 export default function GameArenaPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">Yuklanmoqda...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 text-slate-900 flex items-center justify-center">Yuklanmoqda...</div>}>
       <GameArenaContent />
     </Suspense>
   );

@@ -83,18 +83,15 @@ export default function CertificatesPage() {
       {/* Sarlavha va Sertifikat Berish Tugmasi */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Award className="text-amber-400" size={28} />
-            EduYuz Rasmiy QR-Sertifikatlar
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Sertifikatlar</h1>
+          <p className="text-xs text-slate-500 mt-1">
             Kursni muvaffaqiyatli tamomlagan o'quvchilarga avtomatik QR-kodli sertifikat berish va chop etish
           </p>
         </div>
 
         <button
           onClick={() => setIsIssueModalOpen(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-4 py-2.5 rounded-xl text-sm transition shadow-lg shadow-amber-500/20"
+          className="flex items-center gap-2 text-slate-900 font-bold px-4 py-2.5 rounded-xl text-sm transition shadow-sm bg-amber-600 hover:bg-amber-500"
         >
           <Plus size={18} /> Yangi Sertifikat Berish
         </button>
@@ -104,10 +101,10 @@ export default function CertificatesPage() {
       {loading ? (
         <div className="p-12 text-center text-slate-500">Sertifikatlar yuklanmoqda...</div>
       ) : certificates.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center space-y-3">
-          <Award size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-base font-semibold text-white">Hozircha sertifikatlar berilmagan</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <div className="bg-white border border-slate-200 rounded-2xl p-12 text-center space-y-3">
+          <Award size={36} className="mx-auto text-slate-400" />
+          <h3 className="text-base font-semibold text-slate-900">Hozircha sertifikatlar berilmagan</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
             "Yangi Sertifikat Berish" tugmasi orqali bitiruvchilarga rasmiy QR-kodli sertifikat taqdim eting.
           </p>
         </div>
@@ -116,27 +113,27 @@ export default function CertificatesPage() {
           {certificates.map((cert) => (
             <div
               key={cert.id}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-sm hover:border-slate-700 transition"
+              className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm hover:border-slate-300 transition"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10px] font-bold tracking-wider uppercase text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">
+                  <span className="text-[10px] font-bold tracking-wider uppercase text-amber-600 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md">
                     {cert.certificateNumber}
                   </span>
-                  <h3 className="text-base font-bold text-white mt-2">{cert.student?.fullName}</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{cert.courseTitle}</p>
+                  <h3 className="text-base font-bold text-slate-900 mt-2">{cert.student?.fullName}</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">{cert.courseTitle}</p>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-black text-xs border border-amber-500/20">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-xs border border-amber-500/20">
                   {cert.grade}
                 </div>
               </div>
 
-              <div className="text-xs text-slate-400 flex items-center justify-between pt-2 border-t border-slate-800">
+              <div className="text-xs text-slate-500 flex items-center justify-between pt-2 border-t border-slate-200">
                 <span className="flex items-center gap-1">
                   <Calendar size={13} className="text-slate-500" />
                   {new Date(cert.issuedAt).toLocaleDateString()}
                 </span>
-                <span className="text-emerald-400 flex items-center gap-1 font-medium text-[11px]">
+                <span className="text-emerald-600 flex items-center gap-1 font-medium text-[11px]">
                   <CheckCircle2 size={13} /> Tasdiqlangan
                 </span>
               </div>
@@ -151,7 +148,7 @@ export default function CertificatesPage() {
                 <Link
                   href={`/verify/${cert.certificateNumber}`}
                   target="_blank"
-                  className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition"
+                  className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs transition"
                   title="QR Havolani tekshirish"
                 >
                   <ExternalLink size={15} />
@@ -165,19 +162,19 @@ export default function CertificatesPage() {
       {/* Sertifikat Berish Modali */}
       {isIssueModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <Award className="text-amber-400" size={20} />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Award className="text-amber-600" size={20} />
               Yangi Sertifikat Berish
             </h3>
             <form onSubmit={handleIssueCertificate} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400">O'quvchini Tanlang *</label>
+                <label className="text-xs font-semibold text-slate-500">O'quvchini Tanlang *</label>
                 <select
                   required
                   value={issueForm.studentId}
                   onChange={(e) => setIssueForm({ ...issueForm, studentId: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                 >
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -188,22 +185,22 @@ export default function CertificatesPage() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Tamomlagan Kurs Nomi *</label>
+                <label className="text-xs font-semibold text-slate-500">Tamomlagan Kurs Nomi *</label>
                 <input
                   type="text"
                   required
                   value={issueForm.courseTitle}
                   onChange={(e) => setIssueForm({ ...issueForm, courseTitle: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">O'zlashtirish Darajasi (Baho)</label>
+                <label className="text-xs font-semibold text-slate-500">O'zlashtirish Darajasi (Baho)</label>
                 <select
                   value={issueForm.grade}
                   onChange={(e) => setIssueForm({ ...issueForm, grade: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                 >
                   <option value="A+">A+ (A'lo / Mukammal)</option>
                   <option value="A">A (Juda Yaxshi)</option>
@@ -216,13 +213,13 @@ export default function CertificatesPage() {
                 <button
                   type="button"
                   onClick={() => setIsIssueModalOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2 rounded-xl text-sm transition"
+                  className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-5 py-2 rounded-xl text-sm transition"
                 >
                   Sertifikatni Rasmiylashtirish
                 </button>
@@ -235,22 +232,22 @@ export default function CertificatesPage() {
       {/* Sertifikatni Ko'rish va Chop Etish Modali */}
       {viewingCert && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 w-full max-w-4xl space-y-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <Award className="text-amber-400" size={18} />
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-4xl space-y-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Award className="text-amber-600" size={18} />
                 Sertifikat Ko'rinishi — {viewingCert.certificateNumber}
               </h3>
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => window.print()}
-                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-xl transition"
+                  className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold text-xs px-4 py-2 rounded-xl transition"
                 >
                   <Printer size={14} /> Chop etish / PDF
                 </button>
                 <button
                   onClick={() => setViewingCert(null)}
-                  className="text-slate-400 hover:text-white text-sm"
+                  className="text-slate-500 hover:text-slate-900 text-sm"
                 >
                   Yopish
                 </button>
@@ -260,7 +257,7 @@ export default function CertificatesPage() {
             {/* Sertifikat Dizayni (A4 Formatiga moslashgan) */}
             <div
               id="certificate-sheet"
-              className="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/80 border-4 border-amber-500/60 rounded-3xl p-10 text-center relative overflow-hidden shadow-2xl space-y-6 select-none"
+              className="border-4 border-amber-500/60 rounded-2xl p-10 text-center relative overflow-hidden shadow-sm space-y-6 select-none bg-white"
             >
               {/* Oltin burchak bezaklari */}
               <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-amber-400"></div>
@@ -270,45 +267,45 @@ export default function CertificatesPage() {
 
               {/* Brend va Emblem */}
               <div className="flex flex-col items-center justify-center space-y-2">
-                <div className="bg-white rounded-2xl px-6 py-2.5 shadow-xl shadow-amber-500/20 inline-flex items-center justify-center border border-amber-400/30">
+                <div className="bg-white rounded-2xl px-6 py-2.5 shadow-sm inline-flex items-center justify-center border border-amber-400/30">
                   <img src="/logo-full.png" alt="EduYuz" className="h-11 w-auto object-contain" />
                 </div>
-                <h2 className="text-xl font-black tracking-widest text-amber-400 uppercase">
+                <h2 className="text-xl font-bold tracking-widest text-amber-600 uppercase">
                   EduYuz Ta'lim Akademiyasi
                 </h2>
-                <p className="text-[10px] tracking-widest uppercase text-slate-400 font-semibold">
+                <p className="text-[10px] tracking-widest uppercase text-slate-500 font-semibold">
                   Muvaffaqiyatli Bitiruv To'g'risida Rasmiy
                 </p>
               </div>
 
               <div>
-                <h1 className="text-4xl font-black text-white tracking-wider uppercase font-serif">
+                <h1 className="text-4xl font-bold text-slate-900 tracking-wider uppercase font-serif">
                   SERTIFIKAT
                 </h1>
-                <p className="text-xs text-slate-400 mt-1">Ushbu hujjat tasdiqlaydiki:</p>
+                <p className="text-xs text-slate-500 mt-1">Ushbu hujjat tasdiqlaydiki:</p>
               </div>
 
               {/* O'quvchi Ismi */}
               <div className="py-2">
-                <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 border-b-2 border-amber-500/30 inline-block px-8 pb-2">
+                <h2 className="text-3xl font-bold border-b-2 border-amber-500/30 inline-block px-8 pb-2 text-indigo-600">
                   {viewingCert.student?.fullName || viewingCert.studentName}
                 </h2>
               </div>
 
               <div className="max-w-xl mx-auto space-y-1">
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p className="text-xs text-slate-600 leading-relaxed">
                   <b>{viewingCert.courseTitle}</b> o'quv dasturini barcha amaliy topshiriqlari va imtihonlari bilan muvaffaqiyatli tamomladi.
                 </p>
-                <p className="text-xs text-amber-400 font-semibold">
+                <p className="text-xs text-amber-600 font-semibold">
                   O'zlashtirish Darajasi: <b>{viewingCert.grade}</b>
                 </p>
               </div>
 
               {/* Quyi Qism: QR Kod, Sana va Muhr */}
-              <div className="pt-6 border-t border-slate-800/80 flex items-center justify-between max-w-2xl mx-auto">
+              <div className="pt-6 border-t border-slate-200/80 flex items-center justify-between max-w-2xl mx-auto">
                 <div className="text-left space-y-1">
-                  <p className="text-[11px] text-slate-400">Berilgan sana:</p>
-                  <p className="text-xs font-semibold text-white">
+                  <p className="text-[11px] text-slate-500">Berilgan sana:</p>
+                  <p className="text-xs font-semibold text-slate-900">
                     {new Date(viewingCert.issuedAt).toLocaleDateString()}
                   </p>
                   <p className="text-[10px] text-slate-500 font-mono">
@@ -325,13 +322,13 @@ export default function CertificatesPage() {
                       className="w-16 h-16"
                     />
                   </div>
-                  <span className="text-[9px] text-slate-400 font-mono">Haqiqiylikni skanerlang</span>
+                  <span className="text-[9px] text-slate-500 font-mono">Haqiqiylikni skanerlang</span>
                 </div>
 
                 <div className="text-right space-y-1">
-                  <p className="text-[11px] text-slate-400">EduYuz Boshqaruvi:</p>
-                  <div className="w-24 h-6 border-b border-dashed border-slate-600 mx-auto"></div>
-                  <p className="text-[10px] text-emerald-400 font-semibold flex items-center justify-end gap-1">
+                  <p className="text-[11px] text-slate-500">EduYuz Boshqaruvi:</p>
+                  <div className="w-24 h-6 border-b border-dashed border-slate-300 mx-auto"></div>
+                  <p className="text-[10px] text-emerald-600 font-semibold flex items-center justify-end gap-1">
                     <CheckCircle2 size={11} /> Rasmiy Muhrlangan
                   </p>
                 </div>

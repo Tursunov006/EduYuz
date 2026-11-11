@@ -7,7 +7,7 @@ import Sidebar from '@/components/Sidebar';
 import Navbar from '@/components/Navbar';
 import SubscriptionModal from '@/components/SubscriptionModal';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
-import { ThemeProvider, useTheme } from '@/lib/theme/ThemeContext';
+import { ThemeProvider } from '@/lib/theme/ThemeContext';
 import { SidebarProvider } from '@/lib/context/SidebarContext';
 
 // Axios sozlamalari (token, 401 holati, xato matnlari) bitta joyda: '@/lib/api'
@@ -15,8 +15,6 @@ import { SidebarProvider } from '@/lib/context/SidebarContext';
 function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme } = useTheme();
-  const isLight = theme === 'light';
 
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
@@ -48,9 +46,9 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   // Agar login tekshirilayotgan bo'lsa va login qilinmagan bo'lsa, xavfsiz yuklanish oynasi
   if (isAuthChecking && !isExcluded) {
     return (
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-950 text-white gap-3">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 text-slate-900 gap-3">
         <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
-        <div className="text-xs text-slate-400 font-medium tracking-wide">EduYuz tizimiga ulanmoqda...</div>
+        <div className="text-xs text-slate-500 font-medium tracking-wide">EduYuz tizimiga ulanmoqda...</div>
       </div>
     );
   }
@@ -84,29 +82,25 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isExcluded ? (
-        <div className={`min-h-screen flex w-full transition-colors duration-300 ${
-          isLight ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-slate-100'
-        }`}>
+        <div className="min-h-screen flex w-full bg-[#F5F7FB] text-slate-900">
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
-          <div className={`flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative ${
-            isLight ? 'bg-slate-50' : 'bg-slate-950'
-          }`}>
+          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
             <Navbar />
             
             {/* 14-kunlik Bepul Sinov (Trial) Banneri */}
             {subStatus === 'trial' && daysLeft > 0 && (
-              <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 text-white text-[11px] sm:text-xs font-bold py-2 px-4 flex flex-wrap items-center justify-center gap-2 shadow-sm z-30 relative">
+              <div className="mx-4 sm:mx-6 md:mx-8 mt-4 md:mt-6 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2">
                 <span>
-                  🎁 Siz <b>14-kunlik bepul sinov (Free Trial)</b> versiyasidan foydalanyapsiz. Tugashiga: <b>{daysLeft} kun</b> qoldi.
+                  Bepul sinov muddati: <b>{daysLeft} kun</b> qoldi
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsPricingOpen(true)}
-                  className="bg-white text-slate-950 hover:bg-amber-100 px-3 py-1 rounded-full text-[11px] font-extrabold transition shadow cursor-pointer"
+                  className="font-semibold text-indigo-600 hover:underline"
                 >
-                  💎 Tariflar ro‘yxati va Faollashtirish
+                  Tariflarni ko‘rish
                 </button>
               </div>
             )}
@@ -122,17 +116,13 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
               onClose={() => setIsPricingOpen(false)}
             />
 
-            <main className={`flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto transition-colors duration-300 w-full ${
-              isLight ? 'bg-slate-100/80 text-slate-900' : 'bg-slate-950 text-slate-100'
-            }`}>
+            <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
               {children}
             </main>
           </div>
         </div>
       ) : (
-        <div className={`min-h-screen w-full transition-colors duration-300 ${
-          isLight ? 'bg-slate-100 text-slate-900' : 'bg-slate-950 text-slate-100'
-        }`}>
+        <div className="min-h-screen w-full bg-[#F5F7FB] text-slate-900">
           {children}
         </div>
       )}

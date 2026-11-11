@@ -33,7 +33,7 @@ export default function StudentsPage() {
   async function fetchStudents() {
     try {
       setLoading(true);
-      const data = await apiFetch(`/students${search ? `?search=${search}` : ''}`);
+      const data = await apiFetch(`/students${search ? `?search=${encodeURIComponent(search)}` : ''}`);
       setStudents(data || []);
     } catch (err) {
       console.error(err);
@@ -45,6 +45,15 @@ export default function StudentsPage() {
   useEffect(() => {
     fetchStudents();
   }, [search]);
+
+  // Yuqori paneldagi global qidiruvdan kelgan so'z (?search=...) bilan boshlash
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get('search');
+    if (fromUrl) setSearch(fromUrl);
+    const onSearch = (e: Event) => setSearch((e as CustomEvent<string>).detail || '');
+    window.addEventListener('eduyuz:search', onSearch);
+    return () => window.removeEventListener('eduyuz:search', onSearch);
+  }, []);
 
   useEffect(() => {
     apiFetch('/centers').then((res) => {
@@ -139,7 +148,7 @@ export default function StudentsPage() {
           key: 'coins',
           width: 120,
           align: 'center',
-          format: (val) => `${val || 0} 🪙`,
+          format: (val) => `${val || 0} `,
         },
         {
           header: t('students.status', 'Holati'),
@@ -159,171 +168,195 @@ export default function StudentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('students.title', 'O‘quvchilar Bazasi')}</h1>
-          <p className="text-slate-400 mt-1">O‘quvchilar ro‘yxati, aloqa raqamlari va hisob balansi</p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
+      {/* Sarlavha */}
+      <div>
+        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{t('students.title', 'O‘quvchilar')}</h1>
+        <p className="text-sm text-slate-500 mt-1">Barcha o‘quvchilar va ularning holati</p>
+      </div>
+
+      {/* Asboblar paneli: qidiruv va amallar */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <label className="flex items-center gap-2.5 h-10 w-full sm:w-80 px-3.5 rounded-xl bg-white border border-slate-200 focus-within:border-indigo-400 transition-colors">
+          <Search size={16} className="text-slate-500 shrink-0" />
+          <input
+            type="text"
+            placeholder="Ism yoki telefon bo‘yicha qidirish"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 min-w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none"
+          />
+        </label>
+        <div className="sm:ml-auto flex gap-2.5">
           <button
             onClick={handleExportExcel}
-            className="flex items-center gap-2 bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-sm active:scale-95"
-            title="Excel formatida yuklab olish"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition"
           >
-            <FileSpreadsheet size={16} /> {t('dash.exportExcel', 'Excel (.xlsx)')}
+            <FileSpreadsheet size={16} /> Excel
           </button>
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-indigo-600/20 transition-all"
+            className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 transition"
           >
-            <Plus size={18} /> {t('students.add', 'Yangi o‘quvchi')}
+            <Plus size={16} /> O‘quvchi qo‘shish
           </button>
         </div>
       </div>
 
-      {/* Qidiruv */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3.5 top-3 text-slate-500" size={18} />
-        <input
-          type="text"
-          placeholder={t('students.search', 'Ism yoki telefon orqali qidirish...')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-slate-100 placeholder-slate-500"
-        />
-      </div>
-
       {/* Jadval */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-medium">
-            <tr>
-              <th className="py-4 px-5">{t('students.name', 'F.I.SH')}</th>
-              <th className="py-4 px-5">{t('students.phone', 'Telefon')}</th>
-              <th className="py-4 px-5">Ota-ona telefoni</th>
-              <th className="py-4 px-5">{t('students.balance', 'Balans')}</th>
-              <th className="py-4 px-5">{t('students.status', 'Holat')}</th>
-              <th className="py-4 px-5 text-right">{t('students.actions', 'Amallar')}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {loading ? (
-              <tr><td colSpan={6} className="py-12 text-center text-slate-500">Yuklanmoqda...</td></tr>
-            ) : students.length === 0 ? (
-              <tr><td colSpan={6} className="py-12 text-center text-slate-500">O'quvchilar topilmadi</td></tr>
-            ) : (
-              students.map((s) => (
-                <tr key={s.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-4 px-5 font-semibold text-white">{s.fullName}</td>
-                  <td className="py-4 px-5 text-slate-300">{s.phone || '-'}</td>
-                  <td className="py-4 px-5 text-slate-300">
-                    <div className="flex flex-col">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Phone size={14} className="text-slate-500" />
-                        {s.parentPhone || '-'}
-                      </span>
-                      {s.parentChatId ? (
-                        <span className="text-[11px] text-sky-400 inline-flex items-center gap-1 mt-0.5 font-medium">
-                          <Send size={11} /> Telegram faol
-                        </span>
-                      ) : (
-                        <span className="text-[11px] text-slate-500 mt-0.5">
-                          Telegram ulanmagan
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className={`py-4 px-5 font-semibold ${Number(s.balance) < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-                    {Math.abs(Number(s.balance)).toLocaleString()} so'm
-                  </td>
-                  <td className="py-4 px-5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                      s.status === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    }`}>
-                      {s.status === 'active' ? 'Faol' : 'Nofaol'}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5 text-right">
-                    <div className="inline-flex items-center gap-1.5 justify-end">
-                      <Link
-                        href={`/portal?studentId=${s.id}`}
-                        target="_blank"
-                        title="O'quvchi kabinetini ochish (Portal)"
-                        className="p-2 text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <Smartphone size={15} />
-                      </Link>
-                      <button
-                        onClick={() => {
-                          const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Edyuz_crmbot';
-                          const link = `https://t.me/${botUser}?start=student_${s.id}`;
-                          setTelegramLinkModal({ isOpen: true, link, copied: false });
-                        }}
-                        title="Telegram Botga ulash havolasi"
-                        className="p-2 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <Send size={15} />
+      <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm min-w-[760px]">
+            <thead className="bg-slate-50 text-xs font-semibold text-slate-500">
+              <tr>
+                <th className="h-11 px-5 font-semibold">O‘quvchi</th>
+                <th className="h-11 px-5 font-semibold">Telefon</th>
+                <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
+                <th className="h-11 px-5 font-semibold">Balans</th>
+                <th className="h-11 px-5 font-semibold">Holat</th>
+                <th className="h-11 px-5" />
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td colSpan={6} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
+              ) : students.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-24 px-4 text-center">
+                    <p className="text-[15px] font-semibold text-slate-600">
+                      {search ? 'Hech narsa topilmadi' : 'Hali o‘quvchi qo‘shilmagan'}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {search
+                        ? `«${search}» bo‘yicha o‘quvchi yo‘q. Boshqa ism yoki raqam bilan qidiring`
+                        : '«O‘quvchi qo‘shish» tugmasi bilan birinchi o‘quvchini kiriting'}
+                    </p>
+                    {!search && (
+                      <button onClick={handleOpenCreate} className="mt-3 text-xs font-semibold text-indigo-600 hover:underline">
+                        O‘quvchi qo‘shish
                       </button>
-                      <button
-                        onClick={async () => {
-                          if (!s.parentPhone) return alert("Ota-ona telefon raqami kiritilmagan");
-                          const msg = prompt(`Ota-onaga (${s.parentPhone}) yuboriladigan SMS xabar matnini kiriting:`, `EduYuz: Hurmatli ota-ona! Farzandingiz ${s.fullName} haqida ma'lumot olish uchun markaz ma'muriyatiga murojaat qilishingiz mumkin.`);
-                          if (!msg) return;
-                          try {
-                            await axios.post('http://localhost:3000/api/v1/sms/send', {
-                              phone: s.parentPhone,
-                              message: msg,
-                            });
-                            alert(`✅ ${s.parentPhone} raqamiga SMS muvaffaqiyatli jo'natildi!`);
-                          } catch (err) {
-                            alert("SMS yuborishda xatolik yuz berdi");
-                          }
-                        }}
-                        title="Ota-onaga tezkor SMS jo'natish"
-                        className="p-2 text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <MessageSquare size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleOpenEdit(s)}
-                        title="Tahrirlash"
-                        className="p-2 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <Edit2 size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(s.id, s.fullName)}
-                        title="O'chirish"
-                        className="p-2 text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition active:scale-95"
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
+                    )}
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                students.map((s) => {
+                  const bal = Number(s.balance || 0);
+                  return (
+                    <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <span className="w-9 h-9 rounded-full bg-indigo-500/10 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
+                            {(s.fullName || '?')[0]}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-slate-800 truncate">{s.fullName}</p>
+                            <p className="text-xs text-slate-500 truncate">
+                              {s.groups?.[0]?.group?.name || 'Guruhsiz'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 text-slate-600 whitespace-nowrap">{s.phone || '—'}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <p className="text-slate-600">{s.parentPhone || '—'}</p>
+                        <p className={`text-xs ${s.parentChatId ? 'text-sky-600' : 'text-slate-500'}`}>
+                          {s.parentChatId ? 'Telegram ulangan' : 'Telegram ulanmagan'}
+                        </p>
+                      </td>
+                      <td className={`px-5 py-3.5 font-semibold whitespace-nowrap ${bal < 0 ? 'text-rose-600' : bal > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
+                        {bal < 0 ? '-' : ''}{Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
+                      </td>
+                      <td className="px-5 py-3.5">
+                        {bal < 0 ? (
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600">Qarzdor</span>
+                        ) : s.status === 'active' ? (
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">Faol</span>
+                        ) : (
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Nofaol</span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link
+                            href={`/portal?studentId=${s.id}`}
+                            target="_blank"
+                            title="O‘quvchi portali"
+                            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+                          >
+                            <Smartphone size={16} />
+                          </Link>
+                          <button
+                            onClick={() => {
+                              const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Edyuz_crmbot';
+                              const link = `https://t.me/${botUser}?start=student_${s.id}`;
+                              setTelegramLinkModal({ isOpen: true, link, copied: false });
+                            }}
+                            title="Telegram botga ulash havolasi"
+                            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+                          >
+                            <Send size={16} />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!s.parentPhone) return alert('Ota-ona telefon raqami kiritilmagan');
+                              const msg = prompt(
+                                `Ota-onaga (${s.parentPhone}) yuboriladigan SMS matni:`,
+                                `EduYuz: Hurmatli ota-ona! Farzandingiz ${s.fullName} haqida ma'lumot olish uchun markaz ma'muriyatiga murojaat qilishingiz mumkin.`,
+                              );
+                              if (!msg) return;
+                              try {
+                                await axios.post('http://localhost:3000/api/v1/sms/send', { phone: s.parentPhone, message: msg });
+                                alert('SMS yuborildi');
+                              } catch (err: any) {
+                                alert(err?.response?.data?.message || 'SMS yuborishda xatolik');
+                              }
+                            }}
+                            title="Ota-onaga SMS"
+                            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+                          >
+                            <MessageSquare size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleOpenEdit(s)}
+                            title="Tahrirlash"
+                            className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(s.id, s.fullName)}
+                            title="O‘chirish"
+                            className="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-500/10 transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* O'quvchi qo'shish / tahrirlash Modali */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h2 className="text-xl font-bold text-white">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">
               {editingStudent ? "O'quvchini Tahrirlash" : "Yangi O'quvchi Qo'shish"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               {!editingStudent && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">O'quv markazi</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">O'quv markazi</label>
                   <select
                     required
                     value={form.centerId}
                     onChange={(e) => setForm({ ...form, centerId: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   >
                     {centers.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
@@ -332,64 +365,64 @@ export default function StudentsPage() {
                 </div>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">To'liq ism-familiyasi</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">To'liq ism-familiyasi</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Ali Valiyev"
                   value={form.fullName}
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">O'quvchining telefoni (ixtiyoriy)</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">O'quvchining telefoni (ixtiyoriy)</label>
                 <input
                   type="text"
                   placeholder="+998901234567"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">Ota-onaning telefoni</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Ota-onaning telefoni</label>
                 <input
                   required
                   type="text"
                   placeholder="+998901234567"
                   value={form.parentPhone}
                   onChange={(e) => setForm({ ...form, parentPhone: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Boshlang'ich balans</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Boshlang'ich balans</label>
                   <input
                     type="number"
                     value={form.balance}
                     onChange={(e) => setForm({ ...form, balance: Number(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">Holati</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Holati</label>
                   <select
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   >
                     <option value="active">Faol</option>
                     <option value="inactive">Nofaol</option>
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>
@@ -408,12 +441,12 @@ export default function StudentsPage() {
       {/* Telegram Link Modali */}
       {telegramLinkModal.isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Send className="text-sky-400" /> Telegram Havolasi
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <Send className="text-sky-600" /> Telegram Havolasi
             </h2>
-            <p className="text-sm text-slate-400">
-              Ushbu havoladan nusxa oling va ota-onaga yuboring. Ota-ona havola ustiga bosib, Telegram botda <strong className="text-white">/start</strong> buyrug'ini bersa, tizimga avtomatik ulanadi.
+            <p className="text-sm text-slate-500">
+              Ushbu havoladan nusxa oling va ota-onaga yuboring. Ota-ona havola ustiga bosib, Telegram botda <strong className="text-slate-900">/start</strong> buyrug'ini bersa, tizimga avtomatik ulanadi.
             </p>
             
             <div className="flex items-center gap-2 mt-4">
@@ -421,7 +454,7 @@ export default function StudentsPage() {
                 type="text" 
                 readOnly 
                 value={telegramLinkModal.link} 
-                className="flex-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-sky-500/50"
+                className="flex-1 bg-slate-50 border border-slate-200 text-slate-600 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-sky-500/50"
               />
               <button 
                 onClick={() => {
@@ -431,7 +464,7 @@ export default function StudentsPage() {
                 }}
                 className={`p-2.5 rounded-xl transition flex items-center gap-2 ${
                   telegramLinkModal.copied 
-                    ? 'bg-emerald-500/20 text-emerald-400' 
+                    ? 'bg-emerald-500/20 text-emerald-600' 
                     : 'bg-sky-600 hover:bg-sky-700 text-white'
                 }`}
               >
@@ -442,7 +475,7 @@ export default function StudentsPage() {
             <div className="flex justify-end pt-4">
               <button
                 onClick={() => setTelegramLinkModal({ isOpen: false, link: '', copied: false })}
-                className="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-900 px-5 py-2 rounded-xl text-sm font-medium transition"
               >
                 Yopish
               </button>
