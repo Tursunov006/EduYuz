@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, X } from 'lucide-react';
+import { Archive, LogOut, X } from 'lucide-react';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
 // Figma: "EduYuz Dashboard v2" — yon menyu
@@ -99,6 +99,19 @@ export default function Sidebar() {
             );
           })}
         </ul>
+        <div className="mt-3 pt-3 border-t border-slate-100">
+          <Link
+            href="/archive"
+            onClick={onItemClick}
+            aria-current={pathname.startsWith('/archive') ? 'page' : undefined}
+            className={`flex items-center gap-3 h-[42px] px-3 rounded-[10px] text-sm transition-colors ${
+              pathname.startsWith('/archive') ? 'bg-indigo-50 text-indigo-600 font-semibold' : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Archive size={16} className={pathname.startsWith('/archive') ? 'text-indigo-600' : 'text-slate-400'} />
+            Arxiv
+          </Link>
+        </div>
       </nav>
 
       {/* Foydalanuvchi va chiqish */}

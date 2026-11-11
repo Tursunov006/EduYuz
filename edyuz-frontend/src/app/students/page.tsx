@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2, Archive, RotateCcw } from 'lucide-react';
+import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import axios from 'axios';
@@ -14,7 +14,6 @@ export default function StudentsPage() {
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   // Faol / kursni tugatgan (nofaol) / barchasi
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
@@ -90,12 +89,12 @@ export default function StudentsPage() {
     setIsModalOpen(true);
   }
 
-  // Kursni tugatgan o'quvchini o'chirmasdan "Nofaol" qilish (to'lov tarixi saqlanadi) yoki qayta faollashtirish
-  async function handleToggleStatus(s: any) {
-    const next = s.status === 'active' ? 'inactive' : 'active';
+  // Kursni tugatgan o'quvchi o'chirilmaydi, Arxivga olinadi (to'lov tarixi saqlanadi)
+  async function handleArchive(s: any) {
+    if (!confirm(`"${s.fullName}" kursni tugatdimi? O'quvchi Arxiv bo'limiga o'tkaziladi.`)) return;
     try {
-      await apiFetch(`/students/${s.id}`, { method: 'PATCH', body: JSON.stringify({ status: next }) });
-      setStudents((prev) => prev.map((x) => (x.id === s.id ? { ...x, status: next } : x)));
+      await apiFetch(`/students/${s.id}`, { method: 'PATCH', body: JSON.stringify({ status: 'inactive' }) });
+      setStudents((prev) => prev.map((x) => (x.id === s.id ? { ...x, status: 'inactive' } : x)));
     } catch (err: any) {
       alert(err.message);
     }
@@ -105,7 +104,7 @@ export default function StudentsPage() {
     const ok = confirm(
       `"${name}"ni butunlay o'chirmoqchimisiz?\n\n` +
         `Diqqat: o'quvchining barcha to'lovlari ham o'chadi va kassa hisobotidan chiqib ketadi. ` +
-        `Kursni tugatgan o'quvchini o'chirmasdan, "Kursni tugatdi" tugmasi bilan nofaol qilib qo'yish tavsiya etiladi.`,
+        `Kursni tugatgan o'quvchini o'chirmasdan, "Arxivga olish" tugmasi bilan arxivga o'tkazish tavsiya etiladi.`,
     );
     if (!ok) return;
     try {
@@ -185,16 +184,26 @@ export default function StudentsPage() {
     );
   }
 
-  const visibleStudents = students.filter((x) =>
-    statusFilter === 'all' ? true : statusFilter === 'active' ? x.status === 'active' : x.status !== 'active',
-  );
+  // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
+  const visibleStudents = students.filter((x) => x.status === 'active');
+  const archivedCount = students.length - visibleStudents.length;
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
       <div>
         <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{t('students.title', 'O‘quvchilar')}</h1>
-        <p className="text-sm text-slate-500 mt-1">Barcha o‘quvchilar va ularning holati</p>
+        <p className="text-sm text-slate-500 mt-1">
+          Faol o‘quvchilar
+          {archivedCount > 0 && (
+            <>
+              {' · '}
+              <Link href="/archive" className="text-indigo-600 hover:underline">
+                Arxivda {archivedCount} ta
+              </Link>
+            </>
+          )}
+        </p>
       </div>
 
       {/* Asboblar paneli: qidiruv va amallar */}
@@ -225,29 +234,6 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* Holat bo'yicha filtr */}
-      <div className="flex flex-wrap items-center gap-2">
-        {([
-          { key: 'all', label: 'Barchasi', count: students.length },
-          { key: 'active', label: 'Faol', count: students.filter((x) => x.status === 'active').length },
-          { key: 'inactive', label: 'Kursni tugatgan / nofaol', count: students.filter((x) => x.status !== 'active').length },
-        ] as const).map((f) => (
-          <button
-            key={f.key}
-            type="button"
-            onClick={() => setStatusFilter(f.key)}
-            className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-medium border transition ${
-              statusFilter === f.key
-                ? 'bg-indigo-600 border-indigo-600 text-white'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {f.label}
-            <span className={`text-xs ${statusFilter === f.key ? 'text-indigo-100' : 'text-slate-400'}`}>{f.count}</span>
-          </button>
-        ))}
-      </div>
-
       {/* Jadval */}
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -269,7 +255,7 @@ export default function StudentsPage() {
                 <tr>
                   <td colSpan={6} className="py-24 px-4 text-center">
                     <p className="text-[15px] font-semibold text-slate-600">
-                      {search || statusFilter !== 'all' ? 'Hech narsa topilmadi' : 'Hali o‘quvchi qo‘shilmagan'}
+                      {search ? 'Hech narsa topilmadi' : 'Hali faol o‘quvchi yo‘q'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {search
@@ -362,12 +348,12 @@ export default function StudentsPage() {
                             <MessageSquare size={16} />
                           </button>
                           <button
-                            onClick={() => handleToggleStatus(s)}
-                            title={s.status === 'active' ? 'Kursni tugatdi (nofaol qilish)' : 'Qayta faollashtirish'}
-                            aria-label={s.status === 'active' ? 'Kursni tugatdi' : 'Qayta faollashtirish'}
+                            onClick={() => handleArchive(s)}
+                            title="Arxivga olish (kursni tugatdi)"
+                            aria-label="Arxivga olish"
                             className="p-2 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition"
                           >
-                            {s.status === 'active' ? <Archive size={16} /> : <RotateCcw size={16} />}
+                            <Archive size={16} />
                           </button>
                           <button
                             onClick={() => handleOpenEdit(s)}
@@ -467,7 +453,7 @@ export default function StudentsPage() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   >
                     <option value="active">Faol</option>
-                    <option value="inactive">Kursni tugatgan / nofaol</option>
+                    <option value="inactive">Arxivda (kursni tugatgan)</option>
                   </select>
                 </div>
               </div>

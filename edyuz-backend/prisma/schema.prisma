@@ -104,6 +104,8 @@ model Group {
   startTime String   @map("start_time") @db.VarChar(5) // HH:mm format
   endTime   String   @map("end_time") @db.VarChar(5) // HH:mm format
   createdAt DateTime @default(now()) @map("created_at")
+  // Kursi tugagan guruh arxivga olinadi (o'chirilmaydi): ro'yxat va jadvalda ko'rinmaydi
+  archivedAt DateTime? @map("archived_at")
 
   center      Center         @relation(fields: [centerId], references: [id], onDelete: Cascade)
   course      Course         @relation(fields: [courseId], references: [id], onDelete: Restrict)

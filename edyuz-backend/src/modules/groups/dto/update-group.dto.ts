@@ -1,4 +1,4 @@
-import { IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
 
 export class UpdateGroupDto {
   @IsOptional()
@@ -12,6 +12,11 @@ export class UpdateGroupDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  // true: guruhni arxivga olish, false: arxivdan qaytarish
+  @IsOptional()
+  @IsBoolean()
+  archived?: boolean;
 
   // Kunlar matn ("Dush-Chor-Jum") yoki ro'yxat ko'rinishida kelishi mumkin
   @IsOptional()

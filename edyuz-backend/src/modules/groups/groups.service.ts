@@ -74,9 +74,10 @@ export class GroupsService {
     });
   }
 
-  async findAll(centerId?: string, courseId?: string, teacherId?: string) {
+  async findAll(centerId?: string, courseId?: string, teacherId?: string, archived = false) {
     return this.prisma.group.findMany({
       where: {
+        archivedAt: archived ? { not: null } : null,
         ...(centerId && { centerId }),
         ...(courseId && { courseId }),
         ...(teacherId && { teacherId }),
@@ -131,7 +132,11 @@ export class GroupsService {
     await this.findOne(id);
 
     // Kunlar formadan "Dush-Chor-Jum" ko'rinishida keladi: yaratishdagi kabi ro'yxatga aylantiriladi
-    const data: any = { ...dto };
+    const { archived, ...rest } = dto;
+    const data: any = { ...rest };
+    if (archived !== undefined) {
+      data.archivedAt = archived ? new Date() : null;
+    }
     if (typeof dto.days === 'string') {
       data.days = dto.days.split(/[-,\/]/).map((s: string) => s.trim()).filter(Boolean);
     }

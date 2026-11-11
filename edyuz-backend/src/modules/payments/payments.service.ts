@@ -110,7 +110,8 @@ export class PaymentsService {
   // Oylik avtomatik to'lov yechish (Avtomatik Billing)
   async chargeMonthly(centerId: string, groupId?: string) {
     const groups = await this.prisma.group.findMany({
-      where: { centerId, ...(groupId ? { id: groupId } : {}) },
+      // Arxivdagi (kursi tugagan) guruhlardan oylik to'lov yechilmaydi
+      where: { centerId, archivedAt: null, ...(groupId ? { id: groupId } : {}) },
       include: {
         course: true,
         students: {

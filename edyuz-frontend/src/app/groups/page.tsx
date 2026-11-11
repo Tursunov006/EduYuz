@@ -5,7 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
-  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Trash2
+  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive
 } from 'lucide-react';
 
 interface Group {
@@ -91,7 +91,8 @@ export default function GroupsPage() {
         axios.get('http://localhost:3000/api/v1/teachers', { headers: getHeaders() }).catch(() => ({ data: [] })),
       ]);
 
-      setGroups(groupsRes.data || []);
+      // Arxivdagi guruhlar alohida bo'limda
+      setGroups((groupsRes.data || []).filter((g: any) => !g.archivedAt));
       const cList = coursesRes.data || [];
       const tList = teachersRes.data || [];
       setCourses(cList);
@@ -147,19 +148,19 @@ export default function GroupsPage() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteGroup = async (g: Group) => {
-    const count = g._count?.students || 0;
+  // Kursi tugagan guruh o'chirilmaydi, Arxivga olinadi (Arxiv bo'limidan qaytarish yoki o'chirish mumkin)
+  const handleArchiveGroup = async (g: Group) => {
     const ok = confirm(
-      `"${g.name}" guruhini o'chirmoqchimisiz?\n\n` +
-        (count > 0 ? `Guruhdagi ${count} ta o'quvchi o'chirilmaydi, faqat guruhdan chiqariladi.\n` : '') +
-        `Shu guruhning davomat tarixi ham o'chadi. Bu amalni qaytarib bo'lmaydi.`,
+      `"${g.name}" guruhini arxivga olasizmi?\n\n` +
+        `Guruh ro'yxat va dars jadvalidan olinadi, undan oylik to'lov yechilmaydi. ` +
+        `Kerak bo'lsa uni "Arxiv" bo'limidan qaytarishingiz yoki butunlay o'chirishingiz mumkin.`,
     );
     if (!ok) return;
     try {
-      await axios.delete(`http://localhost:3000/api/v1/groups/${g.id}`, { headers: getHeaders() });
+      await axios.patch(`http://localhost:3000/api/v1/groups/${g.id}`, { archived: true }, { headers: getHeaders() });
       setGroups((prev) => prev.filter((x) => x.id !== g.id));
     } catch (err: any) {
-      const msg = err.response?.data?.message || 'Guruhni o‘chirib bo‘lmadi';
+      const msg = err.response?.data?.message || 'Guruhni arxivga olib bo‘lmadi';
       alert(Array.isArray(msg) ? msg.join(', ') : msg);
     }
   };
@@ -543,12 +544,12 @@ export default function GroupsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDeleteGroup(group)}
-                    title="Guruhni o'chirish"
-                    aria-label="Guruhni o'chirish"
-                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 transition"
+                    onClick={() => handleArchiveGroup(group)}
+                    title="Arxivga olish (kurs tugadi)"
+                    aria-label="Guruhni arxivga olish"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 transition"
                   >
-                    <Trash2 size={15} />
+                    <Archive size={15} />
                   </button>
                 </div>
               </div>
