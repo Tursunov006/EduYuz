@@ -62,7 +62,7 @@ function HomeworkSubmitForm({ homeworkId, studentId, onSuccess }: { homeworkId: 
         value={content}
         onChange={(e) => setContent(e.target.value)}
         placeholder="Vazifa javobini (yoki Google Drive fayl linkini) yozing..."
-        className="w-full text-xs p-2 rounded-lg bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-indigo-500 min-h-[60px]"
+        className="w-full text-xs p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 focus:outline-none focus:border-indigo-500 min-h-[60px]"
       />
       <button
         type="submit"
@@ -118,16 +118,16 @@ function PortalContent() {
   const getCardType = (rawNum: string) => {
     const clean = rawNum.replace(/\s/g, '');
     if (clean.startsWith('8600') || clean.startsWith('5614')) return { name: 'UZCARD', color: 'bg-blue-600 text-white' };
-    if (clean.startsWith('9860')) return { name: 'HUMO', color: 'bg-amber-500 text-slate-950 font-black' };
+    if (clean.startsWith('9860')) return { name: 'HUMO', color: 'bg-amber-500 text-slate-900 font-bold' };
     if (clean.startsWith('4')) return { name: 'VISA', color: 'bg-indigo-600 text-white' };
     if (clean.startsWith('5')) return { name: 'MASTERCARD', color: 'bg-rose-600 text-white' };
-    return { name: 'KARTA', color: 'bg-slate-700 text-slate-300' };
+    return { name: 'KARTA', color: 'bg-slate-200 text-slate-600' };
   };
 
   // Onlayn to'lov: to'lov tizimining (Atmos) himoyalangan sahifasiga yo'naltirish.
   // Avval bu yerda karta raqami shu saytning o'zida so'ralib, soxta "SMS kod"dan keyin
   // hech qanday pul yechilmasdan balans to'g'ridan-to'g'ri oshirilardi — ya'ni istalgan
-  // odam o'ziga bepul balans yozib olishi mumkin edi. Endi balans faqat to'lov tizimi
+  // odam o'ziga bepul balans yozib olishi mumkin edi. Endi faqat to'lov tizimi
   // imzolagan tasdiq (webhook) kelgandagina yoki kassada admin tomonidan oshiriladi.
   const handleRequestSms = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,12 +240,12 @@ function PortalContent() {
 
   if (!selectedStudentId && !loading) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
-        <div className="max-w-sm text-center space-y-3 bg-slate-900 border border-slate-800 rounded-3xl p-6">
-          <div className="text-3xl">🔒</div>
-          <h1 className="text-base font-bold text-white">Shaxsiy havola kerak</h1>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Portalga kirish uchun EduYuz Telegram botidagi «📱 Mini Ilova» tugmasidan yoki
+      <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
+        <div className="max-w-sm text-center space-y-3 bg-white border border-slate-200 rounded-2xl p-6">
+          <div className="text-3xl"></div>
+          <h1 className="text-base font-bold text-slate-900">Shaxsiy havola kerak</h1>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Portalga kirish uchun EduYuz Telegram botidagi «Mini Ilova» tugmasidan yoki
             o‘quv markazingiz bergan shaxsiy havoladan foydalaning.
           </p>
         </div>
@@ -254,32 +254,32 @@ function PortalContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-0 sm:p-4">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center p-0 sm:p-4">
       {/* CRM ga qaytish va Alohida Mini Ilova navigatsiyasi */}
       <div className="w-full max-w-md flex items-center justify-between px-3 py-2 mb-1 text-xs">
-        <Link href="/" className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white transition bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl font-medium">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-900 transition bg-white border border-slate-200 px-3 py-1.5 rounded-xl font-medium">
           ← CRM Boshqaruviga qaytish
         </Link>
         <Link
           href={`/app${selectedStudentId ? `?studentId=${selectedStudentId}` : ''}`}
-          className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 transition bg-blue-950/60 border border-blue-800 px-3 py-1.5 rounded-xl font-bold"
+          className="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-700 transition bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl font-bold"
         >
-          <span>📲 Alohida Mini Ilova (/app)</span>
+          <span>Alohida Mini Ilova (/app)</span>
         </Link>
       </div>
 
       {/* Mobil Ilova Ramkasi */}
-      <div className="w-full max-w-md bg-slate-900 sm:border border-slate-800 sm:rounded-3xl min-h-screen sm:min-h-[840px] flex flex-col shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-white sm:border border-slate-200 sm:rounded-2xl min-h-screen sm:min-h-[840px] flex flex-col shadow-sm overflow-hidden">
         
         {/* Yuqori Profil Header */}
-        <div className="bg-gradient-to-b from-indigo-900/60 to-slate-900 p-5 border-b border-slate-800 space-y-4">
+        <div className="p-5 border-b border-slate-200 space-y-4 bg-indigo-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-md">
                 <img src="/logo-icon-transparent.png" alt="EduYuz" className="w-6 h-6 object-contain" />
               </div>
-              <span className="font-extrabold text-white text-sm">
-                Edu<span className="text-blue-400">Yuz</span> Mobile Portal
+              <span className="font-bold text-slate-900 text-sm">
+                Edu<span className="text-blue-600">Yuz</span> Mobile Portal
               </span>
             </div>
 
@@ -287,7 +287,7 @@ function PortalContent() {
             <select
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-xs rounded-lg px-2 py-1 text-slate-300 focus:outline-none"
+              className="bg-slate-100 border border-slate-300 text-xs rounded-lg px-2 py-1 text-slate-600 focus:outline-none"
             >
               {allStudents.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -300,12 +300,12 @@ function PortalContent() {
           {studentData && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-300 font-black text-lg">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center text-indigo-700 font-bold text-lg">
                   {studentData.fullName?.[0] || 'O'}
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white leading-tight">{studentData.fullName}</h2>
-                  <p className="text-xs text-indigo-300 font-medium">
+                  <h2 className="text-lg font-bold text-slate-900 leading-tight">{studentData.fullName}</h2>
+                  <p className="text-xs text-indigo-700 font-medium">
                     {groupInfo?.name || 'Guruh biriktirilmagan'}
                   </p>
                 </div>
@@ -313,16 +313,16 @@ function PortalContent() {
 
               {/* Balans va EduCoinlar Vidjeti */}
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5">
-                  <span className="text-[10px] text-slate-400 block">{isDebt ? 'Qarzdorlik' : 'Hisob Balansi'}</span>
-                  <span className={`text-sm font-black ${isDebt ? 'text-rose-400' : 'text-emerald-400'}`}>
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                  <span className="text-[10px] text-slate-500 block">{isDebt ? 'Qarzdorlik' : 'Hisob Balansi'}</span>
+                  <span className={`text-sm font-bold ${isDebt ? 'text-rose-600' : 'text-emerald-600'}`}>
                     {Math.abs(Number(studentData.balance || 0)).toLocaleString('uz-UZ')} so'm
                   </span>
                 </div>
 
-                <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-2.5">
-                  <span className="text-[10px] text-slate-400 block">Yig'ilgan Coinlar</span>
-                  <span className="text-sm font-black text-amber-400 flex items-center gap-1">
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                  <span className="text-[10px] text-slate-500 block">Yig'ilgan Coinlar</span>
+                  <span className="text-sm font-bold text-amber-600 flex items-center gap-1">
                     <Coins size={14} />
                     {studentData.coins || 0} EduCoin
                   </span>
@@ -333,11 +333,11 @@ function PortalContent() {
         </div>
 
         {/* Tab Navigatsiyasi */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 bg-slate-950 border-b border-slate-800 text-[11px] font-semibold text-center select-none">
+        <div className="grid grid-cols-3 sm:grid-cols-6 bg-slate-50 border-b border-slate-200 text-[11px] font-semibold text-center select-none">
           <button
             onClick={() => setActiveTab('attendance')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'attendance' ? 'text-indigo-400 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'attendance' ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <CalendarCheck size={16} />
@@ -346,7 +346,7 @@ function PortalContent() {
           <button
             onClick={() => setActiveTab('lms')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'lms' ? 'text-indigo-400 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'lms' ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <BookOpen size={16} />
@@ -355,7 +355,7 @@ function PortalContent() {
           <button
             onClick={() => setActiveTab('games')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'games' ? 'text-rose-400 border-b-2 border-rose-500 bg-rose-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'games' ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <Gamepad2 size={16} />
@@ -364,7 +364,7 @@ function PortalContent() {
           <button
             onClick={() => setActiveTab('ai')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'ai' ? 'text-sky-400 border-b-2 border-sky-500 bg-sky-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'ai' ? 'text-sky-600 border-b-2 border-sky-500 bg-sky-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <Bot size={16} />
@@ -373,7 +373,7 @@ function PortalContent() {
           <button
             onClick={() => setActiveTab('payments')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'payments' ? 'text-indigo-400 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'payments' ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <CreditCard size={16} />
@@ -382,7 +382,7 @@ function PortalContent() {
           <button
             onClick={() => setActiveTab('certificates')}
             className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'certificates' ? 'text-indigo-400 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-400 hover:text-slate-200'
+              activeTab === 'certificates' ? 'text-indigo-600 border-b-2 border-indigo-500 bg-indigo-500/5' : 'text-slate-500 hover:text-slate-700'
             }`}
           >
             <Award size={16} />
@@ -397,11 +397,11 @@ function PortalContent() {
           ) : activeTab === 'attendance' ? (
             /* 1. DAVOMAT TABI */
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Davomat Tarixi ({attendances.length} dars)
               </h3>
               {attendances.length === 0 ? (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500">
                   Hali davomat qilinmagan
                 </div>
               ) : (
@@ -413,24 +413,24 @@ function PortalContent() {
                     return (
                       <div
                         key={att.id}
-                        className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs"
+                        className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs"
                       >
                         <div>
-                          <span className="font-semibold text-white">
+                          <span className="font-semibold text-slate-900">
                             {new Date(att.date).toLocaleDateString()}
                           </span>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{groupInfo?.name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">{groupInfo?.name}</p>
                         </div>
                         <span
                           className={`px-2.5 py-1 rounded-full font-bold text-[10px] inline-flex items-center gap-1 ${
                             isPresent
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
                               : isLate
-                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                              ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                              : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'
                           }`}
                         >
-                          {isPresent ? '✅ Keldi (+10 Coin)' : isLate ? '⏳ Kechikdi' : '❌ Kelmadi'}
+                          {isPresent ? 'Keldi (+10 Coin)' : isLate ? 'Kechikdi' : 'Kelmadi'}
                         </span>
                       </div>
                     );
@@ -441,11 +441,11 @@ function PortalContent() {
           ) : activeTab === 'lms' ? (
             /* 2. DARSLAR VA VAZIFALAR TABI */
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Guruh Darslari va Vazifalar
               </h3>
               {lessons.length === 0 ? (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500">
                   Ushbu guruhga hali darslar joylanmagan
                 </div>
               ) : (
@@ -453,10 +453,10 @@ function PortalContent() {
                   {lessons.map((ls, idx) => (
                     <div
                       key={ls.id}
-                      className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3"
+                      className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-xs font-bold text-white">
+                        <h4 className="text-xs font-bold text-slate-900">
                           {ls.orderIndex || idx + 1}. {ls.title}
                         </h4>
                         {ls.videoUrl && (
@@ -464,7 +464,7 @@ function PortalContent() {
                             href={ls.videoUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-[10px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-md font-semibold shrink-0"
+                            className="text-[10px] bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-0.5 rounded-md font-semibold shrink-0"
                           >
                             Video Dars
                           </a>
@@ -472,7 +472,7 @@ function PortalContent() {
                       </div>
 
                       {ls.content && (
-                        <p className="text-[11px] text-slate-400 line-clamp-2">{ls.content}</p>
+                        <p className="text-[11px] text-slate-500 line-clamp-2">{ls.content}</p>
                       )}
 
                       {/* Uyga vazifalar */}
@@ -482,29 +482,29 @@ function PortalContent() {
                         return (
                           <div
                             key={hw.id}
-                            className="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2 mt-2"
+                            className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 mt-2"
                           >
                             <div className="flex items-center justify-between">
-                              <span className="text-[11px] font-bold text-indigo-300">
-                                📝 {hw.title}
+                              <span className="text-[11px] font-bold text-indigo-700">
+                                {hw.title}
                               </span>
-                              <span className="text-[10px] text-amber-400 font-semibold">
+                              <span className="text-[10px] text-amber-600 font-semibold">
                                 Max {hw.maxScore} ball
                               </span>
                             </div>
 
                             {mySub ? (
-                              <div className="text-[11px] bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2 text-emerald-300 space-y-1">
+                              <div className="text-[11px] bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-2 text-emerald-700 space-y-1">
                                 <div className="flex justify-between font-bold">
                                   <span>Holati: {mySub.status === 'reviewed' ? 'Baholandi' : 'Kutilmoqda'}</span>
                                   {mySub.score !== null && <span>{mySub.score} ball</span>}
                                 </div>
                                 {mySub.feedback && (
-                                  <p className="text-[10px] text-slate-300">Ustoz: "{mySub.feedback}"</p>
+                                  <p className="text-[10px] text-slate-600">Ustoz: "{mySub.feedback}"</p>
                                 )}
                               </div>
                             ) : (
-                              <div className="mt-2 pt-2 border-t border-slate-800">
+                              <div className="mt-2 pt-2 border-t border-slate-200">
                                 <p className="text-[10px] text-slate-500 italic mb-2">Vazifa hali topshirilmagan</p>
                                 <HomeworkSubmitForm 
                                   homeworkId={hw.id} 
@@ -519,7 +519,7 @@ function PortalContent() {
                       {/* Dars o'yini tugmasi */}
                       <Link
                         href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                        className="mt-2.5 py-2 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-[11px] font-bold flex items-center justify-center gap-2 shadow-md shadow-rose-600/20 transition"
+                        className="mt-2.5 py-2 px-3 rounded-xl text-white text-[11px] font-bold flex items-center justify-center gap-2 shadow-md transition bg-rose-600 hover:bg-rose-500"
                       >
                         <Gamepad2 size={14} />
                         <span>Mavzuli O‘yinni Boshlash (+25 Coin)</span>
@@ -532,37 +532,37 @@ function PortalContent() {
           ) : activeTab === 'games' ? (
             /* O'YINLAR TABI */
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-blue-950/40 border border-slate-800 space-y-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                  🎮 EduYuz Gamifikatsiya
+              <div className="p-4 rounded-2xl border border-slate-200 space-y-2 bg-rose-50">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30">
+                  EduYuz Gamifikatsiya
                 </span>
-                <h3 className="text-sm font-bold text-white">Darslarni o‘ynab, EduCoin yutib oling!</h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <h3 className="text-sm font-bold text-slate-900">Darslarni o‘ynab, EduCoin yutib oling!</h3>
+                <p className="text-xs text-slate-600 leading-relaxed">
                   Viktorinada to‘g‘ri javoblarni toping, ketma-ket Combo ballar to‘plang va umumiy reytingda 1-o‘ringa chiqing!
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Guruh Darslari Bo‘yicha O‘yinlar
                 </h4>
                 {lessons.length === 0 ? (
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-500">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">
                     Darslar mavjud emas
                   </div>
                 ) : (
                   lessons.map((ls) => (
                     <div
                       key={ls.id}
-                      className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3"
+                      className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3"
                     >
                       <div className="space-y-0.5 flex-1 min-w-0">
-                        <div className="text-xs font-bold text-white truncate">{ls.title}</div>
-                        <span className="text-[10px] text-amber-400 font-semibold">+25 gacha EduCoin</span>
+                        <div className="text-xs font-bold text-slate-900 truncate">{ls.title}</div>
+                        <span className="text-[10px] text-amber-600 font-semibold">+25 gacha EduCoin</span>
                       </div>
                       <Link
                         href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                        className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-600/20 shrink-0 transition"
+                        className="px-3 py-1.5 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 shadow-md shrink-0 transition bg-rose-600 hover:bg-rose-500"
                       >
                         <Gamepad2 size={13} />
                         <span>O‘ynash</span>
@@ -585,17 +585,17 @@ function PortalContent() {
             <div className="space-y-4">
               
               {/* Click orqali To'lov Vidjeti */}
-              <div className="bg-gradient-to-r from-blue-900/40 to-slate-900 border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 relative overflow-hidden">
+              <div className="border border-blue-500/30 rounded-2xl p-4 flex flex-col items-center text-center space-y-3 relative overflow-hidden bg-indigo-50">
                 <div className="absolute top-0 right-0 p-2 opacity-10">
                   <QrCode size={80} />
                 </div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod (Click)</h4>
-                <p className="text-[11px] text-slate-300 relative z-10">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod (Click)</h4>
+                <p className="text-[11px] text-slate-600 relative z-10">
                   Ota-onangiz o'z telefonlaridagi Click yoki Uzum ilovasi orqali bu QR kodni skaner qilib, to'g'ridan-to'g'ri to'lov qilishlari mumkin!
                 </p>
                 
                 {/* QR KOD RASMI */}
-                <div className="p-2 bg-white rounded-2xl shadow-xl relative z-10 mx-auto max-w-[200px] border border-white/20">
+                <div className="p-2 bg-white rounded-2xl shadow-sm relative z-10 mx-auto max-w-[200px] border border-slate-200">
                   <img 
                     src="/payment-qr.png"
                     alt="To'lov QR va Shtrix Kodi"
@@ -603,35 +603,35 @@ function PortalContent() {
                   />
                 </div>
 
-                <p className="text-[11px] font-mono bg-slate-900/50 px-3 py-1.5 rounded-lg text-slate-300 relative z-10">
-                  ID raqamingiz: <span className="font-bold text-white">{selectedStudentId.split('-')[0]}</span>
+                <p className="text-[11px] font-mono bg-white px-3 py-1.5 rounded-lg text-slate-600 relative z-10">
+                  ID raqamingiz: <span className="font-bold text-slate-900">{selectedStudentId.split('-')[0]}</span>
                 </p>
 
                 {/* To'lov uchun Karta Raqami (Humo / UzCard) */}
-                <div className="w-full bg-slate-950/90 border border-emerald-500/30 rounded-2xl p-3.5 space-y-2 relative z-10 shadow-xl">
+                <div className="w-full bg-slate-50 border border-emerald-500/30 rounded-2xl p-3.5 space-y-2 relative z-10 shadow-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400 flex items-center gap-1.5">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-600 flex items-center gap-1.5">
                       <CreditCard size={13} /> O'quv Markazi Rasmiy Kartasi
                     </span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
                       HUMO
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2.5">
+                  <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono font-black text-sm sm:text-base text-white tracking-widest selection:bg-emerald-500">
+                      <span className="font-mono font-bold text-sm sm:text-base text-slate-900 tracking-widest selection:bg-emerald-500">
                         9860 1201 3540 8280
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={copyCardNumber}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-bold rounded-lg text-[11px] transition shadow-md shadow-emerald-500/20 cursor-pointer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-900 font-bold rounded-lg text-[11px] transition shadow-md cursor-pointer"
                     >
                       {copiedCard ? (
                         <>
-                          <Check size={14} className="text-slate-950" />
+                          <Check size={14} className="text-slate-900" />
                           <span>Nusxalandi!</span>
                         </>
                       ) : (
@@ -643,8 +643,8 @@ function PortalContent() {
                     </button>
                   </div>
 
-                  <p className="text-[10px] text-slate-400 text-left">
-                    💡 <i>To'lov o'tkazishda izohga o'quvchi ID sini (<span className="text-white font-mono">{selectedStudentId.split('-')[0]}</span>) yoki to'liq ismini yozing.</i>
+                  <p className="text-[10px] text-slate-500 text-left">
+                    <i>To'lov o'tkazishda izohga o'quvchi ID sini (<span className="text-white font-mono">{selectedStudentId.split('-')[0]}</span>) yoki to'liq ismini yozing.</i>
                   </p>
                 </div>
 
@@ -657,9 +657,9 @@ function PortalContent() {
                     setPayStep('form');
                     setShowPayModal(true);
                   }}
-                  className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-xl shadow-emerald-500/25 relative z-10 active:scale-[0.98] cursor-pointer"
+                  className="w-full text-slate-900 font-bold py-3 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm relative z-10 active:scale-[0.98] cursor-pointer bg-emerald-600 hover:bg-emerald-500"
                 >
-                  <CreditCard size={18} className="text-slate-950" />
+                  <CreditCard size={18} className="text-slate-900" />
                   <span>Saytda Karta Orqali To‘lash (UzCard / Humo)</span>
                   <ArrowRight size={15} />
                 </button>
@@ -669,7 +669,7 @@ function PortalContent() {
                     href="https://my.click.uz/pay?card=9860120135408280"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-blue-500/20"
+                    className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-slate-900 font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-sm"
                   >
                     Click Ilovasi
                   </a>
@@ -677,17 +677,17 @@ function PortalContent() {
                     href="https://payme.uz/fallback/transfer/9860120135408280"
                     target="_blank"
                     rel="noreferrer"
-                    className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-lg shadow-teal-500/20"
+                    className="flex-1 text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-sm bg-teal-600 hover:bg-teal-500"
                   >
                     Payme Ilovasi
                   </a>
                 </div></div>
 
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-4">
                 To'lov Cheklari va Tarixi
               </h3>
               {payments.length === 0 ? (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500">
                   Hali to'lovlar amalga oshirilmagan
                 </div>
               ) : (
@@ -698,20 +698,20 @@ function PortalContent() {
                     return (
                       <div
                         key={p.id}
-                        className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between text-xs"
+                        className="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between text-xs"
                       >
                         <div>
-                          <span className="font-bold text-white">
+                          <span className="font-bold text-slate-900">
                             {new Date(p.paidAt).toLocaleDateString()}
                           </span>
-                          <p className="text-[10px] text-slate-400 mt-0.5">
+                          <p className="text-[10px] text-slate-500 mt-0.5">
                             {p.comment || (isCharge ? 'Oylik to\'lov' : 'Kassaga to\'lov')}
                           </p>
                         </div>
                         <div className="text-right">
                           <span
-                            className={`font-black text-xs ${
-                              isCharge ? 'text-slate-400' : 'text-emerald-400'
+                            className={`font-bold text-xs ${
+                              isCharge ? 'text-slate-500' : 'text-emerald-600'
                             }`}
                           >
                             {Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so'm
@@ -729,30 +729,30 @@ function PortalContent() {
           ) : (
             /* 4. SERTIFIKATLAR TABI */
             <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Rasmiy QR-Sertifikatlar
               </h3>
               {certificates.length === 0 ? (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-8 text-center text-xs text-slate-500 space-y-2">
-                  <Award size={28} className="mx-auto text-slate-600" />
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-8 text-center text-xs text-slate-500 space-y-2">
+                  <Award size={28} className="mx-auto text-slate-400" />
                   <p>Hozircha rasmiy sertifikat taqdim etilmagan.</p>
-                  <p className="text-[10px] text-slate-600">Kursni bitirganingizdan so'ng sertifikat shu yerda paydo bo'ladi.</p>
+                  <p className="text-[10px] text-slate-400">Kursni bitirganingizdan so'ng sertifikat shu yerda paydo bo'ladi.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {certificates.map((cert) => (
                     <div
                       key={cert.id}
-                      className="bg-slate-950 border-2 border-amber-500/30 rounded-2xl p-4 space-y-3 text-center"
+                      className="bg-slate-50 border-2 border-amber-500/30 rounded-2xl p-4 space-y-3 text-center"
                     >
-                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center mx-auto">
                         <GraduationCap size={22} />
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-white">{cert.courseTitle}</h4>
-                        <p className="text-[11px] font-mono text-amber-400 mt-0.5">{cert.certificateNumber}</p>
+                        <h4 className="text-sm font-bold text-slate-900">{cert.courseTitle}</h4>
+                        <p className="text-[11px] font-mono text-amber-600 mt-0.5">{cert.certificateNumber}</p>
                       </div>
-                      <div className="inline-block px-3 py-1 bg-amber-500/10 rounded-full text-amber-300 font-bold text-xs">
+                      <div className="inline-block px-3 py-1 bg-amber-500/10 rounded-full text-amber-700 font-bold text-xs">
                         Baho: {cert.grade}
                       </div>
                       <div className="pt-2">
@@ -773,26 +773,26 @@ function PortalContent() {
         </div>
       </div>
       {/* ======================================================== */}
-      {/* 💳 ONLINE KARTA ORQALI TO'LOV MODALI (EKVAYRING + SMS OTP) */}
+      {/* ONLINE KARTA ORQALI TO'LOV MODALI (EKVAYRING + SMS OTP) */}
       {/* ======================================================== */}
       {showPayModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-md p-6 shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-50 backdrop-blur-md animate-fadeIn">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-md p-6 shadow-sm relative overflow-hidden">
             
             {/* Modal Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-600">
                   <CreditCard size={18} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Online Karta orqali To‘lov</h3>
-                  <p className="text-[10px] text-slate-400">UzCard, Humo, Visa xavfsiz to‘lov tizimi</p>
+                  <h3 className="text-sm font-bold text-slate-900">Online Karta orqali To‘lov</h3>
+                  <p className="text-[10px] text-slate-500">UzCard, Humo, Visa xavfsiz to‘lov tizimi</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowPayModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition cursor-pointer"
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-900 transition cursor-pointer"
               >
                 <X size={16} />
               </button>
@@ -803,35 +803,35 @@ function PortalContent() {
               <form onSubmit={handleRequestSms} className="mt-5 space-y-4">
                 
                 {/* Interaktiv Karta Dizayni */}
-                <div className="w-full bg-gradient-to-tr from-slate-950 via-slate-900 to-emerald-950/60 border border-emerald-500/30 rounded-2xl p-4 shadow-xl relative overflow-hidden">
+                <div className="w-full border border-emerald-500/30 rounded-2xl p-4 shadow-sm relative overflow-hidden bg-white">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] tracking-wider uppercase font-bold text-slate-400">EduYuz Pay</span>
+                    <span className="text-[10px] tracking-wider uppercase font-bold text-slate-500">EduYuz Pay</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${getCardType(inputCardNumber).color}`}>
                       {getCardType(inputCardNumber).name}
                     </span>
                   </div>
 
                   <div className="my-4">
-                    <span className="font-mono text-base sm:text-lg font-black text-white tracking-widest block">
+                    <span className="font-mono text-base sm:text-lg font-bold text-slate-900 tracking-widest block">
                       {inputCardNumber || '•••• •••• •••• ••••'}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between text-[11px]">
                     <div>
-                      <span className="text-[9px] text-slate-400 block uppercase">O‘quvchi</span>
-                      <span className="font-bold text-slate-200">{studentData?.fullName || 'O‘quvchi'}</span>
+                      <span className="text-[9px] text-slate-500 block uppercase">O‘quvchi</span>
+                      <span className="font-bold text-slate-700">{studentData?.fullName || 'O‘quvchi'}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-[9px] text-slate-400 block uppercase">Muddati</span>
-                      <span className="font-mono font-bold text-slate-200">{inputCardExpiry || 'MM/YY'}</span>
+                      <span className="text-[9px] text-slate-500 block uppercase">Muddati</span>
+                      <span className="font-mono font-bold text-slate-700">{inputCardExpiry || 'MM/YY'}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* To'lov Summasi */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
                     To‘lov summasi (so‘mda)
                   </label>
                   <div className="relative">
@@ -842,7 +842,7 @@ function PortalContent() {
                       step={5000}
                       value={payAmount}
                       onChange={(e) => setPayAmount(Number(e.target.value))}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-bold text-emerald-400 focus:outline-none focus:border-emerald-500"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-emerald-600 focus:outline-none focus:border-emerald-500"
                     />
                     <span className="absolute right-3.5 top-2.5 text-xs font-bold text-slate-500">UZS</span>
                   </div>
@@ -854,7 +854,7 @@ function PortalContent() {
                         key={val}
                         type="button"
                         onClick={() => setPayAmount(val)}
-                        className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-[10px] font-medium transition cursor-pointer"
+                        className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-medium transition cursor-pointer"
                       >
                         +{val.toLocaleString()}
                       </button>
@@ -862,20 +862,20 @@ function PortalContent() {
                   </div>
                 </div>
 
-                <p className="text-[10px] text-slate-400 leading-relaxed">
-                  🔒 Karta ma’lumotlari bu sahifada so‘ralmaydi — ularni faqat to‘lov tizimining
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  Karta ma’lumotlari bu sahifada so‘ralmaydi — ularni faqat to‘lov tizimining
                   himoyalangan sahifasida kiritasiz.
                 </p>
 
-                <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-[10px] text-slate-400 flex items-center justify-between">
+                <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 text-[10px] text-slate-500 flex items-center justify-between">
                   <span>Qabul qiluvchi markaz kartasi:</span>
-                  <span className="font-mono font-bold text-emerald-400">9860 1201 3540 8280</span>
+                  <span className="font-mono font-bold text-emerald-600">9860 1201 3540 8280</span>
                 </div>
 
                 <button 
                   type="submit"
                   disabled={payLoading}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 cursor-pointer"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-900 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer"
                 >
                   {payLoading ? 'Yo‘naltirilmoqda...' : 'To‘lov sahifasiga o‘tish'}
                   <ArrowRight size={14} />
@@ -887,14 +887,14 @@ function PortalContent() {
             {payStep === 'sms' && (
               <form onSubmit={handleConfirmPayment} className="mt-5 space-y-4">
                 <div className="text-center space-y-2">
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 mx-auto flex items-center justify-center">
                     <Smartphone size={24} />
                   </div>
-                  <h4 className="text-sm font-bold text-white">SMS Kodni Kiriting</h4>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <h4 className="text-sm font-bold text-slate-900">SMS Kodni Kiriting</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
                     Kartangizga ulangan telefon raqamingizga tasdiqlash kodi yuborildi.
                   </p>
-                  <p className="text-xs font-bold text-emerald-400">
+                  <p className="text-xs font-bold text-emerald-600">
                     To‘lov summasi: {Number(payAmount).toLocaleString()} so‘m
                   </p>
                 </div>
@@ -908,19 +908,19 @@ function PortalContent() {
                     placeholder="••••••"
                     value={inputSmsCode}
                     onChange={(e) => setInputSmsCode(e.target.value.replace(/\D/g, ''))}
-                    className="w-full text-center tracking-[0.5em] font-mono text-xl font-black bg-slate-950 border-2 border-emerald-500/50 rounded-xl py-3 text-white focus:outline-none focus:border-emerald-400"
+                    className="w-full text-center tracking-[0.5em] font-mono text-xl font-bold bg-slate-50 border-2 border-emerald-500/50 rounded-xl py-3 text-slate-900 focus:outline-none focus:border-emerald-400"
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                <div className="flex items-center justify-between text-xs text-slate-500 px-1">
                   <span>Kodni kuting:</span>
-                  <span className="font-mono text-emerald-400 font-bold">{smsTimer} soniya</span>
+                  <span className="font-mono text-emerald-600 font-bold">{smsTimer} soniya</span>
                 </div>
 
                 <button 
                   type="submit"
                   disabled={payLoading}
-                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 cursor-pointer"
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-900 font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-sm cursor-pointer"
                 >
                   {payLoading ? 'To‘lov tasdiqlanmoqda...' : 'To‘lovni Tasdiqlash'}
                   <Lock size={14} />
@@ -929,7 +929,7 @@ function PortalContent() {
                 <button 
                   type="button"
                   onClick={() => setPayStep('form')}
-                  className="w-full py-2 text-xs text-slate-400 hover:text-white transition cursor-pointer"
+                  className="w-full py-2 text-xs text-slate-500 hover:text-slate-900 transition cursor-pointer"
                 >
                   ← Karta ma'lumotlarini o'zgartirish
                 </button>
@@ -939,36 +939,36 @@ function PortalContent() {
             {/* 3-BOSQICH: TO'LOV MUVAFFAQIYATLI (KVITANSIYA) */}
             {payStep === 'success' && (
               <div className="mt-5 text-center space-y-4">
-                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400 mx-auto flex items-center justify-center animate-bounce">
+                <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 text-emerald-600 mx-auto flex items-center justify-center animate-bounce">
                   <CheckCircle size={36} />
                 </div>
 
                 <div>
-                  <h4 className="text-base font-bold text-white">To‘lov Muvaffaqiyatli O‘tdi! 🎉</h4>
-                  <p className="text-xs text-slate-400 mt-1">O‘quvchi hisobiga pul kelib tushdi va balansi to‘ldirildi.</p>
+                  <h4 className="text-base font-bold text-slate-900">To‘lov Muvaffaqiyatli O‘tdi! </h4>
+                  <p className="text-xs text-slate-500 mt-1">O‘quvchi hisobiga pul kelib tushdi va balansi to‘ldirildi.</p>
                 </div>
 
                 {/* To'lov Cheki */}
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-left space-y-2 font-mono text-xs text-slate-300">
-                  <div className="flex justify-between border-b border-slate-800 pb-2">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-2 font-mono text-xs text-slate-600">
+                  <div className="flex justify-between border-b border-slate-200 pb-2">
                     <span className="text-slate-500">Tranzaksiya:</span>
-                    <span className="font-bold text-white">{lastPaymentInfo?.txId}</span>
+                    <span className="font-bold text-slate-900">{lastPaymentInfo?.txId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Summa:</span>
-                    <span className="font-bold text-emerald-400 text-sm">{Number(lastPaymentInfo?.amount).toLocaleString()} UZS</span>
+                    <span className="font-bold text-emerald-600 text-sm">{Number(lastPaymentInfo?.amount).toLocaleString()} UZS</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">To‘lovchi:</span>
-                    <span className="text-white">{lastPaymentInfo?.card}</span>
+                    <span className="text-slate-900">{lastPaymentInfo?.card}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Qabul qiluvchi:</span>
-                    <span className="text-emerald-300 font-bold">9860 1201 3540 8280 (Humo)</span>
+                    <span className="text-emerald-700 font-bold">9860 1201 3540 8280 (Humo)</span>
                   </div>
-                  <div className="flex justify-between pt-1 border-t border-slate-800">
+                  <div className="flex justify-between pt-1 border-t border-slate-200">
                     <span className="text-slate-500">Holat:</span>
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="text-emerald-600 font-bold flex items-center gap-1">
                       <ShieldCheck size={13} /> To‘landi (Tasdiqlangan)
                     </span>
                   </div>
@@ -977,7 +977,7 @@ function PortalContent() {
                 <button 
                   type="button"
                   onClick={() => setShowPayModal(false)}
-                  className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-xs transition cursor-pointer"
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 font-bold py-3 rounded-xl text-xs transition cursor-pointer"
                 >
                   Yopish
                 </button>

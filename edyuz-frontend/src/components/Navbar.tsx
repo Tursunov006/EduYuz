@@ -1,94 +1,110 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { Smartphone, Menu } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Menu, Search } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationCenter from './NotificationCenter';
-import ThemeToggle from './ThemeToggle';
-import { useTheme } from '@/lib/theme/ThemeContext';
 import { useSidebar } from '@/lib/context/SidebarContext';
+
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return ((parts[0]?.[0] || 'A') + (parts[1]?.[0] || '')).toUpperCase();
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: 'Superadmin',
+  admin: 'Direktor',
+  teacher: 'O‘qituvchi',
+};
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { theme } = useTheme();
+  const router = useRouter();
   const { toggle: toggleSidebar } = useSidebar();
-  const isLight = theme === 'light';
+  const [query, setQuery] = useState('');
+  const [user, setUser] = useState<{ fullName?: string; role?: string }>({});
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Agar login, portal, app yoki verify sahifasida bo'lsa navbar ko'rinmasin
+  useEffect(() => {
+    try {
+      setUser(JSON.parse(localStorage.getItem('user') || '{}'));
+    } catch {
+      setUser({});
+    }
+  }, []);
+
+  // Ctrl+K / Cmd+K — qidiruvga o'tish
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   if (
-    pathname === '/login' || 
-    pathname === '/portal' || 
-    pathname.startsWith('/app') || 
-    pathname.startsWith('/verify') || 
+    pathname === '/login' ||
+    pathname === '/portal' ||
+    pathname.startsWith('/app') ||
+    pathname.startsWith('/verify') ||
     pathname.startsWith('/games/play')
   ) {
     return null;
   }
 
+  function submitSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = query.trim();
+    router.push(q ? `/students?search=${encodeURIComponent(q)}` : '/students');
+    // O'quvchilar sahifasi allaqachon ochiq bo'lsa ham qidiruv yangilansin
+    window.dispatchEvent(new CustomEvent('eduyuz:search', { detail: q }));
+  }
+
+  const name = user.fullName || 'Administrator';
+
   return (
-    <header className={`h-16 px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 transition-colors duration-300 border-b ${
-      isLight 
-        ? 'bg-white/95 backdrop-blur-md border-slate-200 text-slate-800 shadow-sm' 
-        : 'bg-slate-900/85 backdrop-blur-md border-slate-800 text-slate-100'
-    }`}>
-      {/* Chap tomon: Hamburger tugmasi (faqat telefonlarda) + CRM holati */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className={`p-2 rounded-xl md:hidden transition active:scale-95 ${
-            isLight 
-              ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-100' 
-              : 'text-slate-300 hover:text-white hover:bg-slate-800/80'
-          }`}
-          aria-label="Menyuni ochish"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
+    <header className="h-16 px-3 sm:px-6 md:px-8 flex items-center gap-3 sticky top-0 z-20 bg-slate-50 backdrop-blur-md border-b border-slate-200/70">
+      <button
+        type="button"
+        onClick={toggleSidebar}
+        className="p-2 rounded-xl md:hidden text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition"
+        aria-label="Menyuni ochish"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
 
-        <div className="flex items-center gap-1.5 sm:gap-2 text-xs">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
-          <span className={isLight ? 'text-slate-500 font-medium hidden sm:inline' : 'text-slate-400 font-medium hidden sm:inline'}>
-            EduYuz CRM
-          </span>
-          <span className={isLight ? 'text-slate-400 hidden sm:inline' : 'text-slate-600 hidden sm:inline'}>•</span>
-          <span className={`font-semibold capitalize truncate max-w-[120px] sm:max-w-none ${isLight ? 'text-slate-800' : 'text-slate-200'}`}>
-            {pathname === '/' ? 'Dashboard' : pathname.replace('/', '').replace('-', ' ')}
-          </span>
-        </div>
-      </div>
+      {/* Global qidiruv */}
+      <form onSubmit={submitSearch} className="flex-1 max-w-2xl">
+        <label className="flex items-center gap-2.5 h-11 px-4 rounded-xl bg-white border border-slate-200 focus-within:border-indigo-400 transition-colors">
+          <Search className="w-4 h-4 text-slate-500 shrink-0" />
+          <input
+            ref={inputRef}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="O‘quvchi ismi yoki telefon raqamini qidiring"
+            className="flex-1 min-w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none"
+            aria-label="Qidirish"
+          />
+          <kbd className="hidden lg:inline-flex items-center px-2 h-6 rounded-md border border-slate-200 bg-slate-50 text-[11px] font-medium text-slate-500">
+            Ctrl K
+          </kbd>
+        </label>
+      </form>
 
-      {/* O'ng tomon: Asboblar, Rejim, Til, Bildirishnoma, Profil */}
-      <div className="flex items-center gap-1.5 sm:gap-3">
-        {/* Quick link to Mobile Mini App (faqat planshet/kompyuterda) */}
-        <Link
-          href="/app"
-          target="_blank"
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 border border-blue-500/30 text-blue-500 text-xs font-bold transition active:scale-95"
-          title="O‘quvchi mobil ilovasi (/app)"
-        >
-          <Smartphone className="w-3.5 h-3.5" />
-          <span>Mini Ilova (/app)</span>
-        </Link>
-
-        {/* Tungi / Kunduzgi Rejim Switcher */}
-        <ThemeToggle />
-
-        {/* Til Tanlagich (UZ / RU / EN) */}
+      <div className="ml-auto flex items-center gap-2 sm:gap-3">
         <LanguageSwitcher />
-
-        {/* Bildirishnomalar Markazi */}
         <NotificationCenter />
-
-        {/* Admin Profil badge */}
-        <div className={`flex items-center gap-2 pl-1.5 sm:pl-2 border-l ${isLight ? 'border-slate-200' : 'border-slate-800'}`}>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-600 flex items-center justify-center text-white text-xs font-bold shadow-sm shrink-0">
-            A
+        <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-200">
+          <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
+            {initials(name)}
           </div>
-          <div className="hidden lg:block text-left">
-            <div className={`text-xs font-bold leading-tight ${isLight ? 'text-slate-800' : 'text-white'}`}>Admin</div>
-            <div className={`text-[10px] ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Boshqaruvchi</div>
+          <div className="hidden lg:block leading-tight">
+            <div className="text-sm font-semibold text-slate-800 max-w-[160px] truncate">{name}</div>
+            <div className="text-[11px] text-slate-500">{ROLE_LABELS[user.role || ''] || 'Boshqaruvchi'}</div>
           </div>
         </div>
       </div>

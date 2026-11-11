@@ -133,13 +133,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
         <div className="space-y-1">
           <Link
             href="/groups"
-            className="inline-flex items-center gap-2 text-xs font-medium text-slate-400 hover:text-indigo-400 transition mb-2"
+            className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 hover:text-indigo-600 transition mb-2"
           >
             <ArrowLeft size={14} /> Guruhlar ro'yxatiga qaytish
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
             {group.name}
-            <span className="text-xs font-semibold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md">
+            <span className="text-xs font-semibold text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md">
               {group.course?.title || 'Kurs'}
             </span>
           </h1>
@@ -149,13 +149,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           <button
             onClick={handleChargeMonthly}
             disabled={billingLoading}
-            className="flex items-center gap-2 bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 text-amber-300 px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm"
+            className="flex items-center gap-2 bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 text-amber-700 px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm"
           >
             <Sparkles size={16} /> {billingLoading ? 'Yechilmoqda...' : 'Oylik to\'lovni yechish'}
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-indigo-600/20 transition-all"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all"
           >
             <UserPlus size={18} /> O'quvchi biriktirish
           </button>
@@ -163,46 +163,46 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* Guruh tafsilotlari kartasi */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center border border-indigo-500/20">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center border border-indigo-500/20">
             <User size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">O'qituvchi</p>
-            <p className="text-sm font-semibold text-white">{group.teacher?.fullName || 'Biriktirilmagan'}</p>
+            <p className="text-xs text-slate-500">O'qituvchi</p>
+            <p className="text-sm font-semibold text-slate-900">{group.teacher?.fullName || 'Biriktirilmagan'}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center border border-amber-500/20">
             <Clock size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Dars vaqti</p>
-            <p className="text-sm font-semibold text-white">{group.startTime} - {group.endTime}</p>
+            <p className="text-xs text-slate-500">Dars vaqti</p>
+            <p className="text-sm font-semibold text-slate-900">{group.startTime} - {group.endTime}</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center border border-emerald-500/20">
             <Calendar size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Dars kunlari</p>
-            <p className="text-sm font-semibold text-white">
+            <p className="text-xs text-slate-500">Dars kunlari</p>
+            <p className="text-sm font-semibold text-slate-900">
               {Array.isArray(group.days) ? group.days.join(', ') : group.days}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center border border-purple-500/20">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center border border-purple-500/20">
             <CreditCard size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Oylik to'lov narxi</p>
-            <p className="text-sm font-semibold text-emerald-400">
+            <p className="text-xs text-slate-500">Oylik to'lov narxi</p>
+            <p className="text-sm font-semibold text-emerald-600">
               {Number(group.course?.price || 0).toLocaleString()} so'm
             </p>
           </div>
@@ -210,13 +210,13 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       </div>
 
       {/* Tab Navigatsiyasi: O'quvchilar vs LMS */}
-      <div className="flex border-b border-slate-800 gap-2">
+      <div className="flex border-b border-slate-200 gap-2">
         <button
           onClick={() => setActiveTab('students')}
           className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition ${
             activeTab === 'students'
-              ? 'border-indigo-500 text-white'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-indigo-500 text-slate-900'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
           <Users size={18} />
@@ -226,8 +226,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           onClick={() => setActiveTab('lms')}
           className={`flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition ${
             activeTab === 'lms'
-              ? 'border-indigo-500 text-white'
-              : 'border-transparent text-slate-400 hover:text-slate-200'
+              ? 'border-indigo-500 text-slate-900'
+              : 'border-transparent text-slate-500 hover:text-slate-700'
           }`}
         >
           <BookOpen size={18} />
@@ -237,17 +237,17 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
       {activeTab === 'students' ? (
         /* Guruh O'quvchilari Jadvali */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm space-y-4 p-5">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm space-y-4 p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Layers size={18} className="text-indigo-400" />
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Layers size={18} className="text-indigo-600" />
               Guruhdagi O'quvchilar ({group.students?.length || 0})
             </h2>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-slate-950/60 border-b border-slate-800 text-slate-400 font-medium">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-medium">
                 <tr>
                   <th className="py-3 px-4">O'quvchi F.I.SH</th>
                   <th className="py-3 px-4">Telefon</th>
@@ -257,7 +257,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                   <th className="py-3 px-4 text-right">Amal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100/60">
                 {!group.students || group.students.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-10 text-center text-slate-500">
@@ -269,26 +269,26 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                     const st = item.student;
                     if (!st) return null;
                     return (
-                      <tr key={st.id} className="hover:bg-slate-800/30 transition">
-                        <td className="py-4 px-4 font-semibold text-white">{st.fullName}</td>
-                        <td className="py-4 px-4 text-slate-300">{st.phone || '-'}</td>
-                        <td className="py-4 px-4 text-slate-300">
+                      <tr key={st.id} className="hover:bg-slate-50 transition">
+                        <td className="py-4 px-4 font-semibold text-slate-900">{st.fullName}</td>
+                        <td className="py-4 px-4 text-slate-600">{st.phone || '-'}</td>
+                        <td className="py-4 px-4 text-slate-600">
                           <span className="inline-flex items-center gap-1.5">
                             <Phone size={14} className="text-slate-500" />
                             {st.parentPhone}
                           </span>
                         </td>
-                        <td className={`py-4 px-4 font-semibold ${Number(st.balance) < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                        <td className={`py-4 px-4 font-semibold ${Number(st.balance) < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                           {Number(st.balance).toLocaleString()} so'm
                         </td>
-                        <td className="py-4 px-4 text-slate-400">
+                        <td className="py-4 px-4 text-slate-500">
                           {new Date(item.joinedAt).toLocaleDateString()}
                         </td>
                         <td className="py-4 px-4 text-right">
                           <button
                             onClick={() => handleRemoveStudent(st.id, st.fullName)}
                             title="Guruhdan chiqarish"
-                            className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                            className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -308,15 +308,15 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
       {/* O'quvchi biriktirish Modali */}
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h2 className="text-xl font-bold text-white">Guruhga O'quvchi Biriktirish</h2>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">Guruhga O'quvchi Biriktirish</h2>
             <form onSubmit={handleAddStudent} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">
                   Mavjud o'quvchilardan birini tanlang
                 </label>
                 {availableStudents.length === 0 ? (
-                  <p className="text-xs text-amber-400 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
+                  <p className="text-xs text-amber-600 bg-amber-500/10 p-3 rounded-xl border border-amber-500/20">
                     Barcha mavjud o'quvchilar allaqachon ushbu guruhga biriktirilgan yoki bazada o'quvchilar yo'q.
                   </p>
                 ) : (
@@ -324,7 +324,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                     required
                     value={selectedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
                     {availableStudents.map((s) => (
                       <option key={s.id} value={s.id}>
@@ -335,11 +335,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 )}
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>

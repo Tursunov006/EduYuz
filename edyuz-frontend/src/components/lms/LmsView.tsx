@@ -270,21 +270,21 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
   return (
     <div className="space-y-6">
       {/* Yuqori boshqaruv paneli */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2.5">
-            <BookOpen className="text-indigo-400" size={22} />
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2.5">
+            <BookOpen className="text-indigo-600" size={22} />
             LMS — O'quv Darslari va Uyga Vazifalar
           </h2>
-          <p className="text-xs text-slate-400 mt-1">
-            Guruh: <span className="text-indigo-300 font-semibold">{groupName || 'Tanlangan guruh'}</span> — jami {lessons.length} ta dars mavjud
+          <p className="text-xs text-slate-500 mt-1">
+            Guruh: <span className="text-indigo-700 font-semibold">{groupName || 'Tanlangan guruh'}</span> — jami {lessons.length} ta dars mavjud
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsAiModalOpen(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-lg shadow-blue-600/20"
+            className="flex items-center gap-2 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm bg-indigo-600 hover:bg-indigo-500"
           >
             <Sparkles size={16} /> AI Dars & Test Generatori
           </button>
@@ -293,7 +293,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
               setLessonForm({ ...lessonForm, orderIndex: lessons.length + 1 });
               setIsAddLessonOpen(true);
             }}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-lg shadow-indigo-600/20"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm"
           >
             <Plus size={16} /> Yangi Dars Qo'shish
           </button>
@@ -304,10 +304,10 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
       {loading ? (
         <div className="p-12 text-center text-slate-500">Darslar yuklanmoqda...</div>
       ) : lessons.length === 0 ? (
-        <div className="bg-slate-900/60 border border-dashed border-slate-800 rounded-2xl p-12 text-center space-y-3">
-          <BookOpen size={36} className="mx-auto text-slate-600" />
-          <h3 className="text-base font-semibold text-white">Ushbu guruhda hali darslar yo'q</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+        <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-12 text-center space-y-3">
+          <BookOpen size={36} className="mx-auto text-slate-400" />
+          <h3 className="text-base font-semibold text-slate-900">Ushbu guruhda hali darslar yo'q</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
             "Yangi Dars Qo'shish" tugmasini bosib, birinchi dars mavzusi va video darslikni joylashtiring.
           </p>
         </div>
@@ -320,32 +320,32 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
             return (
               <div
                 key={lesson.id}
-                className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden transition-all duration-200"
+                className="bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-200"
               >
                 {/* Dars Sarlavhasi (Accordion header) */}
                 <div
-                  className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 select-none transition"
+                  className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50 select-none transition"
                   onClick={() => setExpandedLessonId(isExpanded ? null : lesson.id)}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-sm shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center font-bold text-sm shrink-0">
                       {lesson.orderIndex || idx + 1}
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                         {lesson.title}
                         {lesson.videoUrl && (
-                          <span className="text-[11px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium">
+                          <span className="text-[11px] bg-red-500/10 text-red-600 border border-red-500/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium">
                             <Video size={11} /> Video
                           </span>
                         )}
                         {lesson.fileUrl && (
-                          <span className="text-[11px] bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium">
+                          <span className="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-medium">
                             <FileText size={11} /> Material
                           </span>
                         )}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-500 mt-0.5">
                         {lesson.homeworks?.length || 0} ta uy vazifasi biriktirilgan
                       </p>
                     </div>
@@ -355,7 +355,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                     <Link
                       href={`/games/play?topic=${encodeURIComponent(lesson.title)}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-600/20 transition"
+                      className="px-3 py-1.5 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition bg-rose-600 hover:bg-rose-500"
                       title="Ushbu dars bo'yicha interaktiv o'yin o'ynash"
                     >
                       <Gamepad2 size={14} />
@@ -366,12 +366,12 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                         e.stopPropagation();
                         handleDeleteLesson(lesson.id, lesson.title);
                       }}
-                      className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                      className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-lg transition"
                       title="Darsni o'chirish"
                     >
                       <Trash2 size={16} />
                     </button>
-                    <div className="text-slate-400">
+                    <div className="text-slate-500">
                       {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                     </div>
                   </div>
@@ -379,14 +379,14 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
 
                 {/* Dars Kontenti (Akkordeon ochilganda) */}
                 {isExpanded && (
-                  <div className="border-t border-slate-800/80 p-6 space-y-6 bg-slate-950/40">
+                  <div className="border-t border-slate-200/80 p-6 space-y-6 bg-slate-50">
                     {/* Video pleyer */}
                     {embedUrl && (
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                          <Video size={14} className="text-indigo-400" /> Video Darslik
+                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                          <Video size={14} className="text-indigo-600" /> Video Darslik
                         </label>
-                        <div className="aspect-video w-full max-w-3xl rounded-xl overflow-hidden bg-black border border-slate-800 shadow-md">
+                        <div className="aspect-video w-full max-w-3xl rounded-xl overflow-hidden bg-black border border-slate-200 shadow-md">
                           <iframe
                             src={embedUrl}
                             title={lesson.title}
@@ -401,10 +401,10 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                     {/* Dars matni / konspekt */}
                     {lesson.content && (
                       <div className="space-y-1.5">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">
                           Dars Konspekti va Izohlar
                         </label>
-                        <div className="bg-slate-900 border border-slate-800/80 rounded-xl p-4 text-sm text-slate-300 whitespace-pre-wrap leading-relaxed">
+                        <div className="bg-white border border-slate-200/80 rounded-xl p-4 text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
                           {lesson.content}
                         </div>
                       </div>
@@ -417,7 +417,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                           href={lesson.fileUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-sky-400 text-xs font-medium px-4 py-2 rounded-xl transition"
+                          className="inline-flex items-center gap-2 bg-white hover:bg-slate-100 border border-slate-200 text-sky-600 text-xs font-medium px-4 py-2 rounded-xl transition"
                         >
                           <FileText size={15} />
                           Qo'shimcha Darslik Materialini Ko'rish / Yuklab olish
@@ -427,10 +427,10 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                     )}
 
                     {/* Avtomatik Test (Quiz) bo'limi */}
-                    <div className="border-t border-slate-800/80 pt-5 space-y-4">
+                    <div className="border-t border-slate-200/80 pt-5 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                          <CheckCircle2 size={16} className="text-emerald-400" />
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <CheckCircle2 size={16} className="text-emerald-600" />
                           Avtomatik Testlar (Quiz) {lesson.quiz ? '(Mavjud)' : ''}
                         </h4>
                         {!lesson.quiz && (
@@ -438,7 +438,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                             onClick={() => {
                               alert("Test qo'shish moduli hozirda ishlab chiqilmoqda...");
                             }}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium bg-emerald-500/10 text-emerald-700 border border-emerald-500/20 hover:bg-emerald-500/20 px-3 py-1.5 rounded-lg transition"
                           >
                             <Plus size={14} /> Test Qo'shish
                           </button>
@@ -448,12 +448,12 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                       {!lesson.quiz ? (
                         <p className="text-xs text-slate-500 italic">Ushbu dars uchun bilimni tekshiruvchi test kiritilmagan.</p>
                       ) : (
-                        <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+                        <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between">
                           <div>
-                            <h5 className="text-sm font-bold text-white">{lesson.quiz.title || 'Mavzulashtirilgan Test'}</h5>
-                            <p className="text-xs text-slate-400 mt-1">{lesson.quiz.questions?.length || 0} ta savol (Avtomatik tekshiriladi)</p>
+                            <h5 className="text-sm font-bold text-slate-900">{lesson.quiz.title || 'Mavzulashtirilgan Test'}</h5>
+                            <p className="text-xs text-slate-500 mt-1">{lesson.quiz.questions?.length || 0} ta savol (Avtomatik tekshiriladi)</p>
                           </div>
-                          <button className="text-xs text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-500/20">
+                          <button className="text-xs text-indigo-600 bg-indigo-500/10 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-500/20">
                             Natijalarni ko'rish
                           </button>
                         </div>
@@ -461,10 +461,10 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                     </div>
 
                     {/* Uyga vazifalar bo'limi */}
-                    <div className="border-t border-slate-800/80 pt-5 space-y-4">
+                    <div className="border-t border-slate-200/80 pt-5 space-y-4">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Award size={16} className="text-amber-400" />
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <Award size={16} className="text-amber-600" />
                           Uyga Vazifalar ({lesson.homeworks?.length || 0})
                         </h4>
                         <button
@@ -472,7 +472,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                             setSelectedLessonForHw(lesson.id);
                             setIsAddHomeworkOpen(true);
                           }}
-                          className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-500/10 text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg transition"
+                          className="inline-flex items-center gap-1.5 text-xs font-medium bg-amber-500/10 text-amber-700 border border-amber-500/20 hover:bg-amber-500/20 px-3 py-1.5 rounded-lg transition"
                         >
                           <Plus size={14} /> Vazifa biriktirish
                         </button>
@@ -488,30 +488,30 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                             return (
                               <div
                                 key={hw.id}
-                                className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-3 relative"
+                                className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 relative"
                               >
                                 <div className="flex items-start justify-between gap-2">
-                                  <h5 className="text-sm font-bold text-white">{hw.title}</h5>
-                                  <span className="text-[11px] font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md shrink-0">
+                                  <h5 className="text-sm font-bold text-slate-900">{hw.title}</h5>
+                                  <span className="text-[11px] font-semibold text-amber-600 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-md shrink-0">
                                     Maks: {hw.maxScore} ball
                                   </span>
                                 </div>
 
-                                <p className="text-xs text-slate-300 whitespace-pre-wrap leading-relaxed line-clamp-3">
+                                <p className="text-xs text-slate-600 whitespace-pre-wrap leading-relaxed line-clamp-3">
                                   {hw.description}
                                 </p>
 
                                 {hw.deadline && (
-                                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                                  <div className="text-[11px] text-slate-500 flex items-center gap-1.5">
                                     <Clock size={13} className="text-slate-500" />
                                     Muddati: {new Date(hw.deadline).toLocaleString()}
                                   </div>
                                 )}
 
-                                <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                                <div className="pt-2 border-t border-slate-200 flex items-center justify-between gap-2">
                                   <button
                                     onClick={() => handleOpenReview(hw)}
-                                    className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1.5 transition"
+                                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 transition"
                                   >
                                     <CheckCircle2 size={14} />
                                     Javoblar ({subCount})
@@ -522,7 +522,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                                       setSelectedHomeworkForSubmit(hw);
                                       setIsSubmitModalOpen(true);
                                     }}
-                                    className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg font-medium transition inline-flex items-center gap-1.5"
+                                    className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-medium transition inline-flex items-center gap-1.5"
                                   >
                                     <Send size={12} /> Topshirish
                                   </button>
@@ -544,51 +544,51 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
       {/* 1. Yangi Dars Qo'shish Modali */}
       {isAddLessonOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Yangi Dars Qo'shish</h3>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-lg space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900">Yangi Dars Qo'shish</h3>
             <form onSubmit={handleCreateLesson} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400">Dars Mavzusi *</label>
+                <label className="text-xs font-semibold text-slate-500">Dars Mavzusi *</label>
                 <input
                   type="text"
                   required
                   placeholder="Masalan: 1-Dars. JavaScript Asoslari va O'zgaruvchilar"
                   value={lessonForm.title}
                   onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Video Darslik Havolasi (YouTube / havola)</label>
+                <label className="text-xs font-semibold text-slate-500">Video Darslik Havolasi (YouTube / havola)</label>
                 <input
                   type="url"
                   placeholder="https://www.youtube.com/watch?v=..."
                   value={lessonForm.videoUrl}
                   onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Dars Konspekti / Qo'llanma matni</label>
+                <label className="text-xs font-semibold text-slate-500">Dars Konspekti / Qo'llanma matni</label>
                 <textarea
                   rows={3}
                   placeholder="Darsda o'tilgan asosiy tushunchalar va eslatmalar..."
                   value={lessonForm.content}
                   onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Qo'shimcha Material Havolasi (Google Drive / GitHub / PDF)</label>
+                <label className="text-xs font-semibold text-slate-500">Qo'shimcha Material Havolasi (Google Drive / GitHub / PDF)</label>
                 <input
                   type="url"
                   placeholder="https://..."
                   value={lessonForm.fileUrl}
                   onChange={(e) => setLessonForm({ ...lessonForm, fileUrl: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -596,7 +596,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                 <button
                   type="button"
                   onClick={() => setIsAddLessonOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>
@@ -615,50 +615,50 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
       {/* 2. Darsga Uyga Vazifa Qo'shish Modali */}
       {isAddHomeworkOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Darsga Uyga Vazifa Biriktirish</h3>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900">Darsga Uyga Vazifa Biriktirish</h3>
             <form onSubmit={handleCreateHomework} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400">Vazifa Sarlavhasi *</label>
+                <label className="text-xs font-semibold text-slate-500">Vazifa Sarlavhasi *</label>
                 <input
                   type="text"
                   required
                   placeholder="Masalan: Kalkulyator dasturini tuzish"
                   value={hwForm.title}
                   onChange={(e) => setHwForm({ ...hwForm, title: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Topshiriq Sharti va Talablar *</label>
+                <label className="text-xs font-semibold text-slate-500">Topshiriq Sharti va Talablar *</label>
                 <textarea
                   rows={4}
                   required
                   placeholder="Talaba nimalar qilishi kerak, qanday qabul qilinadi..."
                   value={hwForm.description}
                   onChange={(e) => setHwForm({ ...hwForm, description: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-semibold text-slate-400">Maksimal Ball</label>
+                  <label className="text-xs font-semibold text-slate-500">Maksimal Ball</label>
                   <input
                     type="number"
                     value={hwForm.maxScore}
                     onChange={(e) => setHwForm({ ...hwForm, maxScore: Number(e.target.value) })}
-                    className="w-full mt-1.5 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                    className="w-full mt-1.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-400">Topshirish Muddati</label>
+                  <label className="text-xs font-semibold text-slate-500">Topshirish Muddati</label>
                   <input
                     type="datetime-local"
                     value={hwForm.deadline}
                     onChange={(e) => setHwForm({ ...hwForm, deadline: e.target.value })}
-                    className="w-full mt-1.5 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                    className="w-full mt-1.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                   />
                 </div>
               </div>
@@ -667,7 +667,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                 <button
                   type="button"
                   onClick={() => setIsAddHomeworkOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>
@@ -686,17 +686,17 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
       {/* 3. O'quvchi Vazifa Topshirish Modali */}
       {isSubmitModalOpen && selectedHomeworkForSubmit && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Vazifa Topshirish</h3>
-            <p className="text-xs text-indigo-400 font-medium">{selectedHomeworkForSubmit.title}</p>
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-900">Vazifa Topshirish</h3>
+            <p className="text-xs text-indigo-600 font-medium">{selectedHomeworkForSubmit.title}</p>
             <form onSubmit={handleSubmitHomework} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-slate-400">O'quvchini Tanlang *</label>
+                <label className="text-xs font-semibold text-slate-500">O'quvchini Tanlang *</label>
                 <select
                   required
                   value={submitForm.studentId}
                   onChange={(e) => setSubmitForm({ ...submitForm, studentId: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                 >
                   <option value="">O'quvchi tanlang...</option>
                   {students.map((item: any) => {
@@ -711,14 +711,14 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-400">Javob Matni yoki Havola (GitHub, Figma, Google Docs) *</label>
+                <label className="text-xs font-semibold text-slate-500">Javob Matni yoki Havola (GitHub, Figma, Google Docs) *</label>
                 <textarea
                   rows={4}
                   required
                   placeholder="Vazifa havolasi yoki yozma javobingiz..."
                   value={submitForm.content}
                   onChange={(e) => setSubmitForm({ ...submitForm, content: e.target.value })}
-                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
@@ -726,7 +726,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                 <button
                   type="button"
                   onClick={() => setIsSubmitModalOpen(false)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
                 </button>
@@ -745,15 +745,15 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
       {/* 4. O'qituvchi Vazifalarni Tekshirish va Baholash Modali */}
       {isReviewModalOpen && selectedHomeworkForReview && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-2xl space-y-4 shadow-2xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-2xl space-y-4 shadow-sm max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div>
-                <h3 className="text-lg font-bold text-white">Topshirilgan Vazifalar</h3>
-                <p className="text-xs text-indigo-400 mt-0.5">{selectedHomeworkForReview.title}</p>
+                <h3 className="text-lg font-bold text-slate-900">Topshirilgan Vazifalar</h3>
+                <p className="text-xs text-indigo-600 mt-0.5">{selectedHomeworkForReview.title}</p>
               </div>
               <button
                 onClick={() => setIsReviewModalOpen(false)}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-slate-500 hover:text-slate-900 text-sm"
               >
                 Yopish
               </button>
@@ -771,34 +771,34 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                   return (
                     <div
                       key={sub.id}
-                      className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3"
+                      className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3"
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm font-bold text-white">{sub.student?.fullName}</p>
-                          <p className="text-[11px] text-slate-400">
+                          <p className="text-sm font-bold text-slate-900">{sub.student?.fullName}</p>
+                          <p className="text-[11px] text-slate-500">
                             Topshirildi: {new Date(sub.submittedAt).toLocaleString()}
                           </p>
                         </div>
                         <span
                           className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
                             sub.status === 'reviewed'
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                              ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                              : 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
                           }`}
                         >
                           {sub.status === 'reviewed' ? `Baholangan (${sub.score} ball)` : 'Kutilmoqda'}
                         </span>
                       </div>
 
-                      <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 text-xs text-slate-200 whitespace-pre-wrap">
+                      <div className="bg-white border border-slate-200 rounded-lg p-3 text-xs text-slate-700 whitespace-pre-wrap">
                         {sub.content}
                       </div>
 
                       {/* Baholash qismi */}
-                      <div className="pt-2 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                      <div className="pt-2 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
                         <div className="sm:col-span-3">
-                          <label className="text-[11px] text-slate-400 block mb-1">Baho (max {selectedHomeworkForReview.maxScore})</label>
+                          <label className="text-[11px] text-slate-500 block mb-1">Baho (max {selectedHomeworkForReview.maxScore})</label>
                           <input
                             type="number"
                             min="0"
@@ -810,12 +810,12 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                                 [sub.id]: { ...currentGrade, score: Number(e.target.value) },
                               })
                             }
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white"
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900"
                           />
                         </div>
 
                         <div className="sm:col-span-6">
-                          <label className="text-[11px] text-slate-400 block mb-1">O'qituvchi Izohi</label>
+                          <label className="text-[11px] text-slate-500 block mb-1">O'qituvchi Izohi</label>
                           <input
                             type="text"
                             placeholder="Izoh yoki tavsiya..."
@@ -826,7 +826,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                                 [sub.id]: { ...currentGrade, feedback: e.target.value },
                               })
                             }
-                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white"
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900"
                           />
                         </div>
 

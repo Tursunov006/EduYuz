@@ -5,19 +5,19 @@ export type Language = 'uz' | 'ru' | 'en';
 export const translations: Record<Language, Record<string, string>> = {
   uz: {
     // Navigatsiya
-    'nav.dashboard': 'Dashboard',
+    'nav.dashboard': 'Boshqaruv paneli',
     'nav.announcements': 'E‘lonlar',
     'nav.students': 'O‘quvchilar',
-    'nav.groups': 'Guruhlar va Jadval',
+    'nav.groups': 'Guruhlar va jadval',
     'nav.teachers': 'O‘qituvchilar',
     'nav.attendance': 'Davomat',
-    'nav.payments': 'Moliya va Kassa',
+    'nav.payments': 'Moliya va kassa',
     'nav.expenses': 'Moliya & Chiqim',
-    'nav.lms': 'Ta‘lim va Sertifikatlar',
+    'nav.lms': 'Ta’lim va sertifikatlar',
     'nav.games': 'Mavzuli O‘yinlar',
     'nav.leaderboard': 'Reyting & Coins',
     'nav.certificates': 'Sertifikatlar',
-    'nav.portal': 'O‘quvchi Portali',
+    'nav.portal': 'O‘quvchi portali',
     'nav.logout': 'Chiqish',
 
     // Dashboard
@@ -50,7 +50,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'games.timer': 'Vaqt',
     'games.score': 'Ball',
     'games.combo': 'On Fire!',
-    'games.victory': 'O‘yin Yakunlandi! 🎉',
+    'games.victory': 'O‘yin Yakunlandi! ',
     'games.earnedCoins': 'EduCoin Yutib Oldingiz!',
 
     // Mini App
@@ -120,7 +120,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'games.timer': 'Время',
     'games.score': 'Баллы',
     'games.combo': 'В огне!',
-    'games.victory': 'Игра завершена! 🎉',
+    'games.victory': 'Игра завершена! ',
     'games.earnedCoins': 'Вы выиграли EduCoins!',
 
     // Mini App
@@ -190,7 +190,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'games.timer': 'Time',
     'games.score': 'Score',
     'games.combo': 'On Fire!',
-    'games.victory': 'Game Complete! 🎉',
+    'games.victory': 'Game Complete! ',
     'games.earnedCoins': 'EduCoins Earned!',
 
     // Mini App

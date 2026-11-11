@@ -26,7 +26,7 @@ function Instagram({ size = 16, className = '' }: { size?: number; className?: s
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -35,7 +35,7 @@ function Instagram({ size = 16, className = '' }: { size?: number; className?: s
       className={className}
     >
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <path d="M16 11.37A4 4 0 1 12.63 8 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
     </svg>
   );
@@ -93,25 +93,25 @@ const STAGES: { key: LeadStage; title: string; badgeColor: string; borderColor: 
   {
     key: 'new',
     title: 'Yangi Murojaatlar',
-    badgeColor: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
+    badgeColor: 'bg-cyan-500/15 text-cyan-700 border-cyan-500/30',
     borderColor: 'border-t-cyan-500',
   },
   {
     key: 'contacted',
     title: 'Aloqaga Chiqildi',
-    badgeColor: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+    badgeColor: 'bg-amber-500/15 text-amber-700 border-amber-500/30',
     borderColor: 'border-t-amber-500',
   },
   {
     key: 'trial',
     title: 'Sinov Darsiga Yozildi',
-    badgeColor: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+    badgeColor: 'bg-purple-500/15 text-purple-700 border-purple-500/30',
     borderColor: 'border-t-purple-500',
   },
   {
     key: 'enrolled',
     title: 'O‘quvchiga Aylandi',
-    badgeColor: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    badgeColor: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/30',
     borderColor: 'border-t-emerald-500',
   },
 ];
@@ -285,7 +285,7 @@ export default function LeadsPage() {
       });
 
       moveStage(lead.id, 'enrolled');
-      alert(`🎉 ${lead.fullName} muvaffaqiyatli O'quvchilar bazasiga qo'shildi!`);
+      alert(`${lead.fullName} muvaffaqiyatli O'quvchilar bazasiga qo'shildi!`);
     } catch (err: any) {
       alert(err.message || 'O‘quvchiga aylantirishda xatolik');
     } finally {
@@ -316,7 +316,7 @@ export default function LeadsPage() {
       await fetchAndMergeLeads();
     } catch {
       setTestDmReply(
-        "✅ Raqamingiz qabul qilindi va EduYuz CRM Lidlar voronkasiga qo'shildi! Mutaxassisimiz tez orada bog'lanadi."
+        "Raqamingiz qabul qilindi va EduYuz CRM Lidlar voronkasiga qo'shildi! Mutaxassisimiz tez orada bog'lanadi."
       );
     } finally {
       setTestDmLoading(false);
@@ -333,18 +333,18 @@ export default function LeadsPage() {
   return (
     <div className="space-y-6 sm:space-y-8 pb-12">
       {/* 1. Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900/95 to-indigo-950/60 border border-slate-800/80 p-5 sm:p-8 shadow-2xl backdrop-blur-xl">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-pink-600/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="relative">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-80 h-80 bg-pink-600/15 rounded-full hidden pointer-events-none"></div>
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-5">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-300 text-xs font-semibold">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/20 text-pink-700 text-xs font-semibold">
               <Instagram size={13} /> @eduyuzcrmuz • Instagram & Sotuv Voronkasi
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2.5">
-              <UserPlus className="text-cyan-400" /> Lidlar va Murojaatlar
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
+              <UserPlus className="text-cyan-600" /> Lidlar va Murojaatlar
             </h1>
-            <p className="text-slate-400 text-xs sm:text-sm max-w-xl">
+            <p className="text-slate-500 text-xs sm:text-sm max-w-xl">
               Instagram (@eduyuzcrmuz), Telegram va qo&apos;ng&apos;iroq orqali kelgan yangi mijozlarni sinov darsiga yozing va bir tugma bilan o&apos;quvchiga aylantiring.
             </p>
           </div>
@@ -352,14 +352,14 @@ export default function LeadsPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setIsInstaModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-indigo-600/20 hover:from-pink-600/30 hover:to-indigo-600/30 border border-pink-500/40 text-pink-300 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-lg shadow-pink-500/10"
+              className="flex items-center justify-center gap-2 border border-pink-500/40 text-pink-700 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm bg-indigo-50"
             >
-              <Instagram size={16} className="text-pink-400" /> @eduyuzcrmuz Integratsiya
+              <Instagram size={16} className="text-pink-600" /> @eduyuzcrmuz Integratsiya
             </button>
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95"
+              className="flex items-center justify-center gap-2 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02] active:scale-95 bg-indigo-600 hover:bg-indigo-500"
             >
               <Plus size={16} /> + Yangi Lid Qo&apos;shish
             </button>
@@ -371,21 +371,21 @@ export default function LeadsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md flex items-center gap-2">
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
             <input
               type="text"
               placeholder="Ism, telefon yoki kurs bo'yicha qidirish..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-500"
             />
           </div>
           <button
             onClick={fetchAndMergeLeads}
             title="Instagram lidlarini yangilash"
-            className="p-2.5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:border-slate-700 transition"
+            className="p-2.5 rounded-2xl bg-white border border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-300 transition"
           >
-            <RefreshCw size={16} className={syncing ? 'animate-spin text-pink-400' : ''} />
+            <RefreshCw size={16} className={syncing ? 'animate-spin text-pink-600' : ''} />
           </button>
         </div>
 
@@ -393,14 +393,14 @@ export default function LeadsPage() {
           <Link
             href="/insta"
             target="_blank"
-            className="px-3.5 py-2 rounded-2xl bg-pink-500/10 border border-pink-500/30 text-pink-300 font-bold flex items-center gap-1.5 hover:bg-pink-500/20 transition"
+            className="px-3.5 py-2 rounded-2xl bg-pink-500/10 border border-pink-500/30 text-pink-700 font-bold flex items-center gap-1.5 hover:bg-pink-500/20 transition"
           >
             <Instagram size={14} /> eduyuz.uz/insta sahifasini ochish <ExternalLink size={12} />
           </Link>
-          <div className="px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-slate-300">
-            Jami murojaatlar: <strong className="text-white font-bold">{leads.length} ta</strong>
+          <div className="px-3.5 py-2 rounded-2xl bg-white border border-slate-200 text-slate-600">
+            Jami murojaatlar: <strong className="text-slate-900 font-bold">{leads.length} ta</strong>
           </div>
-          <div className="px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold">
+          <div className="px-3.5 py-2 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-bold">
             O&apos;quvchiga aylandi: {leads.filter((l) => l.stage === 'enrolled').length} ta
           </div>
         </div>
@@ -414,11 +414,11 @@ export default function LeadsPage() {
           return (
             <div
               key={stage.key}
-              className={`bg-slate-900/75 border border-slate-800/90 border-t-4 ${stage.borderColor} rounded-3xl p-4 flex flex-col gap-3 min-h-[420px] backdrop-blur-md`}
+              className={`bg-white border border-slate-200/90 border-t-4 ${stage.borderColor} rounded-2xl p-4 flex flex-col gap-3 min-h-[420px] backdrop-blur-md`}
             >
               {/* Ustun Sarlavhasi */}
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800/80">
-                <span className="text-xs font-extrabold text-white tracking-wide uppercase">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <span className="text-xs font-bold text-slate-900 tracking-wide uppercase">
                   {stage.title}
                 </span>
                 <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${stage.badgeColor}`}>
@@ -429,63 +429,63 @@ export default function LeadsPage() {
               {/* Ustun Ichidagi Kartalar */}
               <div className="space-y-3 flex-1">
                 {stageLeads.length === 0 ? (
-                  <div className="h-44 flex items-center justify-center text-center text-xs text-slate-600 border border-dashed border-slate-800/80 rounded-2xl p-4">
+                  <div className="h-44 flex items-center justify-center text-center text-xs text-slate-400 border border-dashed border-slate-200/80 rounded-2xl p-4">
                     Bu bosqichda murojaatlar yo&apos;q
                   </div>
                 ) : (
                   stageLeads.map((lead) => (
                     <div
                       key={lead.id}
-                      className="bg-slate-950/90 border border-slate-800/90 hover:border-slate-700 rounded-2xl p-4 space-y-3 shadow-lg transition group"
+                      className="bg-slate-50 border border-slate-200/90 hover:border-slate-300 rounded-2xl p-4 space-y-3 shadow-sm transition group"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
                               lead.source === 'Instagram'
-                                ? 'bg-pink-500/15 text-pink-300 border-pink-500/30'
-                                : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/20'
+                                ? 'bg-pink-500/15 text-pink-700 border-pink-500/30'
+                                : 'bg-indigo-500/15 text-indigo-700 border-indigo-500/20'
                             }`}
                           >
-                            {lead.source === 'Instagram' ? '📸 Instagram' : lead.source}
+                            {lead.source === 'Instagram' ? 'Instagram' : lead.source}
                           </span>
-                          <h4 className="text-sm font-extrabold text-white mt-1.5">{lead.fullName}</h4>
+                          <h4 className="text-sm font-bold text-slate-900 mt-1.5">{lead.fullName}</h4>
                         </div>
                         <button
                           onClick={() => deleteLead(lead.id)}
-                          className="text-slate-600 hover:text-rose-400 p-1 opacity-0 group-hover:opacity-100 transition"
+                          className="text-slate-400 hover:text-rose-600 p-1 opacity-0 group-hover:opacity-100 transition"
                           title="O'chirish"
                         >
                           <Trash2 size={14} />
                         </button>
                       </div>
 
-                      <div className="text-xs space-y-1 text-slate-300">
-                        <div className="font-semibold text-cyan-400">{lead.courseInterest}</div>
-                        <div className="flex items-center gap-1.5 text-slate-400">
+                      <div className="text-xs space-y-1 text-slate-600">
+                        <div className="font-semibold text-cyan-600">{lead.courseInterest}</div>
+                        <div className="flex items-center gap-1.5 text-slate-500">
                           <Phone size={12} /> {lead.phone}
                         </div>
                         {lead.igUsername && (
-                          <div className="text-[11px] text-pink-400 font-medium">
+                          <div className="text-[11px] text-pink-600 font-medium">
                             @{lead.igUsername.replace('@', '')}
                           </div>
                         )}
                         {lead.note && (
-                          <p className="text-[11px] text-slate-400 bg-slate-900/90 p-2 rounded-xl border border-slate-800/70 mt-1">
+                          <p className="text-[11px] text-slate-500 bg-white p-2 rounded-xl border border-slate-200/70 mt-1">
                             &quot;{lead.note}&quot;
                           </p>
                         )}
                       </div>
 
                       {/* Bosqichni o'zgartirish tugmalari */}
-                      <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1.5">
+                      <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between gap-1.5">
                         <span className="text-[10px] text-slate-500">{lead.createdAt}</span>
 
                         <div className="flex items-center gap-1">
                           {stage.key === 'new' && (
                             <button
                               onClick={() => moveStage(lead.id, 'contacted')}
-                              className="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[11px] font-bold flex items-center gap-1 transition"
+                              className="px-2.5 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 border border-amber-500/30 text-[11px] font-bold flex items-center gap-1 transition"
                             >
                               Bog&apos;lanildi <ArrowRight size={11} />
                             </button>
@@ -494,7 +494,7 @@ export default function LeadsPage() {
                           {stage.key === 'contacted' && (
                             <button
                               onClick={() => moveStage(lead.id, 'trial')}
-                              className="px-2.5 py-1 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 text-[11px] font-bold flex items-center gap-1 transition"
+                              className="px-2.5 py-1 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-700 border border-purple-500/30 text-[11px] font-bold flex items-center gap-1 transition"
                             >
                               Sinov darsi <ArrowRight size={11} />
                             </button>
@@ -504,7 +504,7 @@ export default function LeadsPage() {
                             <button
                               disabled={convertingId === lead.id}
                               onClick={() => convertToStudent(lead)}
-                              className="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[11px] font-extrabold flex items-center gap-1 transition"
+                              className="px-2.5 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-700 border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition"
                             >
                               <CheckCircle2 size={12} />
                               {convertingId === lead.id ? 'Qo‘shilmoqda...' : 'O‘quvchi qilish'}
@@ -512,7 +512,7 @@ export default function LeadsPage() {
                           )}
 
                           {stage.key === 'enrolled' && (
-                            <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                            <span className="text-[11px] text-emerald-600 font-bold flex items-center gap-1">
                               <CheckCircle2 size={12} /> Qabul qilingan
                             </span>
                           )}
@@ -530,68 +530,68 @@ export default function LeadsPage() {
       {/* 4. INSTAGRAM (@eduyuzcrmuz) INTEGRATSIYA VA SOZLAMALAR MODALI */}
       {isInstaModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-xl w-full p-6 shadow-2xl space-y-5 my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-xl w-full p-6 shadow-sm space-y-5 my-8">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 via-pink-500 to-purple-600 flex items-center justify-center text-white">
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white bg-amber-600">
                   <Instagram size={18} />
                 </div>
                 <div>
-                  <h2 className="text-base sm:text-lg font-extrabold text-white">
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">
                     @eduyuzcrmuz Instagram + AI Integratsiya
                   </h2>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Instagram Bio havolasi va Direct (DM) AI Sotuv Menejer sozlamalari
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsInstaModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800"
+                className="text-slate-500 hover:text-slate-900 p-1.5 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* 1-Qadam: Bio Link */}
-            <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 space-y-2.5">
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold text-pink-400 uppercase tracking-wider">
+                <span className="text-xs font-bold text-pink-600 uppercase tracking-wider">
                   1. Instagram Bio Havolasi (Tayyor!)
                 </span>
                 <Link
                   href="/insta"
                   target="_blank"
-                  className="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-semibold"
+                  className="text-xs text-indigo-600 hover:underline flex items-center gap-1 font-semibold"
                 >
                   Ochib ko&apos;rish <ExternalLink size={12} />
                 </Link>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Ushbu havolani <strong>@eduyuzcrmuz</strong> profilingizdagi <strong>Edit profile → Website</strong> qismiga qo&apos;ying. Mijozlar kirib ariza qoldirsa yoki AI bilan gaplashsa, shu Kanban doskaga avtomatik tushadi:
               </p>
               <div className="flex items-center gap-2">
                 <input
                   readOnly
                   value="https://eduyuz.uz/insta"
-                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-emerald-400"
+                  className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-emerald-600"
                 />
                 <button
                   onClick={() => copyToClipboard('https://eduyuz.uz/insta', 'bio')}
-                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1.5"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-900 flex items-center gap-1.5"
                 >
-                  {copiedKey === 'bio' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                  {copiedKey === 'bio' ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                   {copiedKey === 'bio' ? 'Nusxalandi' : 'Nusxalash'}
                 </button>
               </div>
             </div>
 
             {/* 2-Qadam: Meta Webhook / ManyChat */}
-            <div className="bg-slate-950 border border-slate-800/90 rounded-2xl p-4 space-y-2.5">
-              <span className="text-xs font-extrabold text-cyan-400 uppercase tracking-wider">
+            <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-4 space-y-2.5">
+              <span className="text-xs font-bold text-cyan-600 uppercase tracking-wider">
                 2. Instagram Direct Webhook (Meta Developer / ManyChat)
               </span>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-500">
                 Meta for Developers yoki ManyChat ichida Instagram DM Webhook sifatida quyidagi manzilni ulang:
               </p>
               <div className="space-y-2">
@@ -599,24 +599,24 @@ export default function LeadsPage() {
                   <input
                     readOnly
                     value="https://eduyuz.onrender.com/api/v1/instagram/webhook"
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs font-mono text-cyan-300"
+                    className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-cyan-700"
                   />
                   <button
                     onClick={() =>
                       copyToClipboard('https://eduyuz.onrender.com/api/v1/instagram/webhook', 'webhook')
                     }
-                    className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white flex items-center gap-1"
+                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-900 flex items-center gap-1"
                   >
-                    {copiedKey === 'webhook' ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                    {copiedKey === 'webhook' ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
                   </button>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-slate-400 bg-slate-900/70 px-3 py-1.5 rounded-xl">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 bg-white px-3 py-1.5 rounded-xl">
                   <span>
-                    Verify Token: <strong className="text-white font-mono">eduyuz_insta_2026</strong>
+                    Verify Token: <strong className="text-slate-900 font-mono">eduyuz_insta_2026</strong>
                   </span>
                   <button
                     onClick={() => copyToClipboard('eduyuz_insta_2026', 'token')}
-                    className="text-indigo-400 hover:text-indigo-300 font-semibold"
+                    className="text-indigo-600 hover:text-indigo-700 font-semibold"
                   >
                     {copiedKey === 'token' ? 'Nusxalandi!' : 'Tokenni nusxalash'}
                   </button>
@@ -625,9 +625,9 @@ export default function LeadsPage() {
             </div>
 
             {/* 3-Qadam: Jonli Sinov (Instagram DM Simulator) */}
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-extrabold text-indigo-300">
-                <Bot size={15} className="text-indigo-400" />
+            <div className="bg-slate-50 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-700">
+                <Bot size={15} className="text-indigo-600" />
                 3. Instagram Direct AI Menejerni Hoziroq Sinab Ko&apos;ring:
               </div>
               <form onSubmit={handleTestInstagramDm} className="flex items-center gap-2">
@@ -636,20 +636,20 @@ export default function LeadsPage() {
                   value={testDmText}
                   onChange={(e) => setTestDmText(e.target.value)}
                   placeholder="Instagram mijoz xabarini yozing..."
-                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                  className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-indigo-500"
                 />
                 <button
                   type="submit"
                   disabled={testDmLoading}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-indigo-600 text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-3.5 py-2 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-50 bg-indigo-600"
                 >
                   <Send size={13} /> {testDmLoading ? '...' : 'Yuborish'}
                 </button>
               </form>
               {testDmReply && (
-                <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 whitespace-pre-line">
-                  <div className="text-[10px] font-bold text-pink-400 mb-1">
-                    🤖 @eduyuzcrmuz AI javobi (va Lid yaratildi):
+                <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs text-slate-700 whitespace-pre-line">
+                  <div className="text-[10px] font-bold text-pink-600 mb-1">
+                    @eduyuzcrmuz AI javobi (va Lid yaratildi):
                   </div>
                   {testDmReply}
                 </div>
@@ -657,17 +657,17 @@ export default function LeadsPage() {
             </div>
 
             {/* 4-Qadam: Obunachi Yig'ish Algoritmi (Viral Reels + Komment Trigger) */}
-            <div className="bg-gradient-to-br from-pink-950/30 to-slate-950 border border-pink-500/30 rounded-2xl p-4 space-y-3">
+            <div className="border border-pink-500/30 rounded-2xl p-4 space-y-3 bg-indigo-50">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold text-pink-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="text-xs font-bold text-pink-600 uppercase tracking-wider flex items-center gap-1.5">
                   <Sparkles size={14} /> 4. Obunachi Yig&apos;ish Algoritmi (Faol!)
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 font-bold">
                   Avto-Trigger Yoqilgan
                 </span>
               </div>
 
-              <div className="text-xs text-slate-300 space-y-1.5">
+              <div className="text-xs text-slate-600 space-y-1.5">
                 <p>
                   <strong>Qanday ishlaydi:</strong> Reels yoki Post ostiga mijoz quyidagi kalit so&apos;zlardan birini komment yozsa, algoritm uning Direct&apos;iga avtomatik <strong>100 000 so&apos;m Vaucher + Bepul Demo</strong> havolasini yuboradi:
                 </p>
@@ -675,7 +675,7 @@ export default function LeadsPage() {
                   {['CRM', 'DEMO', 'NARX', 'BONUS', '+'].map((kw) => (
                     <span
                       key={kw}
-                      className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-300 font-mono text-[11px] font-bold"
+                      className="px-2.5 py-1 rounded-lg bg-pink-500/15 border border-pink-500/30 text-pink-700 font-mono text-[11px] font-bold"
                     >
                       &quot;{kw}&quot;
                     </span>
@@ -683,26 +683,26 @@ export default function LeadsPage() {
                 </div>
               </div>
 
-              <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 space-y-2">
+              <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-300">
-                    🎬 Tayyor Viral Reels & Post Matni (Nusxalab qo&apos;ying):
+                  <span className="text-[11px] font-bold text-slate-600">
+                    Tayyor Viral Reels & Post Matni (Nusxalab qo&apos;ying):
                   </span>
                   <button
                     onClick={() =>
                       copyToClipboard(
-                        `🎓 O'quv markazingiz CRM-siz oyiga qancha pul yo'qotayotganini bilasizmi?\n\n📅 Avtomatik davomat va Ota-onalar Telegram boti\n💰 100% aniq Kassa va Qarzdorlar nazorati\n🎯 Instagram Lidlar voronkasi\n\n🎁 @eduyuzcrmuz sahifamizga OBUNA bo'ling va kommentga «CRM» deb yozing — Direct'ingizga 7 kunlik BEPUL DEMO + 100,000 so'm Vaucher yuboramiz! 👇`,
+                        `O'quv markazingiz CRM-siz oyiga qancha pul yo'qotayotganini bilasizmi?\n\nAvtomatik davomat va Ota-onalar Telegram boti\n100% aniq Kassa va Qarzdorlar nazorati\nInstagram Lidlar voronkasi\n\n@eduyuzcrmuz sahifamizga OBUNA bo'ling va kommentga «CRM» deb yozing — Direct'ingizga 7 kunlik BEPUL DEMO + 100,000 so'm Vaucher yuboramiz! `,
                         'reels_caption'
                       )
                     }
-                    className="text-[11px] text-pink-400 hover:text-pink-300 font-bold flex items-center gap-1"
+                    className="text-[11px] text-pink-600 hover:text-pink-700 font-bold flex items-center gap-1"
                   >
                     {copiedKey === 'reels_caption' ? <Check size={12} /> : <Copy size={12} />}
                     {copiedKey === 'reels_caption' ? 'Nusxalandi!' : 'Matnni nusxalash'}
                   </button>
                 </div>
-                <p className="text-[11px] text-slate-400 italic leading-relaxed">
-                  &quot;🎓 O&apos;quv markazingiz CRM-siz oyiga qancha pul yo&apos;qotayotganini bilasizmi? @eduyuzcrmuz sahifamizga OBUNA bo&apos;ling va kommentga «CRM» deb yozing — Direct&apos;ingizga 7 kunlik BEPUL DEMO + 100,000 so&apos;m Vaucher yuboramiz! 👇&quot;
+                <p className="text-[11px] text-slate-500 italic leading-relaxed">
+                  &quot;O&apos;quv markazingiz CRM-siz oyiga qancha pul yo&apos;qotayotganini bilasizmi? @eduyuzcrmuz sahifamizga OBUNA bo&apos;ling va kommentga «CRM» deb yozing — Direct&apos;ingizga 7 kunlik BEPUL DEMO + 100,000 so&apos;m Vaucher yuboramiz! &quot;
                 </p>
               </div>
             </div>
@@ -713,14 +713,14 @@ export default function LeadsPage() {
       {/* 5. Yangi Lid Qo'shish Modali */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
-                <UserPlus size={18} className="text-cyan-400" /> Yangi Murojaat (Lid)
+          <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-sm space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <UserPlus size={18} className="text-cyan-600" /> Yangi Murojaat (Lid)
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800"
+                className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
               </button>
@@ -728,34 +728,34 @@ export default function LeadsPage() {
 
             <form onSubmit={handleAddLead} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">F.I.SH (Mijoz ismi)</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">F.I.SH (Mijoz ismi)</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Sardorbek Aliyev"
                   value={form.fullName}
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Telefon raqami</label>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">Telefon raqami</label>
                   <input
                     required
                     type="text"
                     value={form.phone}
                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5">Qayerdan keldi?</label>
+                  <label className="block text-xs font-bold text-slate-600 mb-1.5">Qayerdan keldi?</label>
                   <select
                     value={form.source}
                     onChange={(e) => setForm({ ...form, source: e.target.value as Lead['source'] })}
-                    className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                   >
                     <option value="Instagram">Instagram (@eduyuzcrmuz)</option>
                     <option value="Telegram">Telegram Kanal/Bot</option>
@@ -766,39 +766,39 @@ export default function LeadsPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Qiziqqan fan yo&apos;nalishi</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Qiziqqan fan yo&apos;nalishi</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Ingliz tili (IELTS) yoki Frontend"
                   value={form.courseInterest}
                   onChange={(e) => setForm({ ...form, courseInterest: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">Izoh (ixtiyoriy)</label>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Izoh (ixtiyoriy)</label>
                 <input
                   type="text"
                   placeholder="Masalan: Tushdan keyingi vaqt qulay..."
                   value={form.note}
                   onChange={(e) => setForm({ ...form, note: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-2xl text-slate-200 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-2.5 rounded-2xl bg-slate-800 text-slate-300 text-xs font-bold"
+                  className="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold"
                 >
                   Bekor qilish
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white text-xs font-bold shadow-lg shadow-purple-600/30"
+                  className="px-6 py-2.5 rounded-2xl text-white text-xs font-bold shadow-sm bg-indigo-600"
                 >
                   Voronkaga Qo&apos;shish
                 </button>
