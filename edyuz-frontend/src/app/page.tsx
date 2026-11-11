@@ -16,23 +16,13 @@ import axios from 'axios';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { exportToExcel } from '@/lib/excelExport';
 
-// Namuna: 7 kunlik davomat va tushum dinamikasi (Line/Area Chart uchun)
-const weeklyTrendData = [
-  { day: 'Dush', attendance: 42, revenue: 1400 },
-  { day: 'Sesh', attendance: 38, revenue: 950 },
-  { day: 'Chor', attendance: 45, revenue: 2100 },
-  { day: 'Pay', attendance: 40, revenue: 800 },
-  { day: 'Jum', attendance: 48, revenue: 2600 },
-  { day: 'Shan', attendance: 52, revenue: 3400 },
-  { day: 'Yak', attendance: 20, revenue: 400 },
-];
-
-// Namuna: To'lov turlari taqsimoti (Donut Chart uchun)
-const paymentMethodData = [
-  { name: 'Payme / Click', value: 55, color: '#06b6d4' },
-  { name: 'Naqd Pul', value: 30, color: '#10b981' },
-  { name: 'Bank Kartasi', value: 15, color: '#8b5cf6' },
-];
+const DAY_NAMES = ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'];
+const METHOD_LABELS: Record<string, { name: string; color: string }> = {
+  cash: { name: 'Naqd pul', color: '#10b981' },
+  card: { name: 'Bank kartasi', color: '#8b5cf6' },
+  click: { name: 'Click', color: '#06b6d4' },
+  payme: { name: 'Payme', color: '#f59e0b' },
+};
 
 export default function DashboardPage() {
   const { t } = useTranslation();
@@ -45,10 +35,13 @@ export default function DashboardPage() {
   const [recentPayments, setRecentPayments] = useState<any[]>([]);
   const [debtors, setDebtors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weeklyData, setWeeklyData] = useState<{ day: string; revenue: number }[]>([]);
+  const [methodData, setMethodData] = useState<{ name: string; value: number; color: string }[]>([]);
+  const [monthGrowth, setMonthGrowth] = useState<number | null>(null);
 
   // Reja ko'rsatkichlari (Plan vs Actual)
   const targetRevenue = 25000000; // 25 mln so'm oylik reja
-  const currentRevenue = stats.paymentsTotal || 16400000;
+  const currentRevenue = stats.paymentsTotal;
   const revenuePercent = Math.min(Math.round((currentRevenue / targetRevenue) * 100), 100);
 
   useEffect(() => {
@@ -69,10 +62,55 @@ export default function DashboardPage() {
           studentsCount: students?.length || 0,
           groupsCount: groups?.length || 0,
           coursesCount: courses?.length || 0,
-          paymentsTotal: totalPay || 18500000,
+          paymentsTotal: totalPay,
         });
         setRecentPayments(positivePayments.slice(0, 5));
         setDebtors(debtList);
+
+        // Oxirgi 7 kun tushumi (kunlar bo'yicha)
+        const now = new Date();
+        const days: { day: string; revenue: number; key: string }[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(now);
+          d.setDate(now.getDate() - i);
+          days.push({ day: DAY_NAMES[d.getDay()], revenue: 0, key: d.toDateString() });
+        }
+        positivePayments.forEach((p: any) => {
+          const key = new Date(p.paidAt).toDateString();
+          const slot = days.find((d) => d.key === key);
+          if (slot) slot.revenue += Number(p.amount || 0);
+        });
+        setWeeklyData(days.map(({ day, revenue }) => ({ day, revenue })));
+
+        // To'lov usullari bo'yicha taqsimot
+        const byMethod: Record<string, number> = {};
+        positivePayments.forEach((p: any) => {
+          const k = p.paymentMethod || 'cash';
+          byMethod[k] = (byMethod[k] || 0) + Number(p.amount || 0);
+        });
+        const methodTotal = Object.values(byMethod).reduce((x, y) => x + y, 0);
+        setMethodData(
+          Object.entries(byMethod).map(([k, v]) => ({
+            name: METHOD_LABELS[k]?.name || k,
+            value: methodTotal > 0 ? Math.round((v / methodTotal) * 100) : 0,
+            color: METHOD_LABELS[k]?.color || '#64748b',
+          })),
+        );
+
+        // Joriy oy va o'tgan oy tushumi o'rtasidagi o'zgarish
+        const thisMonth = now.getMonth();
+        const thisYear = now.getFullYear();
+        let cur = 0;
+        let prev = 0;
+        positivePayments.forEach((p: any) => {
+          const d = new Date(p.paidAt);
+          const amt = Number(p.amount || 0);
+          if (d.getFullYear() === thisYear && d.getMonth() === thisMonth) cur += amt;
+          const pm = thisMonth === 0 ? 11 : thisMonth - 1;
+          const py = thisMonth === 0 ? thisYear - 1 : thisYear;
+          if (d.getFullYear() === py && d.getMonth() === pm) prev += amt;
+        });
+        setMonthGrowth(prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null);
       } catch (err) {
         console.error(err);
       } finally {
@@ -211,8 +249,8 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
             <span className="text-slate-400">O'tgan oyga nisbatan:</span>
-            <span className="text-emerald-400 font-bold flex items-center gap-0.5">
-              +18.4% <TrendingUp size={12} />
+            <span className={`font-bold flex items-center gap-0.5 ${monthGrowth !== null && monthGrowth < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+              {monthGrowth === null ? '—' : `${monthGrowth >= 0 ? '+' : ''}${monthGrowth}%`} <TrendingUp size={12} />
             </span>
           </div>
         </div>
@@ -239,8 +277,8 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
-            <span className="text-slate-400">O'rtacha to'lalik:</span>
-            <span className="text-purple-300 font-bold">92%</span>
+            <span className="text-slate-400">Qarzdor o'quvchilar:</span>
+            <span className="text-rose-300 font-bold">{debtors.length} ta</span>
           </div>
         </div>
 
@@ -255,16 +293,13 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-base font-bold text-white flex items-center gap-2">
                 <TrendingUp size={18} className="text-cyan-400" />
-                Haftalik Davomat va Tushum Dinamikasi
+                Haftalik Tushum Dinamikasi
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Face-ID orqali o'tgan o'quvchilar va kunlik tushumlar</p>
+              <p className="text-xs text-slate-400 mt-0.5">Oxirgi 7 kundagi kunlik tushumlar</p>
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="flex items-center gap-1.5 text-cyan-400 font-semibold">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400"></span> Davomat
-              </span>
               <span className="flex items-center gap-1.5 text-purple-400 font-semibold">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Tushum (ming so'm)
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-400"></span> Tushum (so'm)
               </span>
             </div>
           </div>
@@ -272,12 +307,8 @@ export default function DashboardPage() {
           {/* Area Chart */}
           <div className="h-64 sm:h-72 w-full pt-2">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weeklyTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={weeklyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06b6d4" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="#06b6d4" stopOpacity={0.0}/>
-                  </linearGradient>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
                     <stop offset="95%" stopColor="#a855f7" stopOpacity={0.0}/>
@@ -294,8 +325,7 @@ export default function DashboardPage() {
                     boxShadow: '0 10px 25px -5px rgba(0,0,0,0.5)'
                   }} 
                 />
-                <Area type="monotone" dataKey="attendance" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#attendanceGradient)" />
-                <Area type="monotone" dataKey="revenue" stroke="#a855f7" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#revenueGradient)" />
+                <Area type="monotone" dataKey="revenue" stroke="#a855f7" strokeWidth={2} fillOpacity={1} fill="url(#revenueGradient)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -315,7 +345,7 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={paymentMethodData}
+                  data={methodData}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -323,7 +353,7 @@ export default function DashboardPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {paymentMethodData.map((entry, index) => (
+                  {methodData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
@@ -340,7 +370,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-2 pt-2 border-t border-slate-800/80">
-            {paymentMethodData.map((item, idx) => (
+            {methodData.length === 0 && (
+              <div className="text-center text-xs text-slate-500 py-2">Hali to‘lovlar yo‘q</div>
+            )}
+            {methodData.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs">
                 <span className="flex items-center gap-2 text-slate-300">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }}></span>

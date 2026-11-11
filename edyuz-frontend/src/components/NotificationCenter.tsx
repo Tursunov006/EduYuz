@@ -18,32 +18,8 @@ export default function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: '1',
-      title: 'Yangi to‘lov qabul qilindi',
-      desc: 'Jasur Bekmurodov — 450 000 so‘m (Naqd)',
-      time: '12 daqiqa oldin',
-      type: 'payment',
-      read: false,
-    },
-    {
-      id: '2',
-      title: 'Mavzuli O‘yin yutug‘i',
-      desc: 'Dasturlash asoslari bo‘yicha +25 EduCoin yutildi',
-      time: '45 daqiqa oldin',
-      type: 'game',
-      read: false,
-    },
-    {
-      id: '3',
-      title: 'Davomat SMS xabarnomasi',
-      desc: '3 ta o‘quvchining ota-onasiga yo‘qlama SMS yuborildi',
-      time: '2 soat oldin',
-      type: 'alert',
-      read: true,
-    },
-  ]);
+  // Haqiqiy bildirishnomalar manbasi hali ulanmagan — soxta (demo) yozuvlar ko'rsatilmaydi
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
