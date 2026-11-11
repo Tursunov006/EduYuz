@@ -165,28 +165,48 @@ export default function GroupsPage() {
     (g.teacher?.fullName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Shaxmatka (Dars jadvali) soatlari
+  // Dars jadvali soatlari
   const TIME_SLOTS = [
-    { start: '08:00', end: '10:00', label: '08:00 — 10:00 (Ertalabki 1-smena)' },
-    { start: '10:00', end: '12:00', label: '10:00 — 12:00 (Ertalabki 2-smena)' },
-    { start: '14:00', end: '16:00', label: '14:00 — 16:00 (Kunduzgi 1-smena)' },
-    { start: '16:00', end: '18:00', label: '16:00 — 18:00 (Kunduzgi 2-smena)' },
-    { start: '18:00', end: '20:00', label: '18:00 — 20:00 (Kechki smena)' },
+    { start: '08:00', end: '10:00', label: 'Ertalab' },
+    { start: '10:00', end: '12:00', label: 'Ertalab' },
+    { start: '14:00', end: '16:00', label: 'Kunduzi' },
+    { start: '16:00', end: '18:00', label: 'Kunduzi' },
+    { start: '18:00', end: '20:00', label: 'Kechqurun' },
   ];
 
-  const getGroupsForSlot = (slotStart: string, dayType: 'odd' | 'even') => {
-    const slotHour = parseInt(slotStart.split(':')[0], 10);
-    return filteredGroups.filter((g) => {
-      const daysStr = (Array.isArray(g.days) ? g.days.join(' ') : String(g.days || '')).toLowerCase();
-      const isOdd = daysStr.includes('dush') || daysStr.includes('toq') || daysStr.includes('har kuni');
-      const isEven = daysStr.includes('sesh') || daysStr.includes('juft') || daysStr.includes('har kuni') || daysStr.includes('dam');
-      const matchesDay = dayType === 'odd' ? isOdd : isEven;
-      if (!matchesDay) return false;
+  const DAY_COLUMNS = [
+    { type: 'odd' as const, title: 'Toq kunlar', days: 'Dushanba · Chorshanba · Juma', dot: 'bg-indigo-500', accent: 'border-l-indigo-500', formDays: 'Dush-Chor-Jum' },
+    { type: 'even' as const, title: 'Juft kunlar', days: 'Seshanba · Payshanba · Shanba', dot: 'bg-emerald-500', accent: 'border-l-emerald-500', formDays: 'Sesh-Pay-Shan' },
+  ];
 
-      const groupHour = parseInt((g.startTime || '14:00').split(':')[0], 10);
-      return Math.abs(groupHour - slotHour) <= 1;
-    });
+  const toMinutes = (t?: string) => {
+    const [h, m] = String(t || '14:00').split(':').map((x) => parseInt(x, 10));
+    return (isNaN(h) ? 14 : h) * 60 + (isNaN(m) ? 0 : m);
   };
+
+  // Har bir guruh faqat bitta qatorga tushadi: boshlanish vaqtidan oldingi eng yaqin smena
+  const slotIndexOf = (g: Group) => {
+    const start = toMinutes(g.startTime);
+    let idx = 0;
+    TIME_SLOTS.forEach((s, i) => {
+      if (toMinutes(s.start) <= start) idx = i;
+    });
+    return idx;
+  };
+
+  const dayTypeMatches = (g: Group, dayType: 'odd' | 'even') => {
+    const d = (Array.isArray(g.days) ? g.days.join(' ') : String(g.days || '')).toLowerCase();
+    if (d.includes('har kuni')) return true;
+    if (dayType === 'odd') return d.includes('dush') || d.includes('chor') || d.includes('jum') || d.includes('toq');
+    return d.includes('sesh') || d.includes('pay') || d.includes('shan') || d.includes('juft') || d.includes('dam');
+  };
+
+  const getGroupsForSlot = (slotIdx: number, dayType: 'odd' | 'even') =>
+    filteredGroups
+      .filter((g) => slotIndexOf(g) === slotIdx && dayTypeMatches(g, dayType))
+      .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+
+  const scheduledCount = filteredGroups.filter((g) => dayTypeMatches(g, 'odd') || dayTypeMatches(g, 'even')).length;
 
   const openModalForSlot = (start: string, end: string, days: string) => {
     setFormData((prev) => ({
@@ -209,22 +229,22 @@ export default function GroupsPage() {
           <div className="space-y-1.5">
             <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Guruhlar va jadval</h1>
             <p className="text-slate-500 text-xs sm:text-sm">
-              Markazdagi barcha dars guruhlari, fan yo'nalishlari va Toq / Juft kunlar shaxmatkasi
+              Barcha guruhlar va haftalik dars jadvali
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => setIsCourseModalOpen(true)}
-              className="flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-750 text-cyan-700 border border-cyan-500/30 px-4 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all active:scale-95"
+              className="flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition"
             >
-              <GraduationCap size={16} /> + Yangi Fan (Kurs)
+              <GraduationCap size={16} /> Yangi kurs
             </button>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 text-white px-5 py-3 rounded-2xl text-xs sm:text-sm font-bold transition-all shadow-sm hover:scale-[1.02] active:scale-95 bg-indigo-600 hover:bg-indigo-500"
+              className="flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 transition"
             >
-              <Plus size={16} /> Yangi Guruh Ochish
+              <Plus size={16} /> Yangi guruh
             </button>
           </div>
         </div>
@@ -253,7 +273,7 @@ export default function GroupsPage() {
             }`}
           >
             <Calendar size={16} />
-            <span>Dars Jadvali (Shaxmatka)</span>
+            <span>Dars jadvali</span>
           </button>
         </div>
 
@@ -273,134 +293,90 @@ export default function GroupsPage() {
       {loading ? (
         <div className="p-16 text-center text-slate-500 text-sm">Guruhlar yuklanmoqda...</div>
       ) : activeTab === 'timetable' ? (
-        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-5 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50">
+        <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
+          {/* Sarlavha */}
+          <div className="px-5 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200">
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Calendar className="text-cyan-600" size={20} />
-                Haftalik Dars Jadvali (Toq va Juft kunlar Shaxmatkasi)
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Bo‘sh vaqt katakchalarini bosib, o‘sha soatga 1-klikda yangi guruh biriktirishingiz mumkin
-              </p>
+              <h2 className="text-lg font-bold text-slate-900">Haftalik dars jadvali</h2>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Bo‘sh katakni bosib, shu vaqtga yangi guruh qo‘shing</p>
             </div>
-            <div className="flex items-center gap-3 text-xs">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 font-bold">
-                Toq kunlar: Dush / Chor / Jum
+            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600">
+              <span className="inline-flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Toq kunlar
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 font-bold">
-                Juft kunlar: Sesh / Pay / Shan
+              <span className="inline-flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Juft kunlar
               </span>
+              <span className="text-slate-400">{scheduledCount} ta guruh jadvalda</span>
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[780px]">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-wider text-slate-500">
-                  <th className="py-4 px-5 w-52 border-r border-slate-200">Dars Vaqti (Smena)</th>
-                  <th className="py-4 px-5 w-1/2 border-r border-slate-200 text-indigo-700">
-                    Toq kunlar (Dushanba • Chorshanba • Juma)
-                  </th>
-                  <th className="py-4 px-5 w-1/2 text-emerald-700">
-                    Juft kunlar (Seshanba • Payshanba • Shanba)
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100/80 text-sm">
-                {TIME_SLOTS.map((slot) => {
-                  const oddGroups = getGroupsForSlot(slot.start, 'odd');
-                  const evenGroups = getGroupsForSlot(slot.start, 'even');
+            <div className="min-w-[720px]">
+              {/* Ustun sarlavhalari */}
+              <div className="grid grid-cols-[150px_1fr_1fr] bg-slate-50 border-b border-slate-200">
+                <div className="px-5 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
+                {DAY_COLUMNS.map((col) => (
+                  <div key={col.type} className="px-5 py-3 border-l border-slate-200">
+                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                      <span className={`w-2 h-2 rounded-full ${col.dot}`} /> {col.title}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-0.5 ml-4">{col.days}</p>
+                  </div>
+                ))}
+              </div>
 
-                  return (
-                    <tr key={slot.start} className="hover:bg-slate-50 transition">
-                      {/* Vaqt ustuni */}
-                      <td className="p-4 sm:p-5 border-r border-slate-200 align-top bg-slate-50">
-                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 font-mono text-xs font-bold">
-                          <Clock size={14} />
-                          {slot.start} — {slot.end}
-                        </div>
-                        <p className="text-[11px] text-slate-500 mt-1.5 font-medium">{slot.label}</p>
-                      </td>
+              {/* Qatorlar */}
+              {TIME_SLOTS.map((slot, i) => (
+                <div
+                  key={slot.start}
+                  className={`grid grid-cols-[150px_1fr_1fr] ${i > 0 ? 'border-t border-slate-200' : ''}`}
+                >
+                  <div className="px-5 py-4">
+                    <p className="text-base font-bold text-slate-900 tabular-nums">{slot.start}</p>
+                    <p className="text-xs text-slate-500 tabular-nums">{slot.end} gacha</p>
+                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md bg-slate-100 text-[11px] font-medium text-slate-600">
+                      {slot.label}
+                    </span>
+                  </div>
 
-                      {/* Toq kunlar ustuni */}
-                      <td className="p-4 border-r border-slate-200 align-top">
-                        <div className="space-y-2.5">
-                          {oddGroups.map((g) => {
-                            const badge = getCourseBadge(g.course?.title || g.name);
-                            return (
-                              <Link
-                                key={g.id}
-                                href={`/groups/${g.id}`}
-                                className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-indigo-500/50 transition group"
-                              >
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-slate-900 group-hover:text-cyan-600 transition text-sm">
-                                    {badge.icon} {g.name}
-                                  </span>
-                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-indigo-500/10 text-indigo-700 border border-indigo-500/20">
-                                    {g.startTime}–{g.endTime}
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between text-xs text-slate-500">
-                                  <span>{g.teacher?.fullName || 'Ustoz'}</span>
-                                  <span className="text-slate-600 font-semibold">
-                                    {g._count?.students || 0} o‘quvchi
-                                  </span>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                          <button
-                            onClick={() => openModalForSlot(slot.start, slot.end, 'Dush-Chor-Jum')}
-                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-200 hover:border-indigo-500/50 text-slate-500 hover:text-indigo-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  {DAY_COLUMNS.map((col) => {
+                    const list = getGroupsForSlot(i, col.type);
+                    return (
+                      <div key={col.type} className="p-3 border-l border-slate-200 flex flex-col gap-2">
+                        {list.map((g) => (
+                          <Link
+                            key={g.id}
+                            href={`/groups/${g.id}`}
+                            className={`block px-3.5 py-3 rounded-xl border border-slate-200 border-l-4 ${col.accent} bg-white hover:bg-slate-50 transition`}
                           >
-                            <Plus size={14} /> Shu vaqtga guruh qo‘shish
-                          </button>
-                        </div>
-                      </td>
-
-                      {/* Juft kunlar ustuni */}
-                      <td className="p-4 align-top">
-                        <div className="space-y-2.5">
-                          {evenGroups.map((g) => {
-                            const badge = getCourseBadge(g.course?.title || g.name);
-                            return (
-                              <Link
-                                key={g.id}
-                                href={`/groups/${g.id}`}
-                                className="block p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-500/50 transition group"
-                              >
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <span className="font-bold text-slate-900 group-hover:text-emerald-600 transition text-sm">
-                                    {badge.icon} {g.name}
-                                  </span>
-                                  <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
-                                    {g.startTime}–{g.endTime}
-                                  </span>
-                                </div>
-                                <div className="flex items-center justify-between text-xs text-slate-500">
-                                  <span>{g.teacher?.fullName || 'Ustoz'}</span>
-                                  <span className="text-slate-600 font-semibold">
-                                    {g._count?.students || 0} o‘quvchi
-                                  </span>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                          <button
-                            onClick={() => openModalForSlot(slot.start, slot.end, 'Sesh-Pay-Shan')}
-                            className="w-full py-2 px-3 rounded-xl border border-dashed border-slate-200 hover:border-emerald-500/50 text-slate-500 hover:text-emerald-700 text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <Plus size={14} /> Shu vaqtga guruh qo‘shish
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                            <div className="flex items-start justify-between gap-2">
+                              <span className="text-sm font-semibold text-slate-900 leading-snug">{g.name}</span>
+                              <span className="shrink-0 text-xs font-medium text-slate-500 tabular-nums">
+                                {g.startTime}–{g.endTime}
+                              </span>
+                            </div>
+                            <div className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500">
+                              <span className="truncate">{g.teacher?.fullName || 'O‘qituvchi biriktirilmagan'}</span>
+                              <span className="shrink-0">{g._count?.students || 0} o‘quvchi</span>
+                            </div>
+                          </Link>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => openModalForSlot(slot.start, slot.end, col.formDays)}
+                          className={`w-full rounded-xl border border-dashed border-slate-200 text-xs font-medium text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition flex items-center justify-center gap-1.5 ${
+                            list.length ? 'h-9' : 'flex-1 min-h-[64px]'
+                          }`}
+                        >
+                          <Plus size={14} /> Guruh qo‘shish
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ) : filteredGroups.length === 0 ? (
