@@ -1,11 +1,67 @@
 @import "tailwindcss";
 
-/* EduYuz dizayni (Figma: "EduYuz Dashboard v3"):
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* EduYuz dizayni (Figma: "EduYuz Dashboard v2"):
    och kul rang fon, oq kartalar, yupqa chegaralar, indigo asosiy rang. */
 :root {
   --background: #f5f7fb;
   --foreground: #111827;
+  --surface: #ffffff;
   color-scheme: light;
+}
+
+/* Tungi rejim: xuddi shu dizayn, faqat ranglar qorong'i.
+   Sahifalar slate/oq ranglardan foydalanadi, shuning uchun ularni shu yerda almashtiramiz. */
+html.dark {
+  color-scheme: dark;
+  --background: #0b1120;
+  --foreground: #e5e7eb;
+  --surface: #131b2e;
+
+  --color-slate-50: #182136;
+  --color-slate-100: #1f2a42;
+  --color-slate-200: #2a3650;
+  --color-slate-300: #3a4763;
+  --color-slate-400: #7d89a3;
+  --color-slate-500: #94a0b8;
+  --color-slate-600: #b3bdd0;
+  --color-slate-700: #cbd3e1;
+  --color-slate-800: #e2e8f0;
+  --color-slate-900: #f1f5f9;
+
+  --color-indigo-50: rgb(99 102 241 / 0.16);
+  --color-indigo-100: rgb(99 102 241 / 0.24);
+  --color-indigo-200: rgb(99 102 241 / 0.4);
+  --color-blue-50: rgb(59 130 246 / 0.16);
+  --color-blue-200: rgb(59 130 246 / 0.4);
+  --color-violet-50: rgb(139 92 246 / 0.16);
+  --color-purple-50: rgb(168 85 247 / 0.16);
+  --color-purple-200: rgb(168 85 247 / 0.4);
+  --color-emerald-50: rgb(16 185 129 / 0.16);
+  --color-emerald-100: rgb(16 185 129 / 0.24);
+  --color-emerald-200: rgb(16 185 129 / 0.4);
+  --color-rose-50: rgb(244 63 94 / 0.16);
+  --color-rose-200: rgb(244 63 94 / 0.4);
+  --color-amber-50: rgb(245 158 11 / 0.16);
+  --color-amber-200: rgb(245 158 11 / 0.4);
+}
+
+/* Oq kartalar tunda qorong'i yuzaga aylanadi (oq matn esa oqligicha qoladi) */
+html.dark .bg-white {
+  background-color: var(--surface);
+}
+html.dark .hover\:bg-white:hover {
+  background-color: var(--surface);
+}
+
+/* Qorong'i fonda indigo matn yaxshi o'qilishi uchun ochroq */
+html.dark .text-indigo-600,
+html.dark .text-indigo-700 {
+  color: #a5b4fc;
+}
+html.dark .hover\:text-indigo-600:hover {
+  color: #a5b4fc;
 }
 
 @theme inline {

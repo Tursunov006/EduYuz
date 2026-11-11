@@ -82,7 +82,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isExcluded ? (
-        <div className="min-h-screen flex w-full bg-[#F5F7FB] text-slate-900">
+        <div className="min-h-screen flex w-full bg-background text-slate-900">
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
@@ -122,7 +122,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       ) : (
-        <div className="min-h-screen w-full bg-[#F5F7FB] text-slate-900">
+        <div className="min-h-screen w-full bg-background text-slate-900">
           {children}
         </div>
       )}

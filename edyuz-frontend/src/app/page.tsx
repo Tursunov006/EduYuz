@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { api, apiFetch } from '@/lib/api';
+import ThemeToggle from '@/components/ThemeToggle';
 
 // Figma: "EduYuz Dashboard v2"
 const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
@@ -163,6 +164,7 @@ export default function DashboardPage() {
           <span className="hidden sm:inline-flex items-center h-10 px-3.5 rounded-[10px] bg-white border border-slate-200 text-[13px] font-medium text-slate-700">
             {dateLabel}
           </span>
+          <ThemeToggle />
           <span className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[15px] font-bold">
             {initial}
           </span>

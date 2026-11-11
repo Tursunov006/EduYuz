@@ -38,7 +38,15 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} notranslate h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-slate-50 text-slate-900 font-sans" suppressHydrationWarning>
+      <head>
+        {/* Tungi rejimni sahifa chizilishidan oldin qo'yish (miltillamasligi uchun) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "try{if(localStorage.getItem('eduyuz_theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}",
+          }}
+        />
+      </head>
+      <body className="min-h-full bg-background text-slate-900 font-sans" suppressHydrationWarning>
         <AppLayout>
           {children}
         </AppLayout>
