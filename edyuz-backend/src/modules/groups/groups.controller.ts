@@ -40,8 +40,14 @@ export class GroupsController {
     @Query('centerId') centerId?: string,
     @Query('courseId') courseId?: string,
     @Query('teacherId') teacherId?: string,
+    @Query('archived') archived?: string,
   ) {
-    return this.groupsService.findAll(this.access.scopeCenter(user, centerId), courseId, teacherId);
+    return this.groupsService.findAll(
+      this.access.scopeCenter(user, centerId),
+      courseId,
+      teacherId,
+      archived === 'true',
+    );
   }
 
   @Get(':id')

@@ -15,7 +15,7 @@ export class StudentsService {
       throw new NotFoundException('Markaz topilmadi');
     }
 
-    return this.prisma.student.create({
+    const student = await this.prisma.student.create({
       data: {
         centerId: dto.centerId,
         fullName: dto.fullName,
@@ -24,8 +24,110 @@ export class StudentsService {
         parentChatId: dto.parentChatId ? BigInt(dto.parentChatId) : null,
         balance: dto.balance !== undefined ? dto.balance : 0,
         status: dto.status,
+        passport: dto.passport?.trim().toUpperCase() || null,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
+        address: dto.address?.trim() || null,
       },
     });
+    // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
+    await this.backup(student.id);
+    return student;
+  }
+
+  // O'quvchining joriy ma'lumotlari (guruhlar, sertifikatlar, to'lovlar jami bilan) zaxira jadvaliga yoziladi.
+  // Zaxira xatosi asosiy amalni to'xtatmasligi kerak, shuning uchun xato faqat logga yoziladi.
+  async backup(studentId: string, deleted = false) {
+    try {
+      const st = await this.prisma.student.findUnique({
+        where: { id: studentId },
+        include: {
+          groups: { include: { group: { select: { name: true } } } },
+          certificates: { orderBy: { issuedAt: 'asc' } },
+        },
+      });
+      if (!st) return;
+      const paid = await this.prisma.payment.aggregate({
+        where: { studentId, amount: { gt: 0 } },
+        _sum: { amount: true },
+      });
+      const data = {
+        fullName: st.fullName,
+        phone: st.phone,
+        parentPhone: st.parentPhone,
+        passport: st.passport,
+        birthDate: st.birthDate ? st.birthDate.toISOString().slice(0, 10) : null,
+        address: st.address,
+        status: st.status,
+        balance: Number(st.balance),
+        totalPaid: Number(paid._sum.amount || 0),
+        groups: st.groups.map((g) => g.group?.name).filter(Boolean),
+        certificates: st.certificates.map((c) => ({
+          number: c.certificateNumber,
+          course: c.courseTitle,
+          grade: c.grade,
+          issuedAt: c.issuedAt.toISOString().slice(0, 10),
+        })),
+        joinedAt: st.createdAt.toISOString(),
+      };
+      await this.prisma.studentBackup.upsert({
+        where: { studentId },
+        create: { studentId, centerId: st.centerId, data, deletedAt: deleted ? new Date() : null },
+        update: { data, deletedAt: deleted ? new Date() : null },
+      });
+    } catch (err) {
+      console.error('O\'quvchi zaxirasini yozib bo\'lmadi:', err);
+    }
+  }
+
+  // Arxiv bo'limidagi "O'quvchilar bazasi": barcha o'quvchilar (faol, arxivdagi va o'chirilganlar).
+  // Bazadagi o'quvchilar har doim joriy holatda olinadi, o'chirilganlar esa zaxiradan.
+  async registry(centerId?: string) {
+    const where = { ...(centerId && { centerId }) };
+    const [students, paidRows, backups] = await Promise.all([
+      this.prisma.student.findMany({
+        where,
+        include: {
+          groups: { include: { group: { select: { name: true } } } },
+          certificates: { orderBy: { issuedAt: 'asc' } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.payment.groupBy({
+        by: ['studentId'],
+        where: { amount: { gt: 0 }, student: where },
+        _sum: { amount: true },
+      }),
+      this.prisma.studentBackup.findMany({ where, orderBy: { updatedAt: 'desc' } }),
+    ]);
+    const paid = new Map(paidRows.map((p) => [p.studentId, Number(p._sum.amount || 0)]));
+    const liveIds = new Set(students.map((s) => s.id));
+
+    const live = students.map((st) => ({
+      id: st.id,
+      fullName: st.fullName,
+      phone: st.phone,
+      parentPhone: st.parentPhone,
+      passport: st.passport,
+      birthDate: st.birthDate ? st.birthDate.toISOString().slice(0, 10) : null,
+      address: st.address,
+      status: st.status,
+      balance: Number(st.balance),
+      totalPaid: paid.get(st.id) || 0,
+      groups: st.groups.map((g) => g.group?.name).filter(Boolean),
+      certificates: st.certificates.map((c) => ({
+        number: c.certificateNumber,
+        course: c.courseTitle,
+        grade: c.grade,
+        issuedAt: c.issuedAt.toISOString().slice(0, 10),
+      })),
+      joinedAt: st.createdAt.toISOString(),
+      deleted: false,
+      deletedAt: null,
+    }));
+    const removed = backups
+      .filter((b) => !liveIds.has(b.studentId))
+      .map((b) => ({ id: b.studentId, ...(b.data as any), deleted: true, deletedAt: b.deletedAt || b.updatedAt }));
+    return [...live, ...removed];
   }
 
   async findAll(centerId?: string, search?: string) {
@@ -58,7 +160,7 @@ export class StudentsService {
   // Portal uchun: ota-ona telefoni, Telegram chat ID kabi ichki maydonlarsiz
   async findOnePublic(id: string) {
     const student = await this.findOne(id);
-    const { parentPhone, parentChatId, phone, centerId, ...safe } = student as any;
+    const { parentPhone, parentChatId, phone, centerId, passport, birthDate, address, ...safe } = student as any;
     return safe;
   }
 
@@ -108,6 +210,9 @@ export class StudentsService {
       parentPhone: dto.parentPhone,
       status: dto.status,
     };
+    if (dto.passport !== undefined) dataToUpdate.passport = dto.passport?.trim().toUpperCase() || null;
+    if (dto.birthDate !== undefined) dataToUpdate.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
+    if (dto.address !== undefined) dataToUpdate.address = dto.address?.trim() || null;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;
@@ -117,14 +222,18 @@ export class StudentsService {
       dataToUpdate.balance = dto.balance;
     }
 
-    return this.prisma.student.update({
+    const updated = await this.prisma.student.update({
       where: { id },
       data: dataToUpdate,
     });
+    await this.backup(id);
+    return updated;
   }
 
   async remove(id: string) {
     await this.findOne(id);
+    // O'chirishdan oldin oxirgi holat zaxiraga yoziladi: Arxivda "o'chirilgan" bo'lib qoladi
+    await this.backup(id, true);
 
     // Prisma schema da payments Restrict qilingani uchun avval to'lovlar tozalanadi.
     // Ikkala amal bitta tranzaksiyada: o'rtada xato bo'lsa to'lovlar yo'qolib qolmaydi.
