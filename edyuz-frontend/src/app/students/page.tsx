@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2 } from 'lucide-react';
+import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2, Archive, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
 import axios from 'axios';
@@ -13,6 +13,8 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
+  // Faol / kursni tugatgan (nofaol) / barchasi
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState<any>(null);
@@ -88,8 +90,24 @@ export default function StudentsPage() {
     setIsModalOpen(true);
   }
 
+  // Kursni tugatgan o'quvchini o'chirmasdan "Nofaol" qilish (to'lov tarixi saqlanadi) yoki qayta faollashtirish
+  async function handleToggleStatus(s: any) {
+    const next = s.status === 'active' ? 'inactive' : 'active';
+    try {
+      await apiFetch(`/students/${s.id}`, { method: 'PATCH', body: JSON.stringify({ status: next }) });
+      setStudents((prev) => prev.map((x) => (x.id === s.id ? { ...x, status: next } : x)));
+    } catch (err: any) {
+      alert(err.message);
+    }
+  }
+
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`Haqiqatan ham "${name}"ni o'chirmoqchimisiz?`)) return;
+    const ok = confirm(
+      `"${name}"ni butunlay o'chirmoqchimisiz?\n\n` +
+        `Diqqat: o'quvchining barcha to'lovlari ham o'chadi va kassa hisobotidan chiqib ketadi. ` +
+        `Kursni tugatgan o'quvchini o'chirmasdan, "Kursni tugatdi" tugmasi bilan nofaol qilib qo'yish tavsiya etiladi.`,
+    );
+    if (!ok) return;
     try {
       await apiFetch(`/students/${id}`, { method: 'DELETE' });
       fetchStudents();
@@ -167,6 +185,10 @@ export default function StudentsPage() {
     );
   }
 
+  const visibleStudents = students.filter((x) =>
+    statusFilter === 'all' ? true : statusFilter === 'active' ? x.status === 'active' : x.status !== 'active',
+  );
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
@@ -203,6 +225,29 @@ export default function StudentsPage() {
         </div>
       </div>
 
+      {/* Holat bo'yicha filtr */}
+      <div className="flex flex-wrap items-center gap-2">
+        {([
+          { key: 'all', label: 'Barchasi', count: students.length },
+          { key: 'active', label: 'Faol', count: students.filter((x) => x.status === 'active').length },
+          { key: 'inactive', label: 'Kursni tugatgan / nofaol', count: students.filter((x) => x.status !== 'active').length },
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setStatusFilter(f.key)}
+            className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-medium border transition ${
+              statusFilter === f.key
+                ? 'bg-indigo-600 border-indigo-600 text-white'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            {f.label}
+            <span className={`text-xs ${statusFilter === f.key ? 'text-indigo-100' : 'text-slate-400'}`}>{f.count}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Jadval */}
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -220,11 +265,11 @@ export default function StudentsPage() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={6} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
-              ) : students.length === 0 ? (
+              ) : visibleStudents.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-24 px-4 text-center">
                     <p className="text-[15px] font-semibold text-slate-600">
-                      {search ? 'Hech narsa topilmadi' : 'Hali o‘quvchi qo‘shilmagan'}
+                      {search || statusFilter !== 'all' ? 'Hech narsa topilmadi' : 'Hali o‘quvchi qo‘shilmagan'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {search
@@ -239,7 +284,7 @@ export default function StudentsPage() {
                   </td>
                 </tr>
               ) : (
-                students.map((s) => {
+                visibleStudents.map((s) => {
                   const bal = Number(s.balance || 0);
                   return (
                     <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
@@ -272,7 +317,7 @@ export default function StudentsPage() {
                         ) : s.status === 'active' ? (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">Faol</span>
                         ) : (
-                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Nofaol</span>
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Kursni tugatgan</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5">
@@ -315,6 +360,14 @@ export default function StudentsPage() {
                             className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
                           >
                             <MessageSquare size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleToggleStatus(s)}
+                            title={s.status === 'active' ? 'Kursni tugatdi (nofaol qilish)' : 'Qayta faollashtirish'}
+                            aria-label={s.status === 'active' ? 'Kursni tugatdi' : 'Qayta faollashtirish'}
+                            className="p-2 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-amber-50 transition"
+                          >
+                            {s.status === 'active' ? <Archive size={16} /> : <RotateCcw size={16} />}
                           </button>
                           <button
                             onClick={() => handleOpenEdit(s)}
@@ -414,7 +467,7 @@ export default function StudentsPage() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   >
                     <option value="active">Faol</option>
-                    <option value="inactive">Nofaol</option>
+                    <option value="inactive">Kursni tugatgan / nofaol</option>
                   </select>
                 </div>
               </div>

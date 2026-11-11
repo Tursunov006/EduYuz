@@ -130,9 +130,15 @@ export class GroupsService {
   async update(id: string, dto: UpdateGroupDto) {
     await this.findOne(id);
 
+    // Kunlar formadan "Dush-Chor-Jum" ko'rinishida keladi: yaratishdagi kabi ro'yxatga aylantiriladi
+    const data: any = { ...dto };
+    if (typeof dto.days === 'string') {
+      data.days = dto.days.split(/[-,\/]/).map((s: string) => s.trim()).filter(Boolean);
+    }
+
     return this.prisma.group.update({
       where: { id },
-      data: dto,
+      data,
     });
   }
 
