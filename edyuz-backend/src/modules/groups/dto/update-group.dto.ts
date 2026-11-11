@@ -1,4 +1,4 @@
-import { IsArray, IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, IsString, Matches } from 'class-validator';
 
 export class UpdateGroupDto {
   @IsOptional()
@@ -13,9 +13,9 @@ export class UpdateGroupDto {
   @IsString()
   name?: string;
 
+  // Kunlar matn ("Dush-Chor-Jum") yoki ro'yxat ko'rinishida kelishi mumkin
   @IsOptional()
-  @IsArray()
-  days?: any[];
+  days?: any;
 
   @IsOptional()
   @IsString()

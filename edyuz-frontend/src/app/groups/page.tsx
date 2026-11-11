@@ -5,7 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
-  Search, ArrowRight, X, GraduationCap, DollarSign
+  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Trash2
 } from 'lucide-react';
 
 interface Group {
@@ -58,6 +58,8 @@ export default function GroupsPage() {
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'cards' | 'timetable'>('cards');
+  // Tahrirlanayotgan guruh (null bo'lsa, yangi guruh ochiladi)
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
@@ -111,24 +113,73 @@ export default function GroupsPage() {
     fetchData();
   }, []);
 
+  const emptyForm = () => ({
+    name: '',
+    courseId: courses[0]?.id || '',
+    teacherId: teachers[0]?.id || '',
+    startTime: '14:00',
+    endTime: '16:00',
+    days: 'Dush-Chor-Jum',
+  });
+
+  const closeGroupModal = () => {
+    setIsModalOpen(false);
+    setEditingGroupId(null);
+    setFormData(emptyForm());
+  };
+
+  const openCreateModal = () => {
+    setEditingGroupId(null);
+    setFormData(emptyForm());
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (g: Group) => {
+    setEditingGroupId(g.id);
+    setFormData({
+      name: g.name,
+      courseId: g.course?.id || courses[0]?.id || '',
+      teacherId: g.teacher?.id || teachers[0]?.id || '',
+      startTime: g.startTime || '14:00',
+      endTime: g.endTime || '16:00',
+      days: Array.isArray(g.days) ? g.days.join('-') : String(g.days || 'Dush-Chor-Jum'),
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteGroup = async (g: Group) => {
+    const count = g._count?.students || 0;
+    const ok = confirm(
+      `"${g.name}" guruhini o'chirmoqchimisiz?\n\n` +
+        (count > 0 ? `Guruhdagi ${count} ta o'quvchi o'chirilmaydi, faqat guruhdan chiqariladi.\n` : '') +
+        `Shu guruhning davomat tarixi ham o'chadi. Bu amalni qaytarib bo'lmaydi.`,
+    );
+    if (!ok) return;
+    try {
+      await axios.delete(`http://localhost:3000/api/v1/groups/${g.id}`, { headers: getHeaders() });
+      setGroups((prev) => prev.filter((x) => x.id !== g.id));
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Guruhni o‘chirib bo‘lmadi';
+      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/api/v1/groups', formData, {
-        headers: getHeaders(),
-      });
-      setIsModalOpen(false);
-      setFormData({
-        name: '',
-        courseId: courses[0]?.id || '',
-        teacherId: teachers[0]?.id || '',
-        startTime: '14:00',
-        endTime: '16:00',
-        days: 'Dush-Chor-Jum',
-      });
+      if (editingGroupId) {
+        await axios.patch(`http://localhost:3000/api/v1/groups/${editingGroupId}`, formData, {
+          headers: getHeaders(),
+        });
+      } else {
+        await axios.post('http://localhost:3000/api/v1/groups', formData, {
+          headers: getHeaders(),
+        });
+      }
+      closeGroupModal();
       fetchData();
     } catch (err: any) {
-      const msg = err.response?.data?.error || err.response?.data?.message || 'Guruh yaratishda xatolik yuz berdi!';
+      const msg = err.response?.data?.error || err.response?.data?.message || 'Guruhni saqlashda xatolik yuz berdi!';
       alert(Array.isArray(msg) ? msg.join(', ') : msg);
     }
   };
@@ -209,8 +260,9 @@ export default function GroupsPage() {
   const scheduledCount = filteredGroups.filter((g) => dayTypeMatches(g, 'odd') || dayTypeMatches(g, 'even')).length;
 
   const openModalForSlot = (start: string, end: string, days: string) => {
-    setFormData((prev) => ({
-      ...prev,
+    setEditingGroupId(null);
+    setFormData(() => ({
+      ...emptyForm(),
       startTime: start,
       endTime: end,
       days,
@@ -241,7 +293,7 @@ export default function GroupsPage() {
               <GraduationCap size={16} /> Yangi kurs
             </button>
             <button
-              onClick={() => setIsModalOpen(true)}
+              onClick={openCreateModal}
               className="flex items-center justify-center gap-2 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 transition"
             >
               <Plus size={16} /> Yangi guruh
@@ -465,21 +517,39 @@ export default function GroupsPage() {
                   </div>
                 </div>
 
-                {/* Pasti: Tezkor Amallar Tugmalari */}
+                {/* Pasti: Amallar */}
                 <div className="flex items-center gap-2 pt-2">
                   <Link
                     href={`/groups/${group.id}`}
-                    className="flex-1 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-750 text-slate-700 text-xs font-bold border border-slate-300/80 text-center transition active:scale-95"
+                    className="flex-1 h-10 inline-flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
                   >
-                    Jurnal & O'quvchilar
+                    O‘quvchilar va jurnal
                   </Link>
                   <Link
-                    href="/attendance"
-                    className="py-2.5 px-3.5 rounded-2xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-600 border border-cyan-500/20 text-xs font-bold transition active:scale-95"
+                    href={`/attendance?groupId=${group.id}`}
+                    className="h-10 px-3 inline-flex items-center rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition"
                     title="Davomatga o'tish"
                   >
                     Davomat
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(group)}
+                    title="Guruhni tahrirlash"
+                    aria-label="Guruhni tahrirlash"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-300 transition"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteGroup(group)}
+                    title="Guruhni o'chirish"
+                    aria-label="Guruhni o'chirish"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 transition"
+                  >
+                    <Trash2 size={15} />
+                  </button>
                 </div>
               </div>
             );
@@ -493,10 +563,10 @@ export default function GroupsPage() {
           <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-sm space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <BookOpen size={18} className="text-cyan-600" /> Yangi guruh ochish
+                <BookOpen size={18} className="text-cyan-600" /> {editingGroupId ? 'Guruhni tahrirlash' : 'Yangi guruh ochish'}
               </h2>
               <button 
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeGroupModal}
                 className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
@@ -600,13 +670,16 @@ export default function GroupsPage() {
                   <option value="Sesh-Pay-Shan">Seshanba / Payshanba / Shanba (Juft kunlar)</option>
                   <option value="Har kuni">Har kuni (Dush - Shan)</option>
                   <option value="Dam olish kunlari">Dam olish kunlari (Shanba / Yakshanba)</option>
+                  {!['Dush-Chor-Jum', 'Sesh-Pay-Shan', 'Har kuni', 'Dam olish kunlari'].includes(formData.days) && formData.days && (
+                    <option value={formData.days}>{formData.days}</option>
+                  )}
                 </select>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeGroupModal}
                   className="px-5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-750 text-slate-600 text-xs font-bold transition"
                 >
                   Bekor qilish
@@ -615,7 +688,7 @@ export default function GroupsPage() {
                   type="submit"
                   className="px-6 py-2.5 rounded-2xl text-white text-xs font-bold transition shadow-sm bg-indigo-600 hover:bg-indigo-500"
                 >
-                  Guruhni Saqlash
+                  {editingGroupId ? 'O‘zgarishlarni saqlash' : 'Guruhni saqlash'}
                 </button>
               </div>
             </form>
