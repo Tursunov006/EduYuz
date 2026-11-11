@@ -320,7 +320,7 @@ export default function CertificatesPage() {
                 <div className="flex flex-col items-center space-y-1">
                   <div className="p-1.5 bg-white rounded-xl shadow-md">
                     <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=http://localhost:3001/verify/${viewingCert.certificateNumber}`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/verify/${viewingCert.certificateNumber}`)}`}
                       alt="QR Code"
                       className="w-16 h-16"
                     />

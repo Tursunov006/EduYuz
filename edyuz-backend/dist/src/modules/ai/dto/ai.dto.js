@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AiChatDto = exports.GenerateQuizDto = exports.GenerateLessonDto = void 0;
+exports.GenerateMarketingDto = exports.AiChatDto = exports.GenerateQuizDto = exports.GenerateLessonDto = void 0;
 const class_validator_1 = require("class-validator");
 class GenerateLessonDto {
 }
@@ -17,6 +17,7 @@ exports.GenerateLessonDto = GenerateLessonDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], GenerateLessonDto.prototype, "topic", void 0);
 __decorate([
@@ -35,11 +36,14 @@ exports.GenerateQuizDto = GenerateQuizDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
 ], GenerateQuizDto.prototype, "topic", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_1.Min)(1),
+    (0, class_validator_1.Max)(20),
     __metadata("design:type", Number)
 ], GenerateQuizDto.prototype, "count", void 0);
 class AiChatDto {
@@ -48,6 +52,7 @@ exports.AiChatDto = AiChatDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(2000),
     __metadata("design:type", String)
 ], AiChatDto.prototype, "message", void 0);
 __decorate([
@@ -60,4 +65,19 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AiChatDto.prototype, "topic", void 0);
+class GenerateMarketingDto {
+}
+exports.GenerateMarketingDto = GenerateMarketingDto;
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(50),
+    __metadata("design:type", String)
+], GenerateMarketingDto.prototype, "platform", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(300),
+    __metadata("design:type", String)
+], GenerateMarketingDto.prototype, "topic", void 0);
 //# sourceMappingURL=ai.dto.js.map

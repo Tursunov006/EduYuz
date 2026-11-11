@@ -1,9 +1,11 @@
 import { ExpensesService } from './expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 export declare class ExpensesController {
     private readonly expensesService;
-    constructor(expensesService: ExpensesService);
-    getSummary(centerId?: string): Promise<{
+    private readonly access;
+    constructor(expensesService: ExpensesService, access: AccessService);
+    getSummary(user: AuthUser, centerId?: string): Promise<{
         totalIncome: number;
         totalExpenses: number;
         totalOperatingExpenses: number;
@@ -13,34 +15,34 @@ export declare class ExpensesController {
         categoryTotals: Record<string, number>;
         totalCount: number;
     }>;
-    findAll(centerId?: string, category?: any): Promise<{
+    findAll(user: AuthUser, centerId?: string, category?: string): Promise<{
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }[]>;
-    create(dto: CreateExpenseDto): Promise<{
+    create(dto: CreateExpenseDto, user: AuthUser): Promise<{
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }>;
-    delete(id: string): Promise<{
+    delete(id: string, user: AuthUser): Promise<{
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }>;
 }

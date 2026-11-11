@@ -14,77 +14,97 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
-const public_decorator_1 = require("../../common/decorators/public.decorator");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let UsersController = class UsersController {
-    constructor(usersService) {
+    constructor(usersService, access) {
         this.usersService = usersService;
+        this.access = access;
     }
-    create(dto) {
+    assertRoleAllowed(user, role) {
+        if (role === client_1.RoleType.superadmin && !this.access.isSuperadmin(user)) {
+            throw new common_1.ForbiddenException("Superadmin rolini berish huquqingiz yo'q");
+        }
+    }
+    create(dto, user) {
+        this.assertRoleAllowed(user, dto.role);
+        dto.centerId = this.access.centerForCreate(user, dto.centerId);
         return this.usersService.create(dto);
     }
-    findAll(centerId) {
-        return this.usersService.findAll(centerId);
+    findAll(user, centerId) {
+        return this.usersService.findAll(this.access.scopeCenter(user, centerId));
     }
-    findOne(id) {
+    async findOne(id, user) {
+        await this.access.staff(user, id);
         return this.usersService.findOne(id);
     }
-    update(id, dto) {
+    async update(id, dto, user) {
+        await this.access.staff(user, id);
+        this.assertRoleAllowed(user, dto.role);
+        if (id === user.id && (dto.isActive === false || (dto.role && dto.role !== user.role))) {
+            throw new common_1.ForbiddenException("O'z hisobingiz rolini o'zgartira yoki o'chira olmaysiz");
+        }
         return this.usersService.update(id, dto);
     }
-    remove(id) {
+    async remove(id, user) {
+        await this.access.staff(user, id);
+        if (id === user.id) {
+            throw new common_1.ForbiddenException("O'z hisobingizni o'chira olmaysiz");
+        }
         return this.usersService.remove(id);
     }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto]),
+    __metadata("design:paramtypes", [create_user_dto_1.CreateUserDto, Object]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "create", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('centerId')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('centerId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "findAll", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 exports.UsersController = UsersController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        access_service_1.AccessService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

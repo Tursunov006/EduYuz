@@ -8,6 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
+const throttler_1 = require("@nestjs/throttler");
+const jwt_auth_guard_1 = require("./common/guards/jwt-auth.guard");
+const roles_guard_1 = require("./common/guards/roles.guard");
 const config_1 = require("@nestjs/config");
 const prisma_module_1 = require("./modules/prisma/prisma.module");
 const auth_module_1 = require("./modules/auth/auth.module");
@@ -27,6 +31,7 @@ const expenses_module_1 = require("./modules/expenses/expenses.module");
 const sms_module_1 = require("./modules/sms/sms.module");
 const ai_module_1 = require("./modules/ai/ai.module");
 const games_module_1 = require("./modules/games/games.module");
+const instagram_module_1 = require("./modules/instagram/instagram.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -36,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
             }),
+            throttler_1.ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
             prisma_module_1.PrismaModule,
             sms_module_1.SmsModule,
             telegram_module_1.TelegramModule,
@@ -46,6 +52,7 @@ exports.AppModule = AppModule = __decorate([
             expenses_module_1.ExpensesModule,
             ai_module_1.AiModule,
             games_module_1.GamesModule,
+            instagram_module_1.InstagramModule,
             auth_module_1.AuthModule,
             centers_module_1.CentersModule,
             users_module_1.UsersModule,
@@ -54,6 +61,11 @@ exports.AppModule = AppModule = __decorate([
             students_module_1.StudentsModule,
             attendance_module_1.AttendanceModule,
             payments_module_1.PaymentsModule,
+        ],
+        providers: [
+            { provide: core_1.APP_GUARD, useClass: throttler_1.ThrottlerGuard },
+            { provide: core_1.APP_GUARD, useClass: jwt_auth_guard_1.JwtAuthGuard },
+            { provide: core_1.APP_GUARD, useClass: roles_guard_1.RolesGuard },
         ],
     })
 ], AppModule);

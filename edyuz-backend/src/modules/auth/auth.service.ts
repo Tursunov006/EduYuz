@@ -1,9 +1,20 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { RoleType } from '@prisma/client';
+import { AuthUser } from '../../common/access/access.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+
+// Mavjud bo'lmagan foydalanuvchi uchun taqqoslanadigan soxta bcrypt hash
+const DUMMY_HASH = '$2b$10$CwTycUXWue0Thq9StjUM0uJ8rj0bq3o3o0y6l8E0y1mG1o9mJ3n2e';
 
 @Injectable()
 export class AuthService {
@@ -12,9 +23,17 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto) {
+  async register(dto: RegisterDto, actor: AuthUser) {
+    const isSuperadmin = actor.role === RoleType.superadmin;
+
+    // Oddiy admin faqat o'z markaziga xodim qo'shadi va superadmin rolini bera olmaydi
+    const centerId = isSuperadmin ? dto.centerId : actor.centerId;
+    if (dto.role === RoleType.superadmin && !isSuperadmin) {
+      throw new ForbiddenException("Superadmin rolini berish huquqingiz yo'q");
+    }
+
     const center = await this.prisma.center.findUnique({
-      where: { id: dto.centerId },
+      where: { id: centerId },
     });
     if (!center) {
       throw new NotFoundException('Ko\'rsatilgan markaz topilmadi');
@@ -32,7 +51,7 @@ export class AuthService {
 
     const user = await this.prisma.user.create({
       data: {
-        centerId: dto.centerId,
+        centerId,
         fullName: dto.fullName,
         phone: dto.phone,
         passwordHash,
@@ -49,16 +68,14 @@ export class AuthService {
       },
     });
 
-    const token = this.generateToken(user.id, user.phone, user.role, user.centerId);
-
+    // Yangi xodim nomidan token qaytarilmaydi — u o'z login/paroli bilan kiradi
     return {
-      message: 'Muvaffaqiyatli ro\'yxatdan o\'tildi',
+      message: 'Xodim muvaffaqiyatli ro\'yxatdan o\'tkazildi',
       user: {
         ...user,
         trialEndsAt: center.trialEndsAt,
         subscriptionStatus: center.subscriptionStatus,
       },
-      accessToken: token,
     };
   }
 
@@ -68,12 +85,12 @@ export class AuthService {
       include: { center: true }
     });
 
-    if (!user) {
-      throw new UnauthorizedException('Telefon raqam yoki parol noto\'g\'ri');
-    }
-
-    const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!isMatch) {
+    // Foydalanuvchi mavjud bo'lmasa ham bcrypt ishlatiladi — javob vaqti orqali
+    // qaysi telefon raqamlar ro'yxatdan o'tganini aniqlab bo'lmasligi uchun.
+    const isMatch = await bcrypt
+      .compare(dto.password, user?.passwordHash || DUMMY_HASH)
+      .catch(() => false);
+    if (!user || !isMatch) {
       throw new UnauthorizedException('Telefon raqam yoki parol noto\'g\'ri');
     }
 

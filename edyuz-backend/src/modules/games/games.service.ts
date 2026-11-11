@@ -1,8 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { GamificationService } from '../gamification/gamification.service';
 import { AiService } from '../ai/ai.service';
 import { SubmitGameDto } from './dto/submit-game.dto';
+
+const GAME_REWARD_PREFIX = "🎮 O'yin yutug'i:";
 
 @Injectable()
 export class GamesService {
@@ -50,6 +52,38 @@ export class GamesService {
       throw new NotFoundException('O\'quvchi topilmadi');
     }
 
+    if (dto.correctCount > dto.totalQuestions) {
+      throw new BadRequestException("To'g'ri javoblar soni savollar sonidan ko'p bo'lishi mumkin emas");
+    }
+
+    // Natija brauzerdan keladi va uni soxtalashtirish mumkin, shuning uchun kunlik chegara:
+    // bir o'quvchi kuniga ko'pi bilan DAILY_REWARDED_GAMES ta o'yin uchun tanga oladi.
+    // (Avval bu endpointni skript bilan cheksiz chaqirib, reytingni to'ldirish mumkin edi.)
+    const DAILY_REWARDED_GAMES = 5;
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+    const rewardedToday = await this.prisma.coinTransaction.count({
+      where: {
+        studentId: dto.studentId,
+        createdAt: { gte: dayStart },
+        reason: { startsWith: GAME_REWARD_PREFIX },
+      },
+    });
+
+    const accuracyPercent =
+      dto.totalQuestions > 0 ? Math.round((dto.correctCount / dto.totalQuestions) * 100) : 0;
+
+    if (rewardedToday >= DAILY_REWARDED_GAMES) {
+      return {
+        success: true,
+        earnedCoins: 0,
+        newCoinBalance: student.coins,
+        newPoints: student.points,
+        accuracy: accuracyPercent,
+        message: `Bugungi o'yin mukofotlari limiti (${DAILY_REWARDED_GAMES} ta) tugadi. Ertaga yana tanga yutishingiz mumkin! 🎮`,
+      };
+    }
+
     // Tangalar hisoblash mantig'i:
     // To'liq to'g'ri topsa -> 25 coin
     // 80% to'g'ri topsa -> 20 coin
@@ -69,7 +103,7 @@ export class GamesService {
     }
 
     // Combo streak bonusi
-    if (dto.comboStreak && dto.comboStreak >= 3) {
+    if (dto.comboStreak && dto.comboStreak >= 3 && dto.comboStreak <= dto.correctCount) {
       earnedCoins += 5; // +5 ekstra "On Fire" combo bonusi!
     }
 
@@ -77,7 +111,7 @@ export class GamesService {
     const updated = await this.gamificationService.awardCoins({
       studentId: dto.studentId,
       amount: earnedCoins,
-      reason: `🎮 O'yin yutug'i: "${dto.topic}" (${dto.correctCount}/${dto.totalQuestions} to'g'ri)`,
+      reason: `${GAME_REWARD_PREFIX} "${dto.topic}" (${dto.correctCount}/${dto.totalQuestions} to'g'ri)`.slice(0, 150),
     });
 
     return {

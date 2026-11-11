@@ -16,66 +16,72 @@ exports.AttendanceController = void 0;
 const common_1 = require("@nestjs/common");
 const attendance_service_1 = require("./attendance.service");
 const mark_attendance_dto_1 = require("./dto/mark-attendance.dto");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
 const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let AttendanceController = class AttendanceController {
-    constructor(attendanceService) {
+    constructor(attendanceService, access) {
         this.attendanceService = attendanceService;
+        this.access = access;
     }
-    async faceScan(image) {
-        if (!image)
-            throw new Error("Rasm yuborilmadi");
-        return this.attendanceService.processFaceScan(image);
+    async faceScan(image, user) {
+        if (!image || typeof image !== 'string') {
+            throw new common_1.BadRequestException('Rasm yuborilmadi');
+        }
+        return this.attendanceService.processFaceScan(image, user.centerId);
     }
-    markAttendance(dto, userId) {
-        return this.attendanceService.markGroupAttendance(dto, userId);
+    async markAttendance(dto, user) {
+        await this.access.group(user, dto.groupId);
+        return this.attendanceService.markGroupAttendance(dto, user.id);
     }
-    findByGroupAndDate(groupId, date) {
+    async findByGroupAndDate(groupId, date, user) {
+        await this.access.group(user, groupId);
         return this.attendanceService.findByGroupAndDate(groupId, date);
     }
-    getStudentAttendance(studentId) {
+    async getStudentAttendance(studentId, user) {
+        if (user)
+            await this.access.student(user, studentId);
         return this.attendanceService.getStudentAttendance(studentId);
     }
 };
 exports.AttendanceController = AttendanceController;
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('face-scan'),
     __param(0, (0, common_1.Body)('image')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AttendanceController.prototype, "faceScan", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('mark'),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, current_user_decorator_1.CurrentUser)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [mark_attendance_dto_1.MarkAttendanceDto, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [mark_attendance_dto_1.MarkAttendanceDto, Object]),
+    __metadata("design:returntype", Promise)
 ], AttendanceController.prototype, "markAttendance", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('group/:groupId'),
     __param(0, (0, common_1.Param)('groupId')),
     __param(1, (0, common_1.Query)('date')),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
 ], AttendanceController.prototype, "findByGroupAndDate", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('student/:studentId'),
     __param(0, (0, common_1.Param)('studentId')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], AttendanceController.prototype, "getStudentAttendance", null);
 exports.AttendanceController = AttendanceController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('attendance'),
-    __metadata("design:paramtypes", [attendance_service_1.AttendanceService])
+    __metadata("design:paramtypes", [attendance_service_1.AttendanceService,
+        access_service_1.AccessService])
 ], AttendanceController);
 //# sourceMappingURL=attendance.controller.js.map

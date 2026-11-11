@@ -5,6 +5,9 @@ export declare class CentersService {
     private prisma;
     constructor(prisma: PrismaService);
     create(dto: CreateCenterDto): Promise<{
+        directorLogin: string;
+        directorPassword: string;
+        directorNote: string;
         id: string;
         name: string;
         phone: string;
@@ -12,7 +15,7 @@ export declare class CentersService {
         trialEndsAt: Date | null;
         subscriptionStatus: string;
     }>;
-    findAll(): Promise<({
+    findAll(onlyCenterId?: string): Promise<({
         _count: {
             users: number;
             courses: number;
@@ -49,6 +52,20 @@ export declare class CentersService {
         createdAt: Date;
         trialEndsAt: Date | null;
         subscriptionStatus: string;
+    }>;
+    updateStatus(id: string, status: 'active' | 'trial' | 'expired', daysToAdd?: number): Promise<{
+        id: string;
+        name: string;
+        phone: string;
+        createdAt: Date;
+        trialEndsAt: Date | null;
+        subscriptionStatus: string;
+    }>;
+    resetDirectorPassword(id: string, requestedPassword?: string): Promise<{
+        success: boolean;
+        login: string;
+        password: string;
+        message: string;
     }>;
     remove(id: string): Promise<{
         id: string;

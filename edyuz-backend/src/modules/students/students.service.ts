@@ -34,7 +34,7 @@ export class StudentsService {
         ...(centerId && { centerId }),
         ...(search && {
           OR: [
-            { fullName: { contains: search } },
+            { fullName: { contains: search, mode: 'insensitive' } },
             { phone: { contains: search } },
             { parentPhone: { contains: search } },
           ],
@@ -51,7 +51,15 @@ export class StudentsService {
           },
         },
       },
+      orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // Portal uchun: ota-ona telefoni, Telegram chat ID kabi ichki maydonlarsiz
+  async findOnePublic(id: string) {
+    const student = await this.findOne(id);
+    const { parentPhone, parentChatId, phone, centerId, ...safe } = student as any;
+    return safe;
   }
 
   async findOne(id: string) {
@@ -117,14 +125,13 @@ export class StudentsService {
 
   async remove(id: string) {
     await this.findOne(id);
-    
-    // Prisma schema da payments Restrict qilingani uchun avval to'lovlarni tozalaymiz
-    await this.prisma.payment.deleteMany({
-      where: { studentId: id }
-    });
 
-    return this.prisma.student.delete({
-      where: { id },
-    });
+    // Prisma schema da payments Restrict qilingani uchun avval to'lovlar tozalanadi.
+    // Ikkala amal bitta tranzaksiyada: o'rtada xato bo'lsa to'lovlar yo'qolib qolmaydi.
+    const [, deleted] = await this.prisma.$transaction([
+      this.prisma.payment.deleteMany({ where: { studentId: id } }),
+      this.prisma.student.delete({ where: { id } }),
+    ]);
+    return deleted;
   }
 }

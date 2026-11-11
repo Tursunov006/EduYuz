@@ -15,6 +15,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const gamification_service_1 = require("../gamification/gamification.service");
 const ai_service_1 = require("../ai/ai.service");
+const GAME_REWARD_PREFIX = "🎮 O'yin yutug'i:";
 let GamesService = GamesService_1 = class GamesService {
     constructor(prisma, gamificationService, aiService) {
         this.prisma = prisma;
@@ -47,6 +48,30 @@ let GamesService = GamesService_1 = class GamesService {
         if (!student) {
             throw new common_1.NotFoundException('O\'quvchi topilmadi');
         }
+        if (dto.correctCount > dto.totalQuestions) {
+            throw new common_1.BadRequestException("To'g'ri javoblar soni savollar sonidan ko'p bo'lishi mumkin emas");
+        }
+        const DAILY_REWARDED_GAMES = 5;
+        const dayStart = new Date();
+        dayStart.setHours(0, 0, 0, 0);
+        const rewardedToday = await this.prisma.coinTransaction.count({
+            where: {
+                studentId: dto.studentId,
+                createdAt: { gte: dayStart },
+                reason: { startsWith: GAME_REWARD_PREFIX },
+            },
+        });
+        const accuracyPercent = dto.totalQuestions > 0 ? Math.round((dto.correctCount / dto.totalQuestions) * 100) : 0;
+        if (rewardedToday >= DAILY_REWARDED_GAMES) {
+            return {
+                success: true,
+                earnedCoins: 0,
+                newCoinBalance: student.coins,
+                newPoints: student.points,
+                accuracy: accuracyPercent,
+                message: `Bugungi o'yin mukofotlari limiti (${DAILY_REWARDED_GAMES} ta) tugadi. Ertaga yana tanga yutishingiz mumkin! 🎮`,
+            };
+        }
         const accuracy = dto.totalQuestions > 0 ? dto.correctCount / dto.totalQuestions : 0;
         let earnedCoins = 5;
         if (accuracy >= 1) {
@@ -61,13 +86,13 @@ let GamesService = GamesService_1 = class GamesService {
         else if (accuracy >= 0.4) {
             earnedCoins = 10;
         }
-        if (dto.comboStreak && dto.comboStreak >= 3) {
+        if (dto.comboStreak && dto.comboStreak >= 3 && dto.comboStreak <= dto.correctCount) {
             earnedCoins += 5;
         }
         const updated = await this.gamificationService.awardCoins({
             studentId: dto.studentId,
             amount: earnedCoins,
-            reason: `🎮 O'yin yutug'i: "${dto.topic}" (${dto.correctCount}/${dto.totalQuestions} to'g'ri)`,
+            reason: `${GAME_REWARD_PREFIX} "${dto.topic}" (${dto.correctCount}/${dto.totalQuestions} to'g'ri)`.slice(0, 150),
         });
         return {
             success: true,

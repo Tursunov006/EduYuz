@@ -14,40 +14,49 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CertificatesController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const certificates_service_1 = require("./certificates.service");
 const issue_certificate_dto_1 = require("./dto/issue-certificate.dto");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let CertificatesController = class CertificatesController {
-    constructor(certificatesService) {
+    constructor(certificatesService, access) {
         this.certificatesService = certificatesService;
+        this.access = access;
     }
-    async issue(dto) {
+    async issue(dto, user) {
+        await this.access.student(user, dto.studentId);
         return this.certificatesService.issue(dto);
     }
-    async findAll() {
-        return this.certificatesService.findAll();
+    async findAll(user) {
+        return this.certificatesService.findAll(this.access.scopeCenter(user));
     }
     async verify(certNumber) {
         return this.certificatesService.verify(certNumber);
     }
-    async findByStudent(studentId) {
+    async findByStudent(studentId, user) {
+        if (user)
+            await this.access.student(user, studentId);
         return this.certificatesService.findByStudent(studentId);
     }
 };
 exports.CertificatesController = CertificatesController;
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Post)('issue'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [issue_certificate_dto_1.IssueCertificateDto]),
+    __metadata("design:paramtypes", [issue_certificate_dto_1.IssueCertificateDto, Object]),
     __metadata("design:returntype", Promise)
 ], CertificatesController.prototype, "issue", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CertificatesController.prototype, "findAll", null);
 __decorate([
@@ -62,12 +71,14 @@ __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('student/:studentId'),
     __param(0, (0, common_1.Param)('studentId')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], CertificatesController.prototype, "findByStudent", null);
 exports.CertificatesController = CertificatesController = __decorate([
     (0, common_1.Controller)('certificates'),
-    __metadata("design:paramtypes", [certificates_service_1.CertificatesService])
+    __metadata("design:paramtypes", [certificates_service_1.CertificatesService,
+        access_service_1.AccessService])
 ], CertificatesController);
 //# sourceMappingURL=certificates.controller.js.map

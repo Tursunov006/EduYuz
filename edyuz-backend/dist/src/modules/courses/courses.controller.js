@@ -14,77 +14,86 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoursesController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const courses_service_1 = require("./courses.service");
 const create_course_dto_1 = require("./dto/create-course.dto");
 const update_course_dto_1 = require("./dto/update-course.dto");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
-const public_decorator_1 = require("../../common/decorators/public.decorator");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let CoursesController = class CoursesController {
-    constructor(coursesService) {
+    constructor(coursesService, access) {
         this.coursesService = coursesService;
+        this.access = access;
     }
-    create(dto) {
+    create(dto, user) {
+        dto.centerId = this.access.centerForCreate(user, dto.centerId);
         return this.coursesService.create(dto);
     }
-    findAll(centerId) {
-        return this.coursesService.findAll(centerId);
+    findAll(user, centerId) {
+        return this.coursesService.findAll(this.access.scopeCenter(user, centerId));
     }
-    findOne(id) {
+    async findOne(id, user) {
+        await this.access.course(user, id);
         return this.coursesService.findOne(id);
     }
-    update(id, dto) {
+    async update(id, dto, user) {
+        await this.access.course(user, id);
         return this.coursesService.update(id, dto);
     }
-    remove(id) {
+    async remove(id, user) {
+        await this.access.course(user, id);
         return this.coursesService.remove(id);
     }
 };
 exports.CoursesController = CoursesController;
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto]),
+    __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto, Object]),
     __metadata("design:returntype", void 0)
 ], CoursesController.prototype, "create", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('centerId')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('centerId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], CoursesController.prototype, "findAll", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "findOne", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_course_dto_1.UpdateCourseDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, update_course_dto_1.UpdateCourseDto, Object]),
+    __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "update", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "remove", null);
 exports.CoursesController = CoursesController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('courses'),
-    __metadata("design:paramtypes", [courses_service_1.CoursesService])
+    __metadata("design:paramtypes", [courses_service_1.CoursesService,
+        access_service_1.AccessService])
 ], CoursesController);
 //# sourceMappingURL=courses.controller.js.map

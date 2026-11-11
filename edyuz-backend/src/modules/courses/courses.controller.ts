@@ -7,47 +7,55 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
+import { RoleType } from '@prisma/client';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Public } from '../../common/decorators/public.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(
+    private readonly coursesService: CoursesService,
+    private readonly access: AccessService,
+  ) {}
 
-  @Public()
+  @Roles(RoleType.admin)
   @Post()
-  create(@Body() dto: CreateCourseDto) {
+  create(@Body() dto: CreateCourseDto, @CurrentUser() user: AuthUser) {
+    dto.centerId = this.access.centerForCreate(user, dto.centerId);
     return this.coursesService.create(dto);
   }
 
-  @Public()
   @Get()
-  findAll(@Query('centerId') centerId?: string) {
-    return this.coursesService.findAll(centerId);
+  findAll(@CurrentUser() user: AuthUser, @Query('centerId') centerId?: string) {
+    return this.coursesService.findAll(this.access.scopeCenter(user, centerId));
   }
 
-  @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.course(user, id);
     return this.coursesService.findOne(id);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateCourseDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateCourseDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.course(user, id);
     return this.coursesService.update(id, dto);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.course(user, id);
     return this.coursesService.remove(id);
   }
 }

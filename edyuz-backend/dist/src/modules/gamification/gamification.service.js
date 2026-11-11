@@ -16,8 +16,10 @@ let GamificationService = class GamificationService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getLeaderboard(groupId) {
+    async getLeaderboard(groupId, centerId) {
         const where = { status: 'active' };
+        if (centerId)
+            where.centerId = centerId;
         if (groupId) {
             where.groups = {
                 some: { groupId },
@@ -86,6 +88,7 @@ let GamificationService = class GamificationService {
         return this.prisma.coinTransaction.findMany({
             where: { studentId },
             orderBy: { createdAt: 'desc' },
+            take: 200,
         });
     }
 };

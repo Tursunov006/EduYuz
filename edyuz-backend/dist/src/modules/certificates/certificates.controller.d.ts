@@ -1,9 +1,11 @@
 import { CertificatesService } from './certificates.service';
 import { IssueCertificateDto } from './dto/issue-certificate.dto';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 export declare class CertificatesController {
     private readonly certificatesService;
-    constructor(certificatesService: CertificatesService);
-    issue(dto: IssueCertificateDto): Promise<{
+    private readonly access;
+    constructor(certificatesService: CertificatesService, access: AccessService);
+    issue(dto: IssueCertificateDto, user: AuthUser): Promise<{
         student: {
             id: string;
             phone: string;
@@ -17,7 +19,7 @@ export declare class CertificatesController {
         grade: string;
         issuedAt: Date;
     }>;
-    findAll(): Promise<({
+    findAll(user: AuthUser): Promise<({
         student: {
             id: string;
             phone: string;
@@ -52,7 +54,7 @@ export declare class CertificatesController {
         status: string;
         message?: undefined;
     }>;
-    findByStudent(studentId: string): Promise<{
+    findByStudent(studentId: string, user?: AuthUser): Promise<{
         id: string;
         studentId: string;
         courseTitle: string;

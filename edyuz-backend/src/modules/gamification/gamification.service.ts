@@ -7,8 +7,9 @@ export class GamificationService {
   constructor(private prisma: PrismaService) {}
 
   // 1. Umumiy Leaderboard (Top 20 o'quvchi)
-  async getLeaderboard(groupId?: string) {
+  async getLeaderboard(groupId?: string, centerId?: string) {
     const where: any = { status: 'active' };
+    if (centerId) where.centerId = centerId;
 
     if (groupId) {
       where.groups = {
@@ -86,6 +87,7 @@ export class GamificationService {
     return this.prisma.coinTransaction.findMany({
       where: { studentId },
       orderBy: { createdAt: 'desc' },
+      take: 200,
     });
   }
 }

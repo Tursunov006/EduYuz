@@ -9,16 +9,26 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
 
     if (isPublic) {
+      // Ochiq endpointlarda token ixtiyoriy: bor bo'lsa request.user to'ldiriladi,
+      // yo'q yoki yaroqsiz bo'lsa so'rov anonim sifatida davom etadi.
+      const request = context.switchToHttp().getRequest();
+      if (request.headers?.authorization) {
+        try {
+          await super.canActivate(context);
+        } catch {
+          request.user = undefined;
+        }
+      }
       return true;
     }
 
-    return super.canActivate(context);
+    return (await super.canActivate(context)) as boolean;
   }
 }

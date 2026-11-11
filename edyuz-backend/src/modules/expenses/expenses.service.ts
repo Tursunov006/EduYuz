@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
+import { ExpenseCategory } from '@prisma/client';
 
 @Injectable()
 export class ExpensesService {
@@ -9,7 +10,10 @@ export class ExpensesService {
   async findAll(centerId?: string, category?: any) {
     const where: any = {};
     if (centerId) where.centerId = centerId;
-    if (category) where.category = category;
+    // Noto'g'ri kategoriya Prisma xatosiga (500) olib kelmasligi uchun tekshiriladi
+    if (category && (Object.values(ExpenseCategory) as string[]).includes(category)) {
+      where.category = category;
+    }
 
     return this.prisma.expense.findMany({
       where,
@@ -18,13 +22,11 @@ export class ExpensesService {
   }
 
   async create(dto: CreateExpenseDto) {
-    let centerId = dto.centerId;
+    // Markaz controller'da foydalanuvchi tokenidan aniqlanadi (avval berilmasa
+    // bazadagi birinchi uchragan — ya'ni begona — markazga yozilardi).
+    const centerId = dto.centerId;
     if (!centerId) {
-      const firstCenter = await this.prisma.center.findFirst();
-      if (!firstCenter) {
-        throw new NotFoundException("Markaz topilmadi");
-      }
-      centerId = firstCenter.id;
+      throw new NotFoundException("Markaz topilmadi");
     }
 
     return this.prisma.expense.create({

@@ -6,16 +6,16 @@ export declare class StudentsService {
     constructor(prisma: PrismaService);
     create(dto: CreateStudentDto): Promise<{
         id: string;
-        fullName: string;
         phone: string | null;
+        createdAt: Date;
+        centerId: string;
+        fullName: string;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
         coins: number;
         points: number;
         status: import(".prisma/client").$Enums.StudentStatus;
-        createdAt: Date;
-        centerId: string;
     }>;
     findAll(centerId?: string, search?: string): Promise<({
         groups: ({
@@ -29,9 +29,9 @@ export declare class StudentsService {
                 };
             } & {
                 id: string;
+                name: string;
                 createdAt: Date;
                 centerId: string;
-                name: string;
                 courseId: string;
                 teacherId: string;
                 days: import("@prisma/client/runtime/library").JsonValue;
@@ -39,26 +39,31 @@ export declare class StudentsService {
                 endTime: string;
             };
         } & {
-            groupId: string;
             studentId: string;
+            groupId: string;
             joinedAt: Date;
         })[];
     } & {
         id: string;
-        fullName: string;
         phone: string | null;
+        createdAt: Date;
+        centerId: string;
+        fullName: string;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
         coins: number;
         points: number;
         status: import(".prisma/client").$Enums.StudentStatus;
-        createdAt: Date;
-        centerId: string;
     })[]>;
+    findOnePublic(id: string): Promise<any>;
     findOne(id: string): Promise<{
         groups: ({
             group: {
+                teacher: {
+                    id: string;
+                    fullName: string;
+                };
                 course: {
                     id: string;
                     createdAt: Date;
@@ -66,15 +71,11 @@ export declare class StudentsService {
                     title: string;
                     price: import("@prisma/client/runtime/library").Decimal;
                 };
-                teacher: {
-                    id: string;
-                    fullName: string;
-                };
             } & {
                 id: string;
+                name: string;
                 createdAt: Date;
                 centerId: string;
-                name: string;
                 courseId: string;
                 teacherId: string;
                 days: import("@prisma/client/runtime/library").JsonValue;
@@ -82,64 +83,64 @@ export declare class StudentsService {
                 endTime: string;
             };
         } & {
-            groupId: string;
             studentId: string;
+            groupId: string;
             joinedAt: Date;
         })[];
         attendances: {
             id: string;
-            status: import(".prisma/client").$Enums.AttendanceStatus;
             createdAt: Date;
-            groupId: string;
+            status: import(".prisma/client").$Enums.AttendanceStatus;
             studentId: string;
+            groupId: string;
             date: Date;
             markedBy: string | null;
         }[];
         payments: {
             id: string;
-            studentId: string;
-            paidAt: Date;
             amount: import("@prisma/client/runtime/library").Decimal;
             paymentMethod: import(".prisma/client").$Enums.PaymentType;
+            paidAt: Date;
             comment: string | null;
+            studentId: string;
         }[];
     } & {
         id: string;
-        fullName: string;
         phone: string | null;
+        createdAt: Date;
+        centerId: string;
+        fullName: string;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
         coins: number;
         points: number;
         status: import(".prisma/client").$Enums.StudentStatus;
-        createdAt: Date;
-        centerId: string;
     }>;
     update(id: string, dto: UpdateStudentDto): Promise<{
         id: string;
-        fullName: string;
         phone: string | null;
+        createdAt: Date;
+        centerId: string;
+        fullName: string;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
         coins: number;
         points: number;
         status: import(".prisma/client").$Enums.StudentStatus;
-        createdAt: Date;
-        centerId: string;
     }>;
     remove(id: string): Promise<{
         id: string;
-        fullName: string;
         phone: string | null;
+        createdAt: Date;
+        centerId: string;
+        fullName: string;
         parentPhone: string;
         parentChatId: bigint | null;
         balance: import("@prisma/client/runtime/library").Decimal;
         coins: number;
         points: number;
         status: import(".prisma/client").$Enums.StudentStatus;
-        createdAt: Date;
-        centerId: string;
     }>;
 }

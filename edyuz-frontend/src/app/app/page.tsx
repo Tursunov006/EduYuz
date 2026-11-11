@@ -54,7 +54,8 @@ function MiniWebAppContent() {
         let stId = selectedStudentId;
 
         // Agar stId bo'lmasa, dastlabki o'quvchini olish
-        if (!stId) {
+        // Ro'yxat faqat tizimga kirgan xodimga beriladi (ko'rib chiqish rejimi)
+        if (!stId && localStorage.getItem('token')) {
           const allRes = await axios.get('http://localhost:3000/api/v1/students');
           const list = allRes.data || [];
           if (list.length > 0) {
@@ -148,6 +149,15 @@ function MiniWebAppContent() {
             <div className="py-36 text-center space-y-3">
               <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               <p className="text-xs text-slate-400 font-semibold">Ilova yuklanmoqda...</p>
+            </div>
+          ) : !student ? (
+            <div className="py-28 px-4 text-center space-y-3">
+              <div className="text-3xl">🔒</div>
+              <h1 className="text-sm font-bold text-white">Shaxsiy havola kerak</h1>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Ilovani EduYuz Telegram botidagi «📱 Mini Ilova» tugmasi yoki o‘quv markazingiz
+                bergan shaxsiy havola orqali oching.
+              </p>
             </div>
           ) : (
             <>

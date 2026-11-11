@@ -7,67 +7,89 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
+import { RoleType } from '@prisma/client';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { AddStudentToGroupDto } from './dto/add-student.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Public } from '../../common/decorators/public.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('groups')
 export class GroupsController {
-  constructor(private readonly groupsService: GroupsService) {}
+  constructor(
+    private readonly groupsService: GroupsService,
+    private readonly access: AccessService,
+  ) {}
 
-  @Public()
+  @Roles(RoleType.admin)
   @Post()
-  create(@Body() dto: CreateGroupDto) {
-    return this.groupsService.create(dto);
+  async create(@Body() dto: CreateGroupDto, @CurrentUser() user: AuthUser) {
+    dto.centerId = this.access.centerForCreate(user, dto.centerId);
+    // Kurs va o'qituvchi ham shu markazga tegishli bo'lishi shart
+    if (dto.courseId) await this.access.course(user, dto.courseId);
+    if (dto.teacherId) await this.access.staff(user, dto.teacherId);
+    return this.groupsService.create(dto, user.id);
   }
 
-  @Public()
   @Get()
   findAll(
+    @CurrentUser() user: AuthUser,
     @Query('centerId') centerId?: string,
     @Query('courseId') courseId?: string,
     @Query('teacherId') teacherId?: string,
   ) {
-    return this.groupsService.findAll(centerId, courseId, teacherId);
+    return this.groupsService.findAll(this.access.scopeCenter(user, centerId), courseId, teacherId);
   }
 
-  @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.group(user, id);
     return this.groupsService.findOne(id);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateGroupDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateGroupDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.group(user, id);
+    if (dto.courseId) await this.access.course(user, dto.courseId);
+    if (dto.teacherId) await this.access.staff(user, dto.teacherId);
     return this.groupsService.update(id, dto);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.group(user, id);
     return this.groupsService.remove(id);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Post(':id/students')
-  addStudent(@Param('id') groupId: string, @Body() dto: AddStudentToGroupDto) {
+  async addStudent(
+    @Param('id') groupId: string,
+    @Body() dto: AddStudentToGroupDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.group(user, groupId);
+    await this.access.student(user, dto.studentId);
     return this.groupsService.addStudent(groupId, dto);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Delete(':id/students/:studentId')
-  removeStudent(
+  async removeStudent(
     @Param('id') groupId: string,
     @Param('studentId') studentId: string,
+    @CurrentUser() user: AuthUser,
   ) {
+    await this.access.group(user, groupId);
     return this.groupsService.removeStudent(groupId, studentId);
   }
 }

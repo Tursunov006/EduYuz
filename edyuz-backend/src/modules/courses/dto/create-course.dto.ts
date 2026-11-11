@@ -1,9 +1,10 @@
-import { IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsOptional, IsNotEmpty, IsNumber, IsPositive, IsString } from 'class-validator';
 
 export class CreateCourseDto {
-  @IsNotEmpty({ message: 'Markaz ID (centerId) kiritilishi shart' })
+  // Markaz serverda foydalanuvchi tokenidan aniqlanadi; bu maydon faqat superadmin uchun
+  @IsOptional()
   @IsString()
-  centerId: string;
+  centerId?: string;
 
   @IsNotEmpty({ message: 'Kurs nomi (title) kiritilishi shart' })
   @IsString()

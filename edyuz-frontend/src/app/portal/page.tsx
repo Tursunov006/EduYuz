@@ -124,73 +124,41 @@ function PortalContent() {
     return { name: 'KARTA', color: 'bg-slate-700 text-slate-300' };
   };
 
-  // 1-bosqich: SMS kod yuborish
-  const handleRequestSms = (e: React.FormEvent) => {
+  // Onlayn to'lov: to'lov tizimining (Atmos) himoyalangan sahifasiga yo'naltirish.
+  // Avval bu yerda karta raqami shu saytning o'zida so'ralib, soxta "SMS kod"dan keyin
+  // hech qanday pul yechilmasdan balans to'g'ridan-to'g'ri oshirilardi — ya'ni istalgan
+  // odam o'ziga bepul balans yozib olishi mumkin edi. Endi balans faqat to'lov tizimi
+  // imzolagan tasdiq (webhook) kelgandagina yoki kassada admin tomonidan oshiriladi.
+  const handleRequestSms = async (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanNum = inputCardNumber.replace(/\s/g, '');
-    if (cleanNum.length !== 16) {
-      return alert('Iltimos, 16 xonali to‘g‘ri karta raqamini kiriting!');
-    }
-    if (inputCardExpiry.length !== 5) {
-      return alert('Iltimos, kartaning amal qilish muddatini to‘g‘ri kiriting (masalan: 12/28)!');
-    }
     if (!payAmount || payAmount < 1000) {
       return alert('Minimal to‘lov miqdori: 1 000 so‘m');
     }
 
     setPayLoading(true);
-    setTimeout(() => {
-      setPayLoading(false);
-      setPayStep('sms');
-      setSmsTimer(60);
-    }, 800);
-  };
-
-  // 2-bosqich: SMS kodni tasdiqlash va to'lovni bazaga yozish
-  const handleConfirmPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputSmsCode || inputSmsCode.length < 4) {
-      return alert('Iltimos, SMS orqali kelgan tasdiqlash kodini kiriting!');
-    }
-
-    setPayLoading(true);
     try {
-      const cleanNum = inputCardNumber.replace(/\s/g, '');
-      const cardType = getCardType(cleanNum).name;
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
-
-      // Backend API'ga to'lovni yuborish
-      const res = await axios.post(`${apiUrl}/payments`, {
+      const res = await axios.post(`${apiUrl}/payments/atmos/create-invoice`, {
         studentId: selectedStudentId,
         amount: Number(payAmount),
-        paymentMethod: 'card',
-        comment: `Online ${cardType} orqali to‘lov (${cleanNum.slice(0, 4)} **** ${cleanNum.slice(-4)}) -> 9860 1201 3540 8280`
       });
-
-      setLastPaymentInfo({
-        txId: `ED-${Date.now().toString().slice(-6)}`,
-        amount: payAmount,
-        card: `${cleanNum.slice(0, 4)} •••• •••• ${cleanNum.slice(-4)}`,
-        cardType: cardType,
-        date: new Date().toLocaleString(),
-        studentName: studentData?.fullName
-      });
-
-      // Talaba ma'lumotlari va to'lovlar tarixini yangilash
-      if (studentData) {
-        setStudentData({
-          ...studentData,
-          balance: Number(studentData.balance || 0) + Number(payAmount)
-        });
+      if (res.data?.url) {
+        window.location.href = res.data.url;
+        return;
       }
-      setPayments(prev => [res.data, ...prev]);
-
-      setPayStep('success');
+      throw new Error('no-url');
     } catch (err: any) {
-      alert(err.response?.data?.message || err.message || 'To‘lovni amalga oshirishda xatolik yuz berdi');
+      alert(
+        'Onlayn karta to‘lovi hozircha ulanmagan. Iltimos, Click yoki Payme ilovasi orqali to‘lang yoki markaz kassasiga murojaat qiling.',
+      );
     } finally {
       setPayLoading(false);
     }
+  };
+
+  const handleConfirmPayment = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowPayModal(false);
   };
 
   const copyCardNumber = () => {
@@ -209,15 +177,24 @@ function PortalContent() {
 
   useEffect(() => {
     async function fetchStudents() {
+      // O'quvchilar ro'yxati faqat tizimga kirgan xodimlarga beriladi.
+      // Ota-ona/o'quvchi portalga shaxsiy havola (?studentId=...) orqali kiradi.
+      if (!localStorage.getItem('token')) {
+        if (!urlStudentId) setLoading(false);
+        return;
+      }
       try {
         const res = await axios.get('http://localhost:3000/api/v1/students');
         const list = res.data || [];
         setAllStudents(list);
         if (!selectedStudentId && list.length > 0) {
           setSelectedStudentId(list[0].id);
+        } else if (!selectedStudentId) {
+          setLoading(false);
         }
       } catch (err) {
         console.error(err);
+        if (!urlStudentId) setLoading(false);
       }
     }
     fetchStudents();
@@ -260,6 +237,21 @@ function PortalContent() {
 
   const groupInfo = studentData?.groups?.[0]?.group;
   const isDebt = Number(studentData?.balance || 0) < 0;
+
+  if (!selectedStudentId && !loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
+        <div className="max-w-sm text-center space-y-3 bg-slate-900 border border-slate-800 rounded-3xl p-6">
+          <div className="text-3xl">🔒</div>
+          <h1 className="text-base font-bold text-white">Shaxsiy havola kerak</h1>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Portalga kirish uchun EduYuz Telegram botidagi «📱 Mini Ilova» tugmasidan yoki
+            o‘quv markazingiz bergan shaxsiy havoladan foydalaning.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-0 sm:p-4">
@@ -690,7 +682,6 @@ function PortalContent() {
                     Payme Ilovasi
                   </a>
                 </div></div>
-              </div>
 
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mt-4">
                 To'lov Cheklari va Tarixi
@@ -871,37 +862,10 @@ function PortalContent() {
                   </div>
                 </div>
 
-                {/* Karta Raqami */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Karta raqami (16 xonali)
-                  </label>
-                  <div className="relative">
-                    <input 
-                      type="text"
-                      required
-                      placeholder="8600 0000 0000 0000 yoki 9860..."
-                      value={inputCardNumber}
-                      onChange={(e) => handleCardNumberChange(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-white tracking-wider focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Amal Qilish Muddati */}
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Amal qilish muddati (Oy / Yil)
-                  </label>
-                  <input 
-                    type="text"
-                    required
-                    placeholder="MM/YY (masalan: 12/28)"
-                    value={inputCardExpiry}
-                    onChange={(e) => handleExpiryChange(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm font-mono font-bold text-white focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  🔒 Karta ma’lumotlari bu sahifada so‘ralmaydi — ularni faqat to‘lov tizimining
+                  himoyalangan sahifasida kiritasiz.
+                </p>
 
                 <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-2.5 text-[10px] text-slate-400 flex items-center justify-between">
                   <span>Qabul qiluvchi markaz kartasi:</span>
@@ -913,7 +877,7 @@ function PortalContent() {
                   disabled={payLoading}
                   className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-500/20 cursor-pointer"
                 >
-                  {payLoading ? 'SMS kod yuborilmoqda...' : 'SMS Tasdiqlash Kodini Olish'}
+                  {payLoading ? 'Yo‘naltirilmoqda...' : 'To‘lov sahifasiga o‘tish'}
                   <ArrowRight size={14} />
                 </button>
               </form>

@@ -42,18 +42,25 @@ npm install
 ```
 
 ### 2. Muhit parametrlarini sozlash (`.env`):
-`.env.example` faylidan nusxa olib `.env` faylini to'ldiring:
+`.env.example` faylidan nusxa olib `.env` faylini to'ldiring (barcha o'zgaruvchilar izohi o'sha faylda):
 ```env
 PORT=3000
-NODE_ENV=development
-
-# Database URL (PostgreSQL)
 DATABASE_URL="postgresql://postgres:password@localhost:5432/edyuz_db?schema=public"
 
-# JWT Configuration
-JWT_SECRET="your_super_secret_jwt_key_here"
+# openssl rand -hex 32 bilan yarating
+JWT_SECRET=""
 JWT_EXPIRES_IN="7d"
+CORS_ORIGINS="https://sizning-domen.uz"
+TELEGRAM_BOT_TOKEN=""
 ```
+
+### 🔐 Xavfsizlik qoidalari
+- **Barcha endpointlar sukut bo'yicha login talab qiladi** (global `JwtAuthGuard` + `RolesGuard`). Ochiq qilish kerak bo'lsa, ongli ravishda `@Public()` qo'yiladi.
+- **Markazlar ajratilgan (multi-tenant):** xodim faqat o'z markazi ma'lumotlarini ko'radi/o'zgartiradi. `centerId` so'rovdan emas, tokendan olinadi (`AccessService`).
+- **Rollar:** `superadmin` — markazlarni boshqarish; `admin` — moliya, xodimlar, o'quvchilar; `teacher` — davomat va LMS.
+- **Maxfiy kalitlar faqat `.env` da.** Token, parol yoki API kalitni hech qachon kodga yozmang.
+- **To'lov webhook'lari imzo bilan tekshiriladi** (`CLICK_SECRET_KEY`, `ATMOS_API_KEY`). Kalit sozlanmagan bo'lsa webhook rad etiladi.
+- O'quvchi portali (`/portal`, `/app`) shaxsiy havola (`?studentId=<UUID>`) orqali ishlaydi.
 
 ### 3. Prisma migratsiyasini bajarish:
 ```bash
@@ -76,7 +83,7 @@ npm run start:prod
 ## 🔑 Asosiy API Endpointlar (Barchasi `/api/v1` prefiksi bilan)
 
 ### Auth (`/api/v1/auth`)
-- `POST /auth/register` - Yangi foydalanuvchini ro'yxatdan o'tkazish
+- `POST /auth/register` - Yangi xodimni ro'yxatdan o'tkazish (faqat admin, o'z markaziga)
 - `POST /auth/login` - Tizimga kirish (JWT token olish)
 - `GET /auth/me` - Joriy profil ma'lumotlarini olish
 

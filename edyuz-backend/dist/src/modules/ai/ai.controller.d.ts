@@ -1,5 +1,5 @@
 import { AiService } from './ai.service';
-import { GenerateLessonDto, GenerateQuizDto, AiChatDto } from './dto/ai.dto';
+import { GenerateLessonDto, GenerateQuizDto, AiChatDto, GenerateMarketingDto } from './dto/ai.dto';
 export declare class AiController {
     private readonly aiService;
     constructor(aiService: AiService);
@@ -9,10 +9,7 @@ export declare class AiController {
     chat(dto: AiChatDto): Promise<{
         reply: string;
     }>;
-    generateMarketing(dto: {
-        platform: string;
-        topic: string;
-    }): Promise<{
+    generateMarketing(dto: GenerateMarketingDto): Promise<{
         success: boolean;
         data: {
             title: string;

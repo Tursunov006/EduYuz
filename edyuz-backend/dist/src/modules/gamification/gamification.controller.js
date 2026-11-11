@@ -17,47 +17,57 @@ const common_1 = require("@nestjs/common");
 const gamification_service_1 = require("./gamification.service");
 const award_coins_dto_1 = require("./dto/award-coins.dto");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let GamificationController = class GamificationController {
-    constructor(gamificationService) {
+    constructor(gamificationService, access) {
         this.gamificationService = gamificationService;
+        this.access = access;
     }
-    async getLeaderboard(groupId) {
-        return this.gamificationService.getLeaderboard(groupId);
+    async getLeaderboard(user, groupId) {
+        if (groupId)
+            await this.access.group(user, groupId);
+        return this.gamificationService.getLeaderboard(groupId, this.access.scopeCenter(user));
     }
-    async awardCoins(dto) {
+    async awardCoins(dto, user) {
+        await this.access.student(user, dto.studentId);
         return this.gamificationService.awardCoins(dto);
     }
-    async getStudentHistory(id) {
+    async getStudentHistory(id, user) {
+        if (user)
+            await this.access.student(user, id);
         return this.gamificationService.getStudentHistory(id);
     }
 };
 exports.GamificationController = GamificationController;
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)('leaderboard'),
-    __param(0, (0, common_1.Query)('groupId')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('groupId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], GamificationController.prototype, "getLeaderboard", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Post)('award'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [award_coins_dto_1.AwardCoinsDto]),
+    __metadata("design:paramtypes", [award_coins_dto_1.AwardCoinsDto, Object]),
     __metadata("design:returntype", Promise)
 ], GamificationController.prototype, "awardCoins", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)('student/:id/history'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], GamificationController.prototype, "getStudentHistory", null);
 exports.GamificationController = GamificationController = __decorate([
     (0, common_1.Controller)('gamification'),
-    __metadata("design:paramtypes", [gamification_service_1.GamificationService])
+    __metadata("design:paramtypes", [gamification_service_1.GamificationService,
+        access_service_1.AccessService])
 ], GamificationController);
 //# sourceMappingURL=gamification.controller.js.map

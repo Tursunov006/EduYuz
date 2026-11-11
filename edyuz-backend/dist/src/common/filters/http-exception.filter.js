@@ -8,7 +8,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.HttpExceptionFilter = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 let HttpExceptionFilter = class HttpExceptionFilter {
+    constructor() {
+        this.logger = new common_1.Logger('HttpExceptionFilter');
+    }
     catch(exception, host) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
@@ -20,8 +24,26 @@ let HttpExceptionFilter = class HttpExceptionFilter {
             const res = exception.getResponse();
             message = typeof res === 'object' && res.message ? res.message : res;
         }
-        else if (exception instanceof Error) {
-            message = exception.message;
+        else if (exception instanceof client_1.Prisma.PrismaClientKnownRequestError) {
+            if (exception.code === 'P2002') {
+                status = common_1.HttpStatus.CONFLICT;
+                message = "Bunday ma'lumot allaqachon mavjud";
+            }
+            else if (exception.code === 'P2025') {
+                status = common_1.HttpStatus.NOT_FOUND;
+                message = "Ma'lumot topilmadi";
+            }
+            else if (exception.code === 'P2003') {
+                status = common_1.HttpStatus.CONFLICT;
+                message = "Bu yozuvga bog'langan boshqa ma'lumotlar mavjud, avval ularni o'chiring";
+            }
+            else {
+                this.logger.error(`${request.method} ${request.url} -> Prisma ${exception.code}: ${exception.message}`);
+            }
+        }
+        else {
+            const err = exception;
+            this.logger.error(`${request.method} ${request.url} -> ${err?.message}`, err?.stack);
         }
         response.status(status).json({
             success: false,

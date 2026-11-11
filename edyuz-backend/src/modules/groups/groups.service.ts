@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
@@ -8,47 +13,37 @@ import { AddStudentToGroupDto } from './dto/add-student.dto';
 export class GroupsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: CreateGroupDto) {
-    // 1. Markazni topish yoki yaratish
-    let centerId = dto.centerId;
+  async create(dto: CreateGroupDto, creatorId: string) {
+    // Markaz controller'da foydalanuvchi tokenidan aniqlanadi.
+    // (Avval markaz berilmasa bazadagi "birinchi uchragan" markaz olinardi —
+    // ya'ni guruh begona markazga yozilib qolishi mumkin edi.)
+    const centerId = dto.centerId;
     if (!centerId) {
-      let center = await this.prisma.center.findFirst();
-      if (!center) {
-        center = await this.prisma.center.create({
-          data: { name: "EdYuz Bosh Markaz", phone: "+998901234567" },
-        });
-      }
-      centerId = center.id;
+      throw new BadRequestException('Markaz aniqlanmadi');
     }
 
-    // 2. Kursni topish yoki yaratish
+    // Kurs tanlanmagan bo'lsa — shu markazning birinchi kursi yoki standart kurs
     let courseId = dto.courseId;
     if (!courseId) {
       let course = await this.prisma.course.findFirst({ where: { centerId } });
       if (!course) {
         course = await this.prisma.course.create({
-          data: { title: "Dasturlash Asoslari", price: 500000, centerId },
+          data: { title: 'Dasturlash Asoslari', price: 500000, centerId },
         });
       }
       courseId = course.id;
     }
 
-    // 3. O'qituvchini topish yoki yaratish
+    // O'qituvchi tanlanmagan bo'lsa — shu markazning birinchi o'qituvchisi,
+    // u ham bo'lmasa guruhni yaratayotgan xodimning o'zi.
+    // (Avval qat'iy "+998900000001" raqamli, yaroqsiz parol hash'li soxta o'qituvchi
+    // yaratilardi; telefon unikal bo'lgani uchun ikkinchi markazda bu xatoga olib kelardi.)
     let teacherId = dto.teacherId;
     if (!teacherId) {
-      let teacher = await this.prisma.user.findFirst({ where: { centerId, role: 'teacher' } });
-      if (!teacher) {
-        teacher = await this.prisma.user.create({
-          data: {
-            centerId,
-            fullName: "Bosh O'qituvchi",
-            phone: "+998900000001",
-            passwordHash: "defaultpasswordhash",
-            role: 'teacher',
-          },
-        });
-      }
-      teacherId = teacher.id;
+      const teacher = await this.prisma.user.findFirst({
+        where: { centerId, role: 'teacher', isActive: true },
+      });
+      teacherId = teacher?.id || creatorId;
     }
 
     let formattedDays = dto.days;
@@ -101,6 +96,7 @@ export class GroupsService {
           },
         },
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 

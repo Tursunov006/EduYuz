@@ -14,6 +14,7 @@ const config_1 = require("@nestjs/config");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
+const jwt_secret_1 = require("../../common/jwt-secret");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -25,9 +26,9 @@ exports.AuthModule = AuthModule = __decorate([
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
                 useFactory: (config) => ({
-                    secret: config.get('JWT_SECRET') || 'edyuz_super_secret_jwt_key_2026',
+                    secret: (0, jwt_secret_1.resolveJwtSecret)(),
                     signOptions: {
-                        expiresIn: config.get('JWT_EXPIRES_IN') || '7d',
+                        expiresIn: config.get('JWT_EXPIRES_IN') || config.get('JWT_EXPIRATION') || '7d',
                     },
                 }),
             }),

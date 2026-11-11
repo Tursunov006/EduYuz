@@ -119,6 +119,11 @@ let SmsService = SmsService_1 = class SmsService {
     }
     async getLogs() {
         return this.prisma.smsLog.findMany({
+            where: {
+                status: {
+                    notIn: ['lead_new', 'lead_contacted', 'lead_trial', 'lead_converted'],
+                },
+            },
             orderBy: { sentAt: 'desc' },
             take: 100,
         });

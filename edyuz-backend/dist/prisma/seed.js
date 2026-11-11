@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const bcrypt = require("bcrypt");
+const crypto_1 = require("crypto");
 const prisma = new client_1.PrismaClient();
 async function main() {
     console.log('🌱 Bazaga dastlabki ma\'lumotlar kiritilmoqda...');
@@ -18,7 +19,8 @@ async function main() {
     const adminPhone = '+998901234567';
     let admin = await prisma.user.findUnique({ where: { phone: adminPhone } });
     if (!admin) {
-        const passwordHash = await bcrypt.hash('admin123', 10);
+        const adminPassword = process.env.SEED_ADMIN_PASSWORD || (0, crypto_1.randomBytes)(9).toString('base64url');
+        const passwordHash = await bcrypt.hash(adminPassword, 10);
         admin = await prisma.user.create({
             data: {
                 centerId: center.id,
@@ -29,12 +31,14 @@ async function main() {
                 isActive: true,
             },
         });
-        console.log('✅ Superadmin yaratildi: login: +998901234567, parol: admin123');
+        console.log(`✅ Superadmin yaratildi: login: ${adminPhone}, parol: ${adminPassword}`);
+        console.log('   ⚠️ Bu parol faqat hozir ko\'rsatiladi — saqlab qo\'ying.');
     }
     const teacherPhone = '+998909876543';
     let teacher = await prisma.user.findUnique({ where: { phone: teacherPhone } });
     if (!teacher) {
-        const passwordHash = await bcrypt.hash('teacher123', 10);
+        const teacherPassword = process.env.SEED_TEACHER_PASSWORD || (0, crypto_1.randomBytes)(9).toString('base64url');
+        const passwordHash = await bcrypt.hash(teacherPassword, 10);
         teacher = await prisma.user.create({
             data: {
                 centerId: center.id,
@@ -45,7 +49,7 @@ async function main() {
                 isActive: true,
             },
         });
-        console.log('✅ O\'qituvchi yaratildi: login: +998909876543, parol: teacher123');
+        console.log(`✅ O'qituvchi yaratildi: login: ${teacherPhone}, parol: ${teacherPassword}`);
     }
     let course1 = await prisma.course.findFirst({ where: { title: 'Frontend Dasturlash (React/Next.js)' } });
     if (!course1) {

@@ -1,5 +1,5 @@
 export declare class CreateCourseDto {
-    centerId: string;
+    centerId?: string;
     title: string;
     price: number;
 }

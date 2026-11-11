@@ -17,11 +17,13 @@ exports.SendSmsDto = SendSmsDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: "Telefon raqam kiritilishi shart" }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^\+?[\d\s()-]{9,20}$/, { message: "Telefon raqam formati noto'g'ri" }),
     __metadata("design:type", String)
 ], SendSmsDto.prototype, "phone", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: "Xabar matni kiritilishi shart" }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(800, { message: "Xabar 800 belgidan oshmasligi kerak" }),
     __metadata("design:type", String)
 ], SendSmsDto.prototype, "message", void 0);
 //# sourceMappingURL=send-sms.dto.js.map

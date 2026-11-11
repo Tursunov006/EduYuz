@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsNumber, IsIn, IsBoolean } from 'class-validator';
+import { MinLength, Min, IsOptional, IsString, IsNumber, IsIn, IsBoolean } from 'class-validator';
 
 export class UpdateTeacherDto {
   @IsOptional()
@@ -11,6 +11,7 @@ export class UpdateTeacherDto {
 
   @IsOptional()
   @IsString()
+  @MinLength(6, { message: "Parol kamida 6 belgidan iborat bo'lishi kerak" })
   password?: string;
 
   @IsOptional()
@@ -23,6 +24,7 @@ export class UpdateTeacherDto {
 
   @IsOptional()
   @IsNumber()
+  @Min(0)
   salaryRate?: number;
 
   @IsOptional()
