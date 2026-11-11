@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { createHash, timingSafeEqual } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
@@ -27,10 +28,67 @@ export class TelegramService implements OnModuleInit {
         '⚠️ TELEGRAM_BOT_TOKEN sozlanmagan. Telegram xabarlar simulyatsiya (console) rejimida ishlaydi.',
       );
     } else {
-      await this.clearWebhookAndSetupMenu();
+      await this.connect();
       this.logger.log('🤖 EduYuz 2.0 Super Telegram Bot muvaffaqiyatli ulandi!');
-      this.startPolling();
     }
+  }
+
+  // Webhook manzili. Render bepul tarifida server 15 daqiqa so'rov kelmasa uxlab qoladi:
+  // polling (getUpdates) ham to'xtaydi va bot javob bermay qoladi. Webhook'da esa Telegram
+  // xabarni serverga o'zi yuboradi va uxlab qolgan serverni uyg'otadi.
+  // TELEGRAM_WEBHOOK_URL berilmasa, Render beradigan RENDER_EXTERNAL_URL ishlatiladi.
+  private webhookUrl(): string | null {
+    const explicit = this.configService.get<string>('TELEGRAM_WEBHOOK_URL')?.trim();
+    if (explicit) return explicit;
+    const base = this.configService.get<string>('RENDER_EXTERNAL_URL')?.trim();
+    return base ? `${base.replace(/\/+$/, '')}/api/v1/telegram/webhook` : null;
+  }
+
+  // Telegram webhook so'rovlarini tekshirish uchun maxfiy kalit (bot tokenidan hosil qilinadi)
+  private webhookSecret(): string {
+    return createHash('sha256').update(`eduyuz-webhook:${this.botToken}`).digest('hex').slice(0, 48);
+  }
+
+  isValidWebhookSecret(header?: string): boolean {
+    if (!this.botToken || !header) return false;
+    const a = Buffer.from(header);
+    const b = Buffer.from(this.webhookSecret());
+    return a.length === b.length && timingSafeEqual(a, b);
+  }
+
+  // Webhook orqali kelgan yangilanish (javob kutmasdan qayta ishlanadi)
+  handleWebhookUpdate(update: any) {
+    this.handleUpdate(update).catch((err: any) =>
+      this.logger.warn(`Telegram yangilanishini qayta ishlashda xato: ${err?.message || err}`),
+    );
+  }
+
+  // Webhook mumkin bo'lsa webhook, aks holda polling
+  private async connect() {
+    await this.clearWebhookAndSetupMenu();
+    const url = this.webhookUrl();
+    if (url) {
+      try {
+        const res = await fetch(`https://api.telegram.org/bot${this.botToken}/setWebhook`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url,
+            secret_token: this.webhookSecret(),
+            drop_pending_updates: false,
+          }),
+        });
+        const data: any = await res.json();
+        if (data?.ok) {
+          this.logger.log(`Telegram webhook o'rnatildi: ${url}`);
+          return;
+        }
+        this.logger.warn(`Webhook o'rnatilmadi (${data?.description}). Polling ishlatiladi.`);
+      } catch (e: any) {
+        this.logger.warn(`Webhook o'rnatishda xato: ${e.message}. Polling ishlatiladi.`);
+      }
+    }
+    this.startPolling();
   }
 
   // Begona webhooklarni o'chirish va rasmiy menyu komandalarini o'rnatish
@@ -66,9 +124,7 @@ export class TelegramService implements OnModuleInit {
       return { success: false, message: 'Token formati noto‘g‘ri' };
     }
     this.botToken = newToken.trim();
-    await this.clearWebhookAndSetupMenu();
-    // Server token'siz ishga tushgan bo'lsa polling hali boshlanmagan bo'ladi
-    this.startPolling();
+    await this.connect();
     return {
       success: true,
       message: 'Yangi Telegram Bot Token muvaffaqiyatli ulandi va himoyalandi!',

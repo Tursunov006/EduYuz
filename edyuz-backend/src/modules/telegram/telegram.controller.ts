@@ -1,4 +1,6 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Headers, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
+import { Public } from '../../common/decorators/public.decorator';
 import { RoleType } from '@prisma/client';
 import { TelegramService } from './telegram.service';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -9,6 +11,20 @@ import { Roles } from '../../common/decorators/roles.decorator';
 @Controller('telegram')
 export class TelegramController {
   constructor(private readonly telegramService: TelegramService) {}
+
+  // Telegram shu manzilga yangi xabarlarni yuboradi (webhook).
+  // Faqat Telegram biladigan maxfiy kalit (X-Telegram-Bot-Api-Secret-Token) bilan qabul qilinadi.
+  @Public()
+  @SkipThrottle()
+  @HttpCode(200)
+  @Post('webhook')
+  webhook(@Headers('x-telegram-bot-api-secret-token') secret: string, @Body() update: any) {
+    if (!this.telegramService.isValidWebhookSecret(secret)) {
+      throw new UnauthorizedException();
+    }
+    this.telegramService.handleWebhookUpdate(update);
+    return { ok: true };
+  }
 
   @Roles(RoleType.admin)
   @Post('send-test')
