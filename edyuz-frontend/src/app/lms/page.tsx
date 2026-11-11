@@ -44,10 +44,7 @@ export default function LmsPage() {
       {/* Sarlavha va Guruh tanlash filtri */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <BookOpen className="text-indigo-600" size={26} />
-            LMS Ta'lim Portali
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Ta’lim va darslar</h1>
           <p className="text-xs text-slate-500 mt-1">
             Guruhlar bo'yicha video darslar, konspektlar va uyga vazifalar nazorati
           </p>

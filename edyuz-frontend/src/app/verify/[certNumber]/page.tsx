@@ -62,7 +62,7 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ ce
               <span className="text-xs font-bold uppercase tracking-widest text-emerald-600 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
                 Haqiqiy & Tasdiqlangan
               </span>
-              <h1 className="text-2xl font-bold text-slate-900 mt-3">Rasmiy Bitiruv Sertifikati</h1>
+              <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Rasmiy Bitiruv Sertifikati</h1>
               <p className="text-xs text-slate-500 mt-1">
                 Ushbu sertifikat EduYuz platformasi ma'lumotlar bazasida ro'yxatga olingan.
               </p>

@@ -67,14 +67,8 @@ export default function GamesHubPage() {
       {/* Hero Banner */}
       <div className="relative overflow-hidden rounded-2xl border border-slate-200 p-8 sm:p-10 shadow-sm bg-rose-50">
         <div className="relative z-10 max-w-2xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30 text-xs font-bold">
-            <Gamepad2 className="w-4 h-4 text-rose-600" />
-            <span>Mavzuli Interaktiv O‘yinlar Arenasi</span>
-          </div>
 
-          <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight">
-            Darslarni o‘yin orqali o‘rganing va <span className="text-indigo-600">EduCoin</span> yutib oling!
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Darslarni o‘yin orqali o‘rganing va <span className="text-indigo-600">EduCoin</span> yutib oling!</h1>
 
           <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
             Har bir dars mavzusi bo‘yicha AI tayyorlagan taymerli viktorina va qiziqarli o‘yinlar. Tez va to‘g‘ri javob bering, combo ballar to‘plang va yetakchilar shohsupasiga ko‘tariling!

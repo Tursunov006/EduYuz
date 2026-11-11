@@ -243,7 +243,7 @@ function PortalContent() {
       <div className="min-h-screen bg-slate-50 text-slate-800 flex items-center justify-center p-6">
         <div className="max-w-sm text-center space-y-3 bg-white border border-slate-200 rounded-2xl p-6">
           <div className="text-3xl"></div>
-          <h1 className="text-base font-bold text-slate-900">Shaxsiy havola kerak</h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Shaxsiy havola kerak</h1>
           <p className="text-xs text-slate-500 leading-relaxed">
             Portalga kirish uchun EduYuz Telegram botidagi «Mini Ilova» tugmasidan yoki
             o‘quv markazingiz bergan shaxsiy havoladan foydalaning.

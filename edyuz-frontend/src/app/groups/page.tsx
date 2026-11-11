@@ -207,13 +207,7 @@ export default function GroupsPage() {
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Jami {groups.length} ta faol guruh • {courses.length} ta fan yo'nalishi
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-              <BookOpen className="text-cyan-600" /> Guruhlar va Dars Jadvali
-            </h1>
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Guruhlar va jadval</h1>
             <p className="text-slate-500 text-xs sm:text-sm">
               Markazdagi barcha dars guruhlari, fan yo'nalishlari va Toq / Juft kunlar shaxmatkasi
             </p>

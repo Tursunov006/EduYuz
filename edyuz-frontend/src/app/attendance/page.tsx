@@ -123,7 +123,7 @@ export default function AttendancePage() {
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
       <div>
-        <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-slate-800">Davomat</h1>
+        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Davomat</h1>
         <p className="text-sm text-slate-500 mt-1">Guruh bo‘yicha davomat belgilash</p>
       </div>
 

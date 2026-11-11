@@ -53,9 +53,7 @@ export default function AiMarketingPage() {
           <Bot size={28} />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            AI Marketing Yordamchisi <Sparkles size={20} className="text-amber-600" />
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">AI yordamchi</h1>
           <p className="text-slate-500 mt-1">Sotuvni oshirish uchun ijtimoiy tarmoqlarga tayyor postlar yarating</p>
         </div>
       </div>

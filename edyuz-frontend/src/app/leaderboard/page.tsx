@@ -86,10 +86,7 @@ export default function LeaderboardPage() {
       {/* Sarlavha va Guruh filtri */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-            <Trophy className="text-amber-600" size={32} />
-            EduYuz Reytingi va EduCoinlar
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Reyting</h1>
           <p className="text-xs text-slate-500 mt-1">
             Darsga qatnashganlik va a'lo baholangan uy vazifalari uchun berilgan ballar shohsupasi
           </p>

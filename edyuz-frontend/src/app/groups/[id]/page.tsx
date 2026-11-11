@@ -137,12 +137,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
           >
             <ArrowLeft size={14} /> Guruhlar ro'yxatiga qaytish
           </Link>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-3">
-            {group.name}
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{group.name}
             <span className="text-xs font-semibold text-indigo-600 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md">
               {group.course?.title || 'Kurs'}
-            </span>
-          </h1>
+            </span></h1>
         </div>
 
         <div className="flex items-center gap-3">

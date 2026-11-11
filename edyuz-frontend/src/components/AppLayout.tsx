@@ -82,29 +82,25 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isExcluded ? (
-        <div className={`min-h-screen flex w-full transition-colors duration-300 ${
-          'bg-slate-50 text-slate-800'
-        }`}>
+        <div className="min-h-screen flex w-full bg-[#F5F7FB] text-slate-900">
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
-          <div className={`flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative ${
-            'bg-slate-50'
-          }`}>
+          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
             <Navbar />
             
             {/* 14-kunlik Bepul Sinov (Trial) Banneri */}
             {subStatus === 'trial' && daysLeft > 0 && (
-              <div className="text-white text-[11px] sm:text-xs font-bold py-2 px-4 flex flex-wrap items-center justify-center gap-2 shadow-sm z-30 relative bg-indigo-600">
+              <div className="mx-4 sm:mx-6 md:mx-8 mt-4 md:mt-6 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2">
                 <span>
-                  Siz <b>14-kunlik bepul sinov (Free Trial)</b> versiyasidan foydalanyapsiz. Tugashiga: <b>{daysLeft} kun</b> qoldi.
+                  Bepul sinov muddati: <b>{daysLeft} kun</b> qoldi
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsPricingOpen(true)}
-                  className="bg-white text-slate-900 hover:bg-amber-100 px-3 py-1 rounded-full text-[11px] font-bold transition shadow cursor-pointer"
+                  className="font-semibold text-indigo-600 hover:underline"
                 >
-                  Tariflar ro‘yxati va Faollashtirish
+                  Tariflarni ko‘rish
                 </button>
               </div>
             )}
@@ -120,17 +116,13 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
               onClose={() => setIsPricingOpen(false)}
             />
 
-            <main className={`flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto transition-colors duration-300 w-full ${
-              'bg-slate-50 text-slate-800'
-            }`}>
+            <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto w-full">
               {children}
             </main>
           </div>
         </div>
       ) : (
-        <div className={`min-h-screen w-full transition-colors duration-300 ${
-          'bg-slate-50 text-slate-800'
-        }`}>
+        <div className="min-h-screen w-full bg-[#F5F7FB] text-slate-900">
           {children}
         </div>
       )}

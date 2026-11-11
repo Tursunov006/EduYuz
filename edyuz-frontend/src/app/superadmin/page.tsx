@@ -252,9 +252,7 @@ export default function SuperAdminPage() {
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-                  EduYuz SaaS SuperAdmin
-                </h1>
+                <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">EduYuz SaaS SuperAdmin</h1>
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-500/20 text-purple-700 border border-purple-500/30">
                   Dasturchi Paneli
                 </span>

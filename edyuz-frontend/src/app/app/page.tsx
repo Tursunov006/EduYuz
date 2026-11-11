@@ -153,7 +153,7 @@ function MiniWebAppContent() {
           ) : !student ? (
             <div className="py-28 px-4 text-center space-y-3">
               <div className="text-3xl"></div>
-              <h1 className="text-sm font-bold text-slate-900">Shaxsiy havola kerak</h1>
+              <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Shaxsiy havola kerak</h1>
               <p className="text-xs text-slate-500 leading-relaxed">
                 Ilovani EduYuz Telegram botidagi «Mini Ilova» tugmasi yoki o‘quv markazingiz
                 bergan shaxsiy havola orqali oching.

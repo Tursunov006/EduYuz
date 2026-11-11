@@ -512,7 +512,7 @@ export default function UnifiedFinancePage() {
       {/* Sarlavha va asosiy amallar (Figma: Ekran — To'lovlar) */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-slate-800">To‘lovlar va moliya</h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Moliya va kassa</h1>
           <p className="text-sm text-slate-500 mt-1">Kirim, chiqim va qarzdorliklar</p>
         </div>
         <div className="flex flex-wrap gap-2.5">

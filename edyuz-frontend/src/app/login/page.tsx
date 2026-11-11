@@ -82,7 +82,7 @@ export default function LoginPage() {
             </div>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">EduYuz Tizimiga Kirish</h1>
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">EduYuz Tizimiga Kirish</h1>
             <p className="text-xs text-slate-500 mt-1">Xodimlar va administratorlar uchun boshqaruv tizimi</p>
           </div>
         </div>

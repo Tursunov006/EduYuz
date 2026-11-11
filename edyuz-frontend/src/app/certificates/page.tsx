@@ -83,10 +83,7 @@ export default function CertificatesPage() {
       {/* Sarlavha va Sertifikat Berish Tugmasi */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <Award className="text-amber-600" size={28} />
-            EduYuz Rasmiy QR-Sertifikatlar
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Sertifikatlar</h1>
           <p className="text-xs text-slate-500 mt-1">
             Kursni muvaffaqiyatli tamomlagan o'quvchilarga avtomatik QR-kodli sertifikat berish va chop etish
           </p>

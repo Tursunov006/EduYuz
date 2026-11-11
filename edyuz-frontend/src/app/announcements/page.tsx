@@ -203,9 +203,7 @@ export default function AnnouncementsPage() {
             <div className="p-2 rounded-xl bg-indigo-600/10 text-indigo-500 border border-indigo-500/20">
               <Megaphone className="w-6 h-6" />
             </div>
-            <h1 className={`text-2xl font-bold tracking-tight text-slate-900`}>
-              E‘lonlar va Yangiliklar Markazi
-            </h1>
+            <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">E’lonlar</h1>
           </div>
           <p className={`text-sm mt-1 text-slate-500`}>
             O‘quv markazining barcha muhim xabarlari, dam olish kunlari va yangiliklarini boshqaring

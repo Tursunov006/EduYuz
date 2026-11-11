@@ -171,7 +171,7 @@ export default function StudentsPage() {
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
       <div>
-        <h1 className="text-2xl sm:text-[28px] font-bold tracking-tight text-slate-800">{t('students.title', 'O‘quvchilar')}</h1>
+        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{t('students.title', 'O‘quvchilar')}</h1>
         <p className="text-sm text-slate-500 mt-1">Barcha o‘quvchilar va ularning holati</p>
       </div>
 

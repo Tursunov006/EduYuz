@@ -216,10 +216,7 @@ export default function TeachersPage() {
       {/* Sahifa Sarlavhasi */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 flex items-center gap-2.5">
-            <Briefcase className="text-indigo-600" size={30} />
-            O‘qituvchilar va Oylik Maosh (Payroll)
-          </h1>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">O‘qituvchilar</h1>
           <p className="text-slate-500 text-sm mt-1">
             Ustozlar tarkibi, dars guruhlari va oylik maosh hisob-kitoblari
           </p>
