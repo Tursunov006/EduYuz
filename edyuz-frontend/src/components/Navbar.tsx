@@ -18,8 +18,10 @@ export default function Navbar() {
         <Menu size={20} />
       </button>
       <Link href="/" className="flex items-center gap-2">
-        <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold">E</span>
-        <span className="font-bold text-slate-900">EduYuz</span>
+        <img src="/logo-icon-transparent.png" alt="EduYuz" className="w-8 h-8 object-contain" />
+        <span className="font-bold text-slate-900">
+          Edu<span className="text-blue-600">Yuz</span>
+        </span>
       </Link>
     </header>
   );
