@@ -30,10 +30,13 @@ const ROLE_LABELS: Record<string, string> = {
 function Brand() {
   return (
     <Link href="/" className="flex items-center gap-2.5 select-none">
-      <span className="w-[34px] h-[34px] rounded-[10px] bg-indigo-600 text-white flex items-center justify-center text-base font-bold">
-        E
+      <img src="/logo-icon-transparent.png" alt="EduYuz" className="w-11 h-11 object-contain shrink-0" />
+      <span className="flex flex-col leading-none">
+        <span className="text-xl font-bold tracking-tight text-slate-900">
+          Edu<span className="text-blue-600">Yuz</span>
+        </span>
+        <span className="mt-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-500">CRM Platform</span>
       </span>
-      <span className="text-lg font-bold text-slate-900">EduYuz</span>
     </Link>
   );
 }
