@@ -14,8 +14,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AiController = void 0;
 const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
 const ai_service_1 = require("./ai.service");
 const ai_dto_1 = require("./dto/ai.dto");
+const public_decorator_1 = require("../../common/decorators/public.decorator");
 let AiController = class AiController {
     constructor(aiService) {
         this.aiService = aiService;
@@ -27,7 +29,7 @@ let AiController = class AiController {
         return this.aiService.generateQuiz(dto.topic, dto.count || 5);
     }
     async getMatchCards(topic) {
-        return this.aiService.generateMatchCards(topic || 'Dasturlash asoslari');
+        return this.aiService.generateMatchCards(String(topic || 'Dasturlash asoslari').slice(0, 100));
     }
     async chat(dto) {
         const reply = await this.aiService.chatTutor(dto.message, dto.studentName, dto.topic);
@@ -39,6 +41,7 @@ let AiController = class AiController {
 };
 exports.AiController = AiController;
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 20 } }),
     (0, common_1.Post)('generate-lesson'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -46,6 +49,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "generateLesson", null);
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 20 } }),
     (0, common_1.Post)('generate-quiz'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -53,6 +57,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "generateQuiz", null);
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 20 } }),
     (0, common_1.Get)('match-cards'),
     __param(0, (0, common_1.Query)('topic')),
     __metadata("design:type", Function),
@@ -60,6 +65,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "getMatchCards", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 15 } }),
     (0, common_1.Post)('chat'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -67,10 +74,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "chat", null);
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 20 } }),
     (0, common_1.Post)('marketing'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [ai_dto_1.GenerateMarketingDto]),
     __metadata("design:returntype", Promise)
 ], AiController.prototype, "generateMarketing", null);
 exports.AiController = AiController = __decorate([

@@ -16,7 +16,7 @@ class CreateStudentDto {
 }
 exports.CreateStudentDto = CreateStudentDto;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)({ message: 'Markaz ID (centerId) kiritilishi shart' }),
+    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateStudentDto.prototype, "centerId", void 0);

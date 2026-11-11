@@ -14,20 +14,27 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TelegramController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const telegram_service_1 = require("./telegram.service");
-const public_decorator_1 = require("../../common/decorators/public.decorator");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 let TelegramController = class TelegramController {
     constructor(telegramService) {
         this.telegramService = telegramService;
     }
     async sendTestMessage(chatId, message) {
-        const success = await this.telegramService.sendMessage(chatId, message || '🔔 EdYuz platformasidan sinov xabari!');
+        if (!chatId || !/^-?\d{1,20}$/.test(String(chatId))) {
+            throw new common_1.BadRequestException("chatId noto'g'ri");
+        }
+        const success = await this.telegramService.sendMessage(chatId, String(message || '🔔 EduYuz platformasidan sinov xabari!').slice(0, 1000));
         return { success, message: success ? 'Xabar yuborildi' : 'Xabar yuborishda xatolik' };
+    }
+    async setBotToken(token) {
+        return this.telegramService.updateBotToken(token);
     }
 };
 exports.TelegramController = TelegramController;
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Post)('send-test'),
     __param(0, (0, common_1.Body)('chatId')),
     __param(1, (0, common_1.Body)('message')),
@@ -35,6 +42,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], TelegramController.prototype, "sendTestMessage", null);
+__decorate([
+    (0, roles_decorator_1.Roles)(client_1.RoleType.superadmin),
+    (0, common_1.Post)('set-token'),
+    __param(0, (0, common_1.Body)('token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], TelegramController.prototype, "setBotToken", null);
 exports.TelegramController = TelegramController = __decorate([
     (0, common_1.Controller)('telegram'),
     __metadata("design:paramtypes", [telegram_service_1.TelegramService])

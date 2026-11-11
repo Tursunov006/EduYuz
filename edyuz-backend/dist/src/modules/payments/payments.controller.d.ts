@@ -1,21 +1,23 @@
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 export declare class PaymentsController {
     private readonly paymentsService;
-    constructor(paymentsService: PaymentsService);
-    create(dto: CreatePaymentDto): Promise<{
+    private readonly access;
+    constructor(paymentsService: PaymentsService, access: AccessService);
+    create(dto: CreatePaymentDto, user: AuthUser): Promise<{
         student: {
             id: string;
+            phone: string | null;
+            createdAt: Date;
             centerId: string;
             fullName: string;
-            phone: string | null;
             parentPhone: string;
             parentChatId: bigint | null;
             balance: import("@prisma/client/runtime/library").Decimal;
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
@@ -25,17 +27,18 @@ export declare class PaymentsController {
         comment: string | null;
         studentId: string;
     }>;
-    chargeMonthly(groupId?: string): Promise<{
+    chargeMonthly(user: AuthUser, groupId?: string): Promise<{
         success: boolean;
         count: number;
+        skipped: number;
         totalCharged: number;
         message: string;
     }>;
-    findAll(studentId?: string): Promise<({
+    findAll(user?: AuthUser, studentId?: string): Promise<({
         student: {
             id: string;
-            fullName: string;
             phone: string;
+            fullName: string;
         };
     } & {
         id: string;
@@ -45,19 +48,19 @@ export declare class PaymentsController {
         comment: string | null;
         studentId: string;
     })[]>;
-    findOne(id: string): Promise<{
+    findOne(id: string, user: AuthUser): Promise<{
         student: {
             id: string;
+            phone: string | null;
+            createdAt: Date;
             centerId: string;
             fullName: string;
-            phone: string | null;
             parentPhone: string;
             parentChatId: bigint | null;
             balance: import("@prisma/client/runtime/library").Decimal;
             coins: number;
             points: number;
             status: import(".prisma/client").$Enums.StudentStatus;
-            createdAt: Date;
         };
     } & {
         id: string;
@@ -67,16 +70,11 @@ export declare class PaymentsController {
         comment: string | null;
         studentId: string;
     }>;
-    resetAll(): Promise<{
-        success: boolean;
-        message: string;
-    }>;
     clickPrepare(data: any): Promise<{
         click_trans_id: any;
         merchant_trans_id: any;
         error: number;
         error_note: string;
-        merchant_prepare_id?: undefined;
     } | {
         click_trans_id: any;
         merchant_trans_id: any;
@@ -89,7 +87,6 @@ export declare class PaymentsController {
         merchant_trans_id: any;
         error: number;
         error_note: string;
-        merchant_confirm_id?: undefined;
     } | {
         click_trans_id: any;
         merchant_trans_id: any;
@@ -101,7 +98,7 @@ export declare class PaymentsController {
         studentId: string;
         amount: number;
     }): Promise<{
-        url: string;
+        url: any;
     }>;
     atmosCallback(data: any, sign: string): Promise<{
         status: number;

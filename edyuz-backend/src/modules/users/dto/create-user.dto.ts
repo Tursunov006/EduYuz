@@ -2,9 +2,10 @@ import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from '
 import { RoleType } from '@prisma/client';
 
 export class CreateUserDto {
-  @IsNotEmpty({ message: 'Markaz ID (centerId) kiritilishi shart' })
+  // Markaz serverda foydalanuvchi tokenidan aniqlanadi; bu maydon faqat superadmin uchun
+  @IsOptional()
   @IsString()
-  centerId: string;
+  centerId?: string;
 
   @IsNotEmpty({ message: 'To\'liq ism-familiya kiritilishi shart' })
   @IsString()

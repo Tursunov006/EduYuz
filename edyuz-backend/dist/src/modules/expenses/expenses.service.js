@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ExpensesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let ExpensesService = class ExpensesService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -20,21 +21,18 @@ let ExpensesService = class ExpensesService {
         const where = {};
         if (centerId)
             where.centerId = centerId;
-        if (category)
+        if (category && Object.values(client_1.ExpenseCategory).includes(category)) {
             where.category = category;
+        }
         return this.prisma.expense.findMany({
             where,
             orderBy: { paidAt: 'desc' },
         });
     }
     async create(dto) {
-        let centerId = dto.centerId;
+        const centerId = dto.centerId;
         if (!centerId) {
-            const firstCenter = await this.prisma.center.findFirst();
-            if (!firstCenter) {
-                throw new common_1.NotFoundException("Markaz topilmadi");
-            }
-            centerId = firstCenter.id;
+            throw new common_1.NotFoundException("Markaz topilmadi");
         }
         return this.prisma.expense.create({
             data: {

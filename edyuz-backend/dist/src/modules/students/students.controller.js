@@ -14,78 +14,92 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentsController = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const students_service_1 = require("./students.service");
 const create_student_dto_1 = require("./dto/create-student.dto");
 const update_student_dto_1 = require("./dto/update-student.dto");
-const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
-const roles_guard_1 = require("../../common/guards/roles.guard");
 const public_decorator_1 = require("../../common/decorators/public.decorator");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
+const current_user_decorator_1 = require("../../common/decorators/current-user.decorator");
+const access_service_1 = require("../../common/access/access.service");
 let StudentsController = class StudentsController {
-    constructor(studentsService) {
+    constructor(studentsService, access) {
         this.studentsService = studentsService;
+        this.access = access;
     }
-    create(dto) {
+    create(dto, user) {
+        dto.centerId = this.access.centerForCreate(user, dto.centerId);
         return this.studentsService.create(dto);
     }
-    findAll(centerId, search) {
-        return this.studentsService.findAll(centerId, search);
+    findAll(user, centerId, search) {
+        return this.studentsService.findAll(this.access.scopeCenter(user, centerId), search);
     }
-    findOne(id) {
-        return this.studentsService.findOne(id);
+    async findOne(id, user) {
+        if (user) {
+            await this.access.student(user, id);
+            return this.studentsService.findOne(id);
+        }
+        return this.studentsService.findOnePublic(id);
     }
-    update(id, dto) {
+    async update(id, dto, user) {
+        await this.access.student(user, id);
         return this.studentsService.update(id, dto);
     }
-    remove(id) {
+    async remove(id, user) {
+        await this.access.student(user, id);
         return this.studentsService.remove(id);
     }
 };
 exports.StudentsController = StudentsController;
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_student_dto_1.CreateStudentDto]),
+    __metadata("design:paramtypes", [create_student_dto_1.CreateStudentDto, Object]),
     __metadata("design:returntype", void 0)
 ], StudentsController.prototype, "create", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('centerId')),
-    __param(1, (0, common_1.Query)('search')),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Query)('centerId')),
+    __param(2, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [Object, String, String]),
     __metadata("design:returntype", void 0)
 ], StudentsController.prototype, "findAll", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], StudentsController.prototype, "findOne", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_student_dto_1.UpdateStudentDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, update_student_dto_1.UpdateStudentDto, Object]),
+    __metadata("design:returntype", Promise)
 ], StudentsController.prototype, "update", null);
 __decorate([
-    (0, public_decorator_1.Public)(),
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], StudentsController.prototype, "remove", null);
 exports.StudentsController = StudentsController = __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, common_1.Controller)('students'),
-    __metadata("design:paramtypes", [students_service_1.StudentsService])
+    __metadata("design:paramtypes", [students_service_1.StudentsService,
+        access_service_1.AccessService])
 ], StudentsController);
 //# sourceMappingURL=students.controller.js.map

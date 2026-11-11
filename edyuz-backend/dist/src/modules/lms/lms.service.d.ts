@@ -7,21 +7,6 @@ export declare class LmsService {
     private prisma;
     constructor(prisma: PrismaService);
     getLessonsByGroup(groupId: string): Promise<({
-        quiz: {
-            questions: {
-                id: string;
-                points: number;
-                question: string;
-                options: import("@prisma/client/runtime/library").JsonValue;
-                correctIndex: number;
-                quizId: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            title: string;
-            lessonId: string;
-        };
         homeworks: ({
             submissions: ({
                 student: {
@@ -45,11 +30,26 @@ export declare class LmsService {
             id: string;
             createdAt: Date;
             title: string;
+            lessonId: string;
             description: string;
             deadline: Date | null;
             maxScore: number;
-            lessonId: string;
         })[];
+        quiz: {
+            questions: {
+                id: string;
+                points: number;
+                quizId: string;
+                question: string;
+                options: import("@prisma/client/runtime/library").JsonValue;
+                correctIndex: number;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            title: string;
+            lessonId: string;
+        };
     } & {
         id: string;
         createdAt: Date;
@@ -61,6 +61,56 @@ export declare class LmsService {
         orderIndex: number;
         updatedAt: Date;
     })[]>;
+    getLessonsByGroupPublic(groupId: string): Promise<{
+        quiz: {
+            questions: {
+                id: string;
+                points: number;
+                quizId: string;
+                question: string;
+                options: import("@prisma/client/runtime/library").JsonValue;
+            }[];
+            id: string;
+            createdAt: Date;
+            title: string;
+            lessonId: string;
+        };
+        homeworks: {
+            submissions: {
+                student: {
+                    id: string;
+                    fullName: string;
+                };
+                id: string;
+                status: import(".prisma/client").$Enums.SubmissionStatus;
+                studentId: string;
+                content: string;
+                fileUrl: string | null;
+                homeworkId: string;
+                score: number | null;
+                feedback: string | null;
+                submittedAt: Date;
+                reviewedAt: Date | null;
+            }[];
+            id: string;
+            createdAt: Date;
+            title: string;
+            lessonId: string;
+            description: string;
+            deadline: Date | null;
+            maxScore: number;
+        }[];
+        id: string;
+        createdAt: Date;
+        title: string;
+        groupId: string;
+        content: string | null;
+        videoUrl: string | null;
+        fileUrl: string | null;
+        orderIndex: number;
+        updatedAt: Date;
+    }[]>;
+    private assertStudentInGroup;
     createLesson(dto: CreateLessonDto): Promise<{
         id: string;
         createdAt: Date;
@@ -87,10 +137,10 @@ export declare class LmsService {
         id: string;
         createdAt: Date;
         title: string;
+        lessonId: string;
         description: string;
         deadline: Date | null;
         maxScore: number;
-        lessonId: string;
     }>;
     submitHomework(dto: SubmitHomeworkDto): Promise<{
         id: string;
@@ -138,10 +188,10 @@ export declare class LmsService {
         questions: {
             id: string;
             points: number;
+            quizId: string;
             question: string;
             options: import("@prisma/client/runtime/library").JsonValue;
             correctIndex: number;
-            quizId: string;
         }[];
     } & {
         id: string;
@@ -150,6 +200,8 @@ export declare class LmsService {
         lessonId: string;
     }>;
     submitQuiz(quizId: string, studentId: string, answers: number[]): Promise<{
+        lastScore: number;
+        lastPassed: boolean;
         id: string;
         createdAt: Date;
         studentId: string;

@@ -14,14 +14,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GamesController = void 0;
 const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
 const games_service_1 = require("./games.service");
 const submit_game_dto_1 = require("./dto/submit-game.dto");
+const public_decorator_1 = require("../../common/decorators/public.decorator");
 let GamesController = class GamesController {
     constructor(gamesService) {
         this.gamesService = gamesService;
     }
     async getGameContent(topic, type) {
-        return this.gamesService.getGameContent(topic, type);
+        return this.gamesService.getGameContent(String(topic || '').slice(0, 100), type);
     }
     async submitScore(dto) {
         return this.gamesService.submitScore(dto);
@@ -29,6 +31,8 @@ let GamesController = class GamesController {
 };
 exports.GamesController = GamesController;
 __decorate([
+    (0, public_decorator_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 15 } }),
     (0, common_1.Get)('content'),
     __param(0, (0, common_1.Query)('topic')),
     __param(1, (0, common_1.Query)('type')),
@@ -37,6 +41,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], GamesController.prototype, "getGameContent", null);
 __decorate([
+    (0, public_decorator_1.Public)(),
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 10 } }),
     (0, common_1.Post)('submit-score'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),

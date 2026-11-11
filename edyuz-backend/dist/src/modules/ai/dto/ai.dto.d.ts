@@ -12,3 +12,7 @@ export declare class AiChatDto {
     studentName?: string;
     topic?: string;
 }
+export declare class GenerateMarketingDto {
+    platform: string;
+    topic: string;
+}

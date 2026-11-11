@@ -18,11 +18,13 @@ exports.PaySalaryDto = PaySalaryDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: "To'lov summasi kiritilishi shart" }),
     (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)({ message: "To'lov summasi musbat son bo'lishi kerak" }),
     __metadata("design:type", Number)
 ], PaySalaryDto.prototype, "amount", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: "Oylik davri kiritilishi shart (masalan, 2026-09)" }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.Matches)(/^\d{4}-(0[1-9]|1[0-2])$/, { message: "Oylik davri YYYY-MM formatida bo'lishi kerak" }),
     __metadata("design:type", String)
 ], PaySalaryDto.prototype, "periodMonth", void 0);
 __decorate([

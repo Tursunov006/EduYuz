@@ -2,9 +2,10 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-valida
 import { StudentStatus } from '@prisma/client';
 
 export class CreateStudentDto {
-  @IsNotEmpty({ message: 'Markaz ID (centerId) kiritilishi shart' })
+  // Markaz serverda foydalanuvchi tokenidan aniqlanadi; bu maydon faqat superadmin uchun
+  @IsOptional()
   @IsString()
-  centerId: string;
+  centerId?: string;
 
   @IsNotEmpty({ message: 'O\'quvchi to\'liq ismi (fullName) kiritilishi shart' })
   @IsString()

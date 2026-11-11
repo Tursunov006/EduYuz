@@ -17,7 +17,7 @@ export declare class CertificatesService {
         grade: string;
         issuedAt: Date;
     }>;
-    findAll(): Promise<({
+    findAll(centerId?: string): Promise<({
         student: {
             id: string;
             phone: string;

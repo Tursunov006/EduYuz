@@ -18,9 +18,10 @@ export class TelegramService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.botToken =
-      this.configService.get<string>('TELEGRAM_BOT_TOKEN') ||
-      '8842750173:AAHo7Ep8GNuvrs1wdBhdmt10OCSQedGceoU';
+    // Token faqat muhit o'zgaruvchisidan olinadi. Avval kodda zaxira sifatida HAQIQIY
+    // bot tokeni ochiq yozilgan edi — u GitHub tarixida qolgan, shuning uchun
+    // @BotFather orqali /revoke qilib, yangi tokenni .env ga yozish SHART.
+    this.botToken = this.configService.get<string>('TELEGRAM_BOT_TOKEN')?.trim() || null;
     if (!this.botToken || this.botToken.includes('YOUR_TELEGRAM_BOT_TOKEN')) {
       this.logger.warn(
         '⚠️ TELEGRAM_BOT_TOKEN sozlanmagan. Telegram xabarlar simulyatsiya (console) rejimida ishlaydi.',
@@ -61,11 +62,13 @@ export class TelegramService implements OnModuleInit {
 
   // Bot tokenni dinamik yangilash (agar @BotFather orqali /revoke qilinsa)
   async updateBotToken(newToken: string) {
-    if (!newToken || !newToken.includes(':')) {
+    if (!newToken || !/^\d{6,12}:[A-Za-z0-9_-]{30,}$/.test(newToken.trim())) {
       return { success: false, message: 'Token formati noto‘g‘ri' };
     }
     this.botToken = newToken.trim();
     await this.clearWebhookAndSetupMenu();
+    // Server token'siz ishga tushgan bo'lsa polling hali boshlanmagan bo'ladi
+    this.startPolling();
     return {
       success: true,
       message: 'Yangi Telegram Bot Token muvaffaqiyatli ulandi va himoyalandi!',
@@ -117,6 +120,10 @@ export class TelegramService implements OnModuleInit {
     caption?: string,
   ): Promise<boolean> {
     const targetChatId = chatId.toString();
+    if (!this.botToken || this.botToken.includes('YOUR_TELEGRAM_BOT_TOKEN')) {
+      this.logger.log(`[Telegram Simulyatsiya] ChatId: ${targetChatId} -> Rasm: ${caption || ''}`);
+      return true;
+    }
     try {
       const url = `https://api.telegram.org/bot${this.botToken}/sendPhoto`;
       const buffer = Buffer.from(base64Data.split(',')[1] || base64Data, 'base64');
@@ -325,12 +332,26 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
 
     // 1. Ota-ona yoki yangi lid telefon raqamini ulashganda (request_contact)
     if (contact && contact.phone_number) {
+      // Faqat foydalanuvchining O'Z raqami qabul qilinadi. Telegramda istalgan kontaktni
+      // (masalan, begona ota-onaning raqamini) ulashish mumkin — tekshiruvsiz bu begona
+      // o'quvchining ma'lumotlarini ko'rish va uning xabarnomalarini egallab olishga yo'l ochardi.
+      if (!contact.user_id || contact.user_id !== msg.from?.id) {
+        await this.sendMessage(
+          chatId,
+          `⚠️ Iltimos, boshqa kontaktni emas, pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasi orqali <b>o‘z raqamingizni</b> yuboring.`,
+          quickReplyKeyboard,
+        );
+        return;
+      }
+
       const cleanPhone = contact.phone_number.replace(/\D/g, '');
       const last9 = cleanPhone.slice(-9);
 
-      const students = await this.prisma.student.findMany({
+      // Raqam to'liq (kamida 9 xonali) bo'lishi shart: qisqa raqam "contains" qidiruvida
+      // ko'plab begona o'quvchilarga mos kelib qolardi.
+      const students = last9.length < 9 ? [] : await this.prisma.student.findMany({
         where: {
-          OR: [{ phone: { contains: last9 } }, { parentPhone: { contains: last9 } }],
+          OR: [{ phone: { endsWith: last9 } }, { parentPhone: { endsWith: last9 } }],
         },
         include: {
           groups: { include: { group: { include: { course: true, teacher: true } } } },
@@ -460,19 +481,31 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
 
     // 5. Mini Ilova (/app)
     if (text.includes('Mini Ilova') || text === '/app') {
+      // Portal endi o'quvchilar ro'yxatini login'siz bermaydi, shuning uchun havolaga
+      // shu chatga ulangan farzandning ID si qo'shiladi.
+      const linked = await this.findLinkedStudent(chatId);
+      if (!linked) {
+        await this.sendMessage(
+          chatId,
+          `📱 Mini ilovani ochish uchun avval <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasi orqali farzandingiz profilini ulang.`,
+          quickReplyKeyboard,
+        );
+        return;
+      }
+      const studentQuery = `?studentId=${linked.id}`;
       const inlineButtons = webAppUrl.startsWith('https://')
         ? {
             inline_keyboard: [
               [
                 {
                   text: '🚀 EduYuz Mini Ilovasini Ochish',
-                  web_app: { url: `${webAppUrl}/app` },
+                  web_app: { url: `${webAppUrl}/app${studentQuery}` },
                 },
               ],
               [
                 {
                   text: '🌐 Ota-onalar va O‘quvchi Portali (/portal)',
-                  url: `${webAppUrl}/portal`,
+                  url: `${webAppUrl}/portal${studentQuery}`,
                 },
               ],
             ],
@@ -482,7 +515,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
               [
                 {
                   text: '🌐 EduYuz Portalini Ochish',
-                  url: 'https://eduyuz.uz/app',
+                  url: `${webAppUrl}/app${studentQuery}`,
                 },
               ],
             ],
@@ -528,34 +561,33 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
       return;
     }
 
-    // Talabani topamiz (agar ulanmagan bo'lsa, birinchi faol talabani demo sifatida olamiz)
-    let student = await this.findLinkedStudent(chatId);
-    let isDemoStudent = false;
-    if (!student) {
-      isDemoStudent = true;
-      student = await this.prisma.student.findFirst({
-        where: { status: 'active' },
-        include: {
-          certificates: { orderBy: { issuedAt: 'desc' } },
-          payments: { orderBy: { paidAt: 'desc' }, take: 5 },
-          groups: {
-            include: {
-              group: {
-                include: {
-                  course: true,
-                  teacher: true,
-                  lessons: { orderBy: { createdAt: 'desc' }, take: 3 },
-                },
-              },
-            },
-          },
-        },
-      });
-    }
+    // Faqat shu chatga ulangan o'quvchi ma'lumotlari ko'rsatiladi.
+    // Avval ulanmagan foydalanuvchiga "demo" sifatida bazadagi birinchi HAQIQIY o'quvchining
+    // balansi, to'lovlari va davomati ko'rsatilardi — bu shaxsiy ma'lumot sizib chiqishi edi.
+    const student = await this.findLinkedStudent(chatId);
+    const demoNotice = '';
 
-    const demoNotice = isDemoStudent
-      ? `\n\n💡 <i>Eslatma: O‘z farzandingiz profiliga ulash uchun «📲 Farzandimni Ulash (Telefon)» tugmasini bosing.</i>`
-      : '';
+    const isPersonalCommand =
+      text.includes('Dars Jadvali') ||
+      text === '/jadval' ||
+      text.includes('Farzandim Davomati') ||
+      text === '/davomat' ||
+      text.includes('To‘lov & Qarz') ||
+      text === '/tolov' ||
+      text.includes('Reyting & Sertifikat') ||
+      text.includes('Yutuq va Ballar') ||
+      text === '/reyting';
+
+    if (!student && isPersonalCommand) {
+      await this.sendMessage(
+        chatId,
+        `🔒 Bu bo‘lim faqat farzandi ulangan ota-onalar uchun.
+
+Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bosib, markazga bergan telefon raqamingizni tasdiqlang.`,
+        quickReplyKeyboard,
+      );
+      return;
+    }
 
     // 8. DARS JADVALI VA UYGA VAZIFALAR (LMS)
     if (text.includes('Dars Jadvali') || text === '/jadval') {
@@ -681,6 +713,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
       }
 
       const allStudents = await this.prisma.student.findMany({
+        where: { centerId: student.centerId, status: 'active' },
         orderBy: { coins: 'desc' },
         select: { id: true, fullName: true, coins: true },
       });

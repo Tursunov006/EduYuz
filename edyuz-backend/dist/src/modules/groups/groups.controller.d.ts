@@ -2,10 +2,12 @@ import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { AddStudentToGroupDto } from './dto/add-student.dto';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 export declare class GroupsController {
     private readonly groupsService;
-    constructor(groupsService: GroupsService);
-    create(dto: CreateGroupDto): Promise<{
+    private readonly access;
+    constructor(groupsService: GroupsService, access: AccessService);
+    create(dto: CreateGroupDto, user: AuthUser): Promise<{
         teacher: {
             id: string;
             phone: string;
@@ -29,7 +31,7 @@ export declare class GroupsController {
         startTime: string;
         endTime: string;
     }>;
-    findAll(centerId?: string, courseId?: string, teacherId?: string): Promise<({
+    findAll(user: AuthUser, centerId?: string, courseId?: string, teacherId?: string): Promise<({
         _count: {
             students: number;
         };
@@ -56,7 +58,7 @@ export declare class GroupsController {
         startTime: string;
         endTime: string;
     })[]>;
-    findOne(id: string): Promise<{
+    findOne(id: string, user: AuthUser): Promise<{
         students: ({
             student: {
                 id: string;
@@ -72,8 +74,8 @@ export declare class GroupsController {
                 status: import(".prisma/client").$Enums.StudentStatus;
             };
         } & {
-            groupId: string;
             studentId: string;
+            groupId: string;
             joinedAt: Date;
         })[];
         teacher: {
@@ -99,7 +101,7 @@ export declare class GroupsController {
         startTime: string;
         endTime: string;
     }>;
-    update(id: string, dto: UpdateGroupDto): Promise<{
+    update(id: string, dto: UpdateGroupDto, user: AuthUser): Promise<{
         id: string;
         name: string;
         createdAt: Date;
@@ -110,7 +112,7 @@ export declare class GroupsController {
         startTime: string;
         endTime: string;
     }>;
-    remove(id: string): Promise<{
+    remove(id: string, user: AuthUser): Promise<{
         id: string;
         name: string;
         createdAt: Date;
@@ -121,7 +123,7 @@ export declare class GroupsController {
         startTime: string;
         endTime: string;
     }>;
-    addStudent(groupId: string, dto: AddStudentToGroupDto): Promise<{
+    addStudent(groupId: string, dto: AddStudentToGroupDto, user: AuthUser): Promise<{
         student: {
             id: string;
             phone: string | null;
@@ -136,13 +138,13 @@ export declare class GroupsController {
             status: import(".prisma/client").$Enums.StudentStatus;
         };
     } & {
-        groupId: string;
         studentId: string;
+        groupId: string;
         joinedAt: Date;
     }>;
-    removeStudent(groupId: string, studentId: string): Promise<{
-        groupId: string;
+    removeStudent(groupId: string, studentId: string, user: AuthUser): Promise<{
         studentId: string;
+        groupId: string;
         joinedAt: Date;
     }>;
 }

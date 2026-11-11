@@ -42,14 +42,7 @@ export declare class UsersService {
     remove(id: string): Promise<{
         id: string;
         phone: string;
-        createdAt: Date;
-        centerId: string;
         fullName: string;
-        passwordHash: string;
         role: import(".prisma/client").$Enums.RoleType;
-        specialty: string | null;
-        salaryType: string;
-        salaryRate: import("@prisma/client/runtime/library").Decimal;
-        isActive: boolean;
     }>;
 }

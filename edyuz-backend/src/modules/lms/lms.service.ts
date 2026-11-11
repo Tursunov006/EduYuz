@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLessonDto } from './dto/create-lesson.dto';
 import { CreateHomeworkDto } from './dto/create-homework.dto';
@@ -37,6 +43,38 @@ export class LmsService {
     });
   }
 
+  // 1b. O'quvchi portali uchun darslar: testning to'g'ri javoblari (correctIndex)
+  // va boshqa o'quvchilarning telefon raqamlari qaytarilmaydi.
+  async getLessonsByGroupPublic(groupId: string) {
+    const lessons = await this.getLessonsByGroup(groupId);
+    return lessons.map((lesson) => ({
+      ...lesson,
+      quiz: lesson.quiz
+        ? {
+            ...lesson.quiz,
+            questions: lesson.quiz.questions.map(({ correctIndex, ...q }) => q),
+          }
+        : null,
+      homeworks: lesson.homeworks.map((hw) => ({
+        ...hw,
+        submissions: hw.submissions.map((sub) => ({
+          ...sub,
+          student: sub.student ? { id: sub.student.id, fullName: sub.student.fullName } : null,
+        })),
+      })),
+    }));
+  }
+
+  // O'quvchi shu guruhga (darsga) biriktirilganini tekshirish
+  private async assertStudentInGroup(studentId: string, groupId: string) {
+    const membership = await this.prisma.groupStudent.findUnique({
+      where: { groupId_studentId: { groupId, studentId } },
+    });
+    if (!membership) {
+      throw new ForbiddenException("O'quvchi bu guruhga biriktirilmagan");
+    }
+  }
+
   // 2. Yangi dars yaratish
   async createLesson(dto: CreateLessonDto) {
     const group = await this.prisma.group.findUnique({ where: { id: dto.groupId } });
@@ -56,6 +94,8 @@ export class LmsService {
 
   // 3. Darsni o'chirish
   async deleteLesson(id: string) {
+    const lesson = await this.prisma.lesson.findUnique({ where: { id } });
+    if (!lesson) throw new NotFoundException('Dars topilmadi');
     return this.prisma.lesson.delete({
       where: { id },
     });
@@ -79,8 +119,24 @@ export class LmsService {
 
   // 5. Vazifaga javob topshirish (O'quvchi tomonidan)
   async submitHomework(dto: SubmitHomeworkDto) {
-    const homework = await this.prisma.homework.findUnique({ where: { id: dto.homeworkId } });
+    const homework = await this.prisma.homework.findUnique({
+      where: { id: dto.homeworkId },
+      include: { lesson: { select: { groupId: true } } },
+    });
     if (!homework) throw new NotFoundException('Vazifa topilmadi');
+
+    // Faqat shu guruh o'quvchisi topshira oladi (begona ID bilan topshirib bo'lmaydi)
+    await this.assertStudentInGroup(dto.studentId, homework.lesson.groupId);
+
+    // Baholangan ishni qayta yozib, bahoni "pending" ga qaytarib bo'lmaydi
+    const existing = await this.prisma.homeworkSubmission.findUnique({
+      where: {
+        homeworkId_studentId: { homeworkId: dto.homeworkId, studentId: dto.studentId },
+      },
+    });
+    if (existing?.status === 'reviewed') {
+      throw new ConflictException("Bu vazifa allaqachon baholangan, qayta topshirib bo'lmaydi");
+    }
 
     return this.prisma.homeworkSubmission.upsert({
       where: {
@@ -109,40 +165,51 @@ export class LmsService {
   async gradeSubmission(submissionId: string, dto: GradeSubmissionDto) {
     const submission = await this.prisma.homeworkSubmission.findUnique({
       where: { id: submissionId },
+      include: { homework: { select: { maxScore: true, title: true } } },
     });
     if (!submission) throw new NotFoundException('Topshiriq topilmadi');
 
-    const updated = await this.prisma.homeworkSubmission.update({
-      where: { id: submissionId },
-      data: {
-        score: dto.score,
-        feedback: dto.feedback,
-        status: 'reviewed',
-        reviewedAt: new Date(),
-      },
-    });
-
-    if (dto.score > 0) {
-      this.prisma.student
-        .update({
-          where: { id: submission.studentId },
-          data: {
-            coins: { increment: dto.score },
-            points: { increment: dto.score },
-          },
-        })
-        .catch(() => {});
-
-      this.prisma.coinTransaction
-        .create({
-          data: {
-            studentId: submission.studentId,
-            amount: dto.score,
-            reason: `Uyga vazifani ${dto.score} ballga bajargani uchun`,
-          },
-        })
-        .catch(() => {});
+    const maxScore = submission.homework?.maxScore ?? 100;
+    if (dto.score > maxScore) {
+      throw new BadRequestException(`Baho ${maxScore} balldan oshmasligi kerak`);
     }
+
+    // Qayta baholanganda tanga to'liq qaytadan emas, faqat FARQ miqdorida o'zgaradi.
+    // (Avval har "Saqlash" bosilganda o'quvchiga yana to'liq ball qo'shilardi.)
+    const delta = dto.score - (submission.score ?? 0);
+
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.homeworkSubmission.update({
+        where: { id: submissionId },
+        data: {
+          score: dto.score,
+          feedback: dto.feedback,
+          status: 'reviewed',
+          reviewedAt: new Date(),
+        },
+      }),
+      ...(delta !== 0
+        ? [
+            this.prisma.student.update({
+              where: { id: submission.studentId },
+              data: {
+                coins: { increment: delta },
+                points: { increment: delta },
+              },
+            }),
+            this.prisma.coinTransaction.create({
+              data: {
+                studentId: submission.studentId,
+                amount: delta,
+                reason:
+                  submission.score == null
+                    ? `Uyga vazifani ${dto.score} ballga bajargani uchun`
+                    : `Uyga vazifa bahosi ${submission.score} dan ${dto.score} ga o'zgartirildi`,
+              },
+            }),
+          ]
+        : []),
+    ]);
 
     return updated;
   }
@@ -166,71 +233,106 @@ export class LmsService {
 
   // --- QUIZ & GAMIFICATION LOGIC ---
   async createQuiz(lessonId: string, title: string, questions: any[]) {
+    for (const q of questions) {
+      if (q.correctIndex >= q.options.length) {
+        throw new BadRequestException("To'g'ri javob indeksi variantlar sonidan katta");
+      }
+    }
+
+    // Bitta darsga bitta test: mavjud bo'lsa yangisi bilan almashtiriladi
+    // (avval ikkinchi marta yaratishda unikal cheklov xatosi — 500 chiqardi)
+    const existing = await this.prisma.quiz.findUnique({ where: { lessonId } });
+    if (existing) {
+      await this.prisma.quiz.delete({ where: { id: existing.id } });
+    }
+
     return this.prisma.quiz.create({
       data: {
         lessonId,
         title,
         questions: {
-          create: questions.map(q => ({
+          create: questions.map((q) => ({
             question: q.question,
             options: q.options,
             correctIndex: q.correctIndex,
-            points: q.points || 10
-          }))
-        }
+            points: q.points || 10,
+          })),
+        },
       },
-      include: { questions: true }
+      include: { questions: true },
     });
   }
 
   async submitQuiz(quizId: string, studentId: string, answers: number[]) {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: quizId },
-      include: { questions: true }
+      include: { questions: true, lesson: { select: { groupId: true } } },
     });
     if (!quiz) throw new NotFoundException('Test topilmadi');
+
+    const student = await this.prisma.student.findUnique({ where: { id: studentId } });
+    if (!student) throw new NotFoundException("O'quvchi topilmadi");
+    await this.assertStudentInGroup(studentId, quiz.lesson.groupId);
 
     let score = 0;
     let maxScore = 0;
     quiz.questions.forEach((q, index) => {
       maxScore += q.points;
-      if (answers[index] === q.correctIndex) {
+      if (answers?.[index] === q.correctIndex) {
         score += q.points;
       }
     });
 
-    const passed = score >= (maxScore * 0.6); // 60% for passing
+    const passed = maxScore > 0 && score >= maxScore * 0.6; // 60% for passing
 
-    if (passed) {
-      await this.prisma.student.update({
-        where: { id: studentId },
-        data: {
-          coins: { increment: 20 },
-          points: { increment: score }
-        }
-      });
-      
-      await this.prisma.coinTransaction.create({
-        data: {
-          studentId,
-          amount: 20,
-          reason: `Testni muvaffaqiyatli topshirdi: ${quiz.title}`
-        }
-      });
-    }
-
-    // Save result (upsert to allow retries or just create)
     const existing = await this.prisma.quizResult.findUnique({
-       where: { quizId_studentId: { quizId, studentId } }
+      where: { quizId_studentId: { quizId, studentId } },
     });
-    if (existing) {
-       return this.prisma.quizResult.update({
-         where: { id: existing.id },
-         data: { score, maxScore, passed }
-       });
-    }
-    return this.prisma.quizResult.create({
-      data: { quizId, studentId, score, maxScore, passed }
-    });
+
+    // Mukofot faqat BIRINCHI marta o'tganda beriladi. Avval testni qayta-qayta
+    // topshirib, har safar +20 tanga va ball yig'ish mumkin edi.
+    const firstPass = passed && !existing?.passed;
+    // Reyting ballari faqat natija yaxshilangan qismiga oshadi
+    const pointsDelta = Math.max(0, score - (existing?.score ?? 0));
+
+    const [result] = await this.prisma.$transaction([
+      existing
+        ? this.prisma.quizResult.update({
+            where: { id: existing.id },
+            // Qayta topshirishda eng yaxshi natija saqlanadi
+            data: {
+              score: Math.max(score, existing.score),
+              maxScore,
+              passed: passed || existing.passed,
+            },
+          })
+        : this.prisma.quizResult.create({
+            data: { quizId, studentId, score, maxScore, passed },
+          }),
+      ...(firstPass || pointsDelta > 0
+        ? [
+            this.prisma.student.update({
+              where: { id: studentId },
+              data: {
+                coins: { increment: firstPass ? 20 : 0 },
+                points: { increment: pointsDelta },
+              },
+            }),
+          ]
+        : []),
+      ...(firstPass
+        ? [
+            this.prisma.coinTransaction.create({
+              data: {
+                studentId,
+                amount: 20,
+                reason: `Testni muvaffaqiyatli topshirdi: ${quiz.title}`,
+              },
+            }),
+          ]
+        : []),
+    ]);
+
+    return { ...result, lastScore: score, lastPassed: passed };
   }
 }

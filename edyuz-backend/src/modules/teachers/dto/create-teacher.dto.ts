@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, IsIn } from 'class-validator';
+import { MinLength, Min, IsNotEmpty, IsOptional, IsString, IsNumber, IsIn } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsNotEmpty({ message: "F.I.SH kiritilishi shart" })
@@ -11,6 +11,7 @@ export class CreateTeacherDto {
 
   @IsOptional()
   @IsString()
+  @MinLength(6, { message: "Parol kamida 6 belgidan iborat bo'lishi kerak" })
   password?: string;
 
   @IsOptional()
@@ -23,6 +24,7 @@ export class CreateTeacherDto {
 
   @IsOptional()
   @IsNumber({}, { message: "Maosh stavkasi son bo'lishi kerak" })
+  @Min(0)
   salaryRate?: number;
 
   @IsOptional()

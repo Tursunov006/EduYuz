@@ -11,8 +11,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TeachersService = void 0;
 const common_1 = require("@nestjs/common");
+const crypto_1 = require("crypto");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = require("bcrypt");
+const TEACHER_SAFE_SELECT = {
+    id: true,
+    centerId: true,
+    fullName: true,
+    phone: true,
+    role: true,
+    specialty: true,
+    salaryType: true,
+    salaryRate: true,
+    isActive: true,
+    createdAt: true,
+};
+function generateTempPassword(length = 10) {
+    const alphabet = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let out = '';
+    for (let i = 0; i < length; i++)
+        out += alphabet[(0, crypto_1.randomInt)(alphabet.length)];
+    return out;
+}
 let TeachersService = class TeachersService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -116,16 +136,20 @@ let TeachersService = class TeachersService {
         if (!teacher || teacher.role !== 'teacher') {
             throw new common_1.NotFoundException("O'qituvchi topilmadi");
         }
+        const { passwordHash, ...safe } = teacher;
+        return safe;
+    }
+    async getTeacherOrThrow(id) {
+        const teacher = await this.prisma.user.findUnique({ where: { id } });
+        if (!teacher || teacher.role !== 'teacher') {
+            throw new common_1.NotFoundException("O'qituvchi topilmadi");
+        }
         return teacher;
     }
     async create(dto) {
-        let centerId = dto.centerId;
+        const centerId = dto.centerId;
         if (!centerId) {
-            const firstCenter = await this.prisma.center.findFirst();
-            if (!firstCenter) {
-                throw new common_1.NotFoundException('Tizimda o\'quv markazi topilmadi');
-            }
-            centerId = firstCenter.id;
+            throw new common_1.NotFoundException('Tizimda o\'quv markazi topilmadi');
         }
         const existing = await this.prisma.user.findUnique({
             where: { phone: dto.phone },
@@ -133,9 +157,12 @@ let TeachersService = class TeachersService {
         if (existing) {
             throw new common_1.ConflictException("Ushbu telefon raqam bilan foydalanuvchi ro'yxatdan o'tgan");
         }
-        const rawPassword = dto.password || 'teacher123';
-        const passwordHash = await bcrypt.hash(rawPassword, 10);
-        return this.prisma.user.create({
+        if ((dto.salaryType || 'percentage') === 'percentage' && (dto.salaryRate ?? 50) > 100) {
+            throw new common_1.BadRequestException("Foiz stavkasi 100% dan oshmasligi kerak");
+        }
+        const generated = dto.password ? null : generateTempPassword();
+        const passwordHash = await bcrypt.hash(dto.password || generated, 10);
+        const created = await this.prisma.user.create({
             data: {
                 centerId,
                 fullName: dto.fullName,
@@ -156,11 +183,15 @@ let TeachersService = class TeachersService {
                 createdAt: true,
             },
         });
+        return { ...created, temporaryPassword: generated };
     }
     async update(id, dto) {
-        const teacher = await this.prisma.user.findUnique({ where: { id } });
-        if (!teacher) {
-            throw new common_1.NotFoundException("O'qituvchi topilmadi");
+        const teacher = await this.getTeacherOrThrow(id);
+        if (dto.phone !== undefined && dto.phone !== teacher.phone) {
+            const taken = await this.prisma.user.findUnique({ where: { phone: dto.phone } });
+            if (taken) {
+                throw new common_1.ConflictException("Ushbu telefon raqam bilan foydalanuvchi ro'yxatdan o'tgan");
+            }
         }
         const data = {};
         if (dto.fullName !== undefined)
@@ -175,26 +206,30 @@ let TeachersService = class TeachersService {
             data.salaryRate = dto.salaryRate;
         if (dto.isActive !== undefined)
             data.isActive = dto.isActive;
+        const effectiveType = dto.salaryType ?? teacher.salaryType;
+        const effectiveRate = dto.salaryRate ?? Number(teacher.salaryRate);
+        if (effectiveType === 'percentage' && effectiveRate > 100) {
+            throw new common_1.BadRequestException("Foiz stavkasi 100% dan oshmasligi kerak");
+        }
         if (dto.password) {
             data.passwordHash = await bcrypt.hash(dto.password, 10);
         }
         return this.prisma.user.update({
             where: { id },
             data,
+            select: TEACHER_SAFE_SELECT,
         });
     }
     async delete(id) {
-        const teacher = await this.prisma.user.findUnique({ where: { id } });
-        if (!teacher) {
-            throw new common_1.NotFoundException("O'qituvchi topilmadi");
+        await this.getTeacherOrThrow(id);
+        const groupCount = await this.prisma.group.count({ where: { teacherId: id } });
+        if (groupCount > 0) {
+            throw new common_1.ConflictException(`Bu o'qituvchiga ${groupCount} ta guruh biriktirilgan. Avval guruhlarni boshqa o'qituvchiga o'tkazing.`);
         }
-        return this.prisma.user.delete({ where: { id } });
+        return this.prisma.user.delete({ where: { id }, select: TEACHER_SAFE_SELECT });
     }
     async paySalary(teacherId, dto) {
-        const teacher = await this.prisma.user.findUnique({ where: { id: teacherId } });
-        if (!teacher) {
-            throw new common_1.NotFoundException("O'qituvchi topilmadi");
-        }
+        await this.getTeacherOrThrow(teacherId);
         return this.prisma.salaryPayment.create({
             data: {
                 teacherId,

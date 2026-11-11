@@ -19,15 +19,24 @@ let JwtAuthGuard = class JwtAuthGuard extends (0, passport_1.AuthGuard)('jwt') {
         super();
         this.reflector = reflector;
     }
-    canActivate(context) {
+    async canActivate(context) {
         const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
             context.getHandler(),
             context.getClass(),
         ]);
         if (isPublic) {
+            const request = context.switchToHttp().getRequest();
+            if (request.headers?.authorization) {
+                try {
+                    await super.canActivate(context);
+                }
+                catch {
+                    request.user = undefined;
+                }
+            }
             return true;
         }
-        return super.canActivate(context);
+        return (await super.canActivate(context));
     }
 };
 exports.JwtAuthGuard = JwtAuthGuard;

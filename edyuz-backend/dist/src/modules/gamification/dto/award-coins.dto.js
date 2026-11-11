@@ -21,12 +21,15 @@ __decorate([
 ], AwardCoinsDto.prototype, "studentId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'Coin miqdori kiritilishi shart' }),
-    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsInt)({ message: 'Coin miqdori butun son bo\'lishi kerak' }),
+    (0, class_validator_1.Min)(-10000),
+    (0, class_validator_1.Max)(10000),
     __metadata("design:type", Number)
 ], AwardCoinsDto.prototype, "amount", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: 'Sabab kiritilishi shart' }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(150),
     __metadata("design:type", String)
 ], AwardCoinsDto.prototype, "reason", void 0);
 //# sourceMappingURL=award-coins.dto.js.map

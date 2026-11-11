@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -28,6 +28,8 @@ const STATUS_TO_STAGE: Record<string, LeadRecord['stage']> = {
   lead_converted: 'converted',
 };
 
+const LEAD_STATUSES = ['lead_new', 'lead_contacted', 'lead_trial', 'lead_converted'];
+
 @Injectable()
 export class InstagramService {
   private readonly logger = new Logger(InstagramService.name);
@@ -37,13 +39,31 @@ export class InstagramService {
     private readonly prisma: PrismaService,
   ) {}
 
-  // 1. Bazadan barcha lidlarni olish
-  async getAllLeads(): Promise<LeadRecord[]> {
+  // Lid qaysi markazga tegishli ekani JSON ichidagi "centerId" maydonida saqlanadi
+  // (sms_logs jadvalida markaz ustuni yo'q). Shu belgi orqali baza darajasida filtrlanadi.
+  private centerMarker(centerId: string) {
+    return `"centerId":${JSON.stringify(centerId)}`;
+  }
+
+  // Yozuv haqiqatan lid ekanini va (berilgan bo'lsa) shu markazga tegishli ekanini tekshirish
+  private async findLeadRow(id: string, centerId?: string) {
+    return this.prisma.smsLog.findFirst({
+      where: {
+        id,
+        status: { in: LEAD_STATUSES },
+        ...(centerId ? { message: { contains: this.centerMarker(centerId) } } : {}),
+      },
+    });
+  }
+
+  // 1. Lidlarni olish. centerId berilsa — faqat shu markaz lidlari (oddiy xodimlar uchun);
+  //    berilmasa — hammasi (superadmin). Avval har bir markaz boshqa markazlarning
+  //    mijoz ism va telefonlarini ham ko'rardi.
+  async getAllLeads(centerId?: string): Promise<LeadRecord[]> {
     const rows = await this.prisma.smsLog.findMany({
       where: {
-        status: {
-          in: ['lead_new', 'lead_contacted', 'lead_trial', 'lead_converted'],
-        },
+        status: { in: LEAD_STATUSES },
+        ...(centerId ? { message: { contains: this.centerMarker(centerId) } } : {}),
       },
       orderBy: { sentAt: 'desc' },
       take: 200,
@@ -61,17 +81,21 @@ export class InstagramService {
     stage?: string;
     note?: string;
     igUsername?: string;
+    centerId?: string;
   }): Promise<LeadRecord> {
     const stageKey = dto.stage && STAGE_TO_STATUS[dto.stage] ? dto.stage : 'new';
     const status = STAGE_TO_STATUS[stageKey];
-    const cleanPhone = (dto.phone || '+998').slice(0, 20);
+    const cleanPhone = String(dto.phone || '+998').slice(0, 20);
 
     const payload = JSON.stringify({
-      fullName: dto.fullName || 'Instagram Mijoz',
-      course: dto.course || 'EduYuz CRM Demo',
-      source: dto.source || 'Instagram',
-      note: dto.note || '@eduyuzcrmuz orqali murojaat',
-      igUsername: dto.igUsername || '',
+      // centerId birinchi turadi: foydalanuvchi kiritgan matn bu belgini soxtalashtira olmaydi,
+      // chunki JSON.stringify qo'shtirnoqlarni ekranlaydi.
+      ...(dto.centerId ? { centerId: dto.centerId } : {}),
+      fullName: String(dto.fullName || 'Instagram Mijoz').slice(0, 100),
+      course: String(dto.course || 'EduYuz CRM Demo').slice(0, 150),
+      source: String(dto.source || 'Instagram').slice(0, 50),
+      note: String(dto.note || '@eduyuzcrmuz orqali murojaat').slice(0, 500),
+      igUsername: String(dto.igUsername || '').slice(0, 60),
     });
 
     const created = await this.prisma.smsLog.create({
@@ -82,33 +106,30 @@ export class InstagramService {
       },
     });
 
-    this.logger.log(`🎯 Yangi Lid saqlandi: ${dto.fullName} (${cleanPhone}) [${dto.source || 'Instagram'}]`);
+    this.logger.log(`🎯 Yangi Lid saqlandi [${dto.source || 'Instagram'}]`);
     return this.mapRowToLead(created);
   }
 
   // 3. Lid bosqichini (stage) o'zgartirish
-  async updateLeadStage(id: string, stage: string): Promise<LeadRecord | null> {
-    const status = STAGE_TO_STATUS[stage] || 'lead_new';
-    try {
-      const updated = await this.prisma.smsLog.update({
-        where: { id },
-        data: { status },
-      });
-      return this.mapRowToLead(updated);
-    } catch (err) {
-      this.logger.warn(`Lid topilmadi (${id}): ${err.message}`);
-      return null;
-    }
+  async updateLeadStage(id: string, stage: string, centerId?: string): Promise<LeadRecord> {
+    const row = await this.findLeadRow(id, centerId);
+    if (!row) throw new NotFoundException('Lid topilmadi');
+
+    const updated = await this.prisma.smsLog.update({
+      where: { id },
+      data: { status: STAGE_TO_STATUS[stage] || 'lead_new' },
+    });
+    return this.mapRowToLead(updated);
   }
 
-  // 4. Lidni o'chirish
-  async deleteLead(id: string): Promise<{ deleted: boolean }> {
-    try {
-      await this.prisma.smsLog.delete({ where: { id } });
-      return { deleted: true };
-    } catch {
-      return { deleted: false };
-    }
+  // 4. Lidni o'chirish. Avval bu yerda ID bo'yicha sms_logs dagi ISTALGAN yozuv
+  //    (jumladan haqiqiy SMS jurnali) o'chirilishi mumkin edi.
+  async deleteLead(id: string, centerId?: string): Promise<{ deleted: boolean }> {
+    const row = await this.findLeadRow(id, centerId);
+    if (!row) throw new NotFoundException('Lid topilmadi');
+
+    await this.prisma.smsLog.delete({ where: { id } });
+    return { deleted: true };
   }
 
   // 5. Instagram Direct / Bio-Link uchun AI Sotuv Menejer (@eduyuzcrmuz)
@@ -146,10 +167,11 @@ export class InstagramService {
     if (apiKey) {
       try {
         const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            // Kalit URL'da emas, sarlavhada: URL'lar log va proksilarda saqlanib qoladi
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
             body: JSON.stringify({
               contents: [
                 {
@@ -208,8 +230,9 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
   }
 
   // 6. Meta Graph API Webhook qabul qiluvchi (Instagram DM & Comments)
-  async handleMetaWebhook(body: any): Promise<any> {
-    this.logger.log(`📩 Meta Instagram Webhook keldi: ${JSON.stringify(body).slice(0, 300)}`);
+  async handleMetaWebhook(body: any, signatureVerified = false): Promise<any> {
+    // Xabar matni va telefon raqamlar logga yozilmaydi (shaxsiy ma'lumot)
+    this.logger.log(`📩 Instagram Webhook keldi (object: ${body?.object || 'custom'})`);
 
     try {
       // A) ManyChat yoki To'g'ridan-to'g'ri Webhook JSON format bo'lsa
@@ -235,7 +258,8 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
           const messageText = event?.message?.text;
           const isEcho = event?.message?.is_echo;
 
-          if (senderId && messageText && !isEcho) {
+          // Avtomatik DM javobi faqat Meta imzosi tasdiqlangan so'rovlar uchun yuboriladi
+          if (signatureVerified && senderId && messageText && !isEcho) {
             const aiRes = await this.chatInstagramSales(messageText, `IG #${senderId.slice(-4)}`, senderId);
             await this.sendInstagramDirectReply(senderId, aiRes.reply);
           }
@@ -250,6 +274,7 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
             const commenterUsername = change.value.from?.username || 'Instagram Foydalanuvchi';
 
             if (
+              signatureVerified &&
               commenterId &&
               (commentText.includes('crm') ||
                 commentText.includes('demo') ||
@@ -266,7 +291,7 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
       return { status: 'EVENT_RECEIVED' };
     } catch (err) {
       this.logger.error(`Instagram webhook xatosi: ${err.message}`);
-      return { status: 'ERROR', message: err.message };
+      return { status: 'ERROR' };
     }
   }
 
@@ -278,9 +303,9 @@ Javobingni o'zbek tilida, 3-5 qatordan oshirmay, chiroyli emojilar bilan yoz va 
     }
 
     try {
-      await fetch(`https://graph.facebook.com/v19.0/me/messages?access_token=${token}`, {
+      await fetch(`https://graph.facebook.com/v19.0/me/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           recipient: { id: recipientId },
           message: { text },

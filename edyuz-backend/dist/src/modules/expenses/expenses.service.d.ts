@@ -7,31 +7,31 @@ export declare class ExpensesService {
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }[]>;
     create(dto: CreateExpenseDto): Promise<{
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }>;
     delete(id: string): Promise<{
         id: string;
         centerId: string;
         title: string;
-        paidAt: Date;
         amount: import("@prisma/client/runtime/library").Decimal;
-        paymentMethod: import(".prisma/client").$Enums.PaymentType;
-        comment: string | null;
         category: import(".prisma/client").$Enums.ExpenseCategory;
+        paymentMethod: import(".prisma/client").$Enums.PaymentType;
+        paidAt: Date;
+        comment: string | null;
     }>;
     getSummary(centerId?: string): Promise<{
         totalIncome: number;

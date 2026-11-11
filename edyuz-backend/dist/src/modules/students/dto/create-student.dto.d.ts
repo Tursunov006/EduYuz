@@ -1,6 +1,6 @@
 import { StudentStatus } from '@prisma/client';
 export declare class CreateStudentDto {
-    centerId: string;
+    centerId?: string;
     fullName: string;
     phone?: string;
     parentPhone: string;

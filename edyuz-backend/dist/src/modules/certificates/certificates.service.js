@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CertificatesService = void 0;
 const common_1 = require("@nestjs/common");
+const crypto_1 = require("crypto");
 const prisma_service_1 = require("../prisma/prisma.service");
 let CertificatesService = class CertificatesService {
     constructor(prisma) {
@@ -22,30 +23,39 @@ let CertificatesService = class CertificatesService {
         });
         if (!student)
             throw new common_1.NotFoundException('O\'quvchi topilmadi');
-        const randomCode = Math.floor(1000 + Math.random() * 9000);
         const year = new Date().getFullYear();
-        const certificateNumber = `EDU-${year}-${randomCode}`;
-        return this.prisma.certificate.create({
-            data: {
-                certificateNumber,
-                studentId: dto.studentId,
-                courseTitle: dto.courseTitle,
-                grade: dto.grade || 'A+',
-                issuedAt: new Date(),
-            },
-            include: {
-                student: {
-                    select: {
-                        id: true,
-                        fullName: true,
-                        phone: true,
+        for (let attempt = 0; attempt < 5; attempt++) {
+            const certificateNumber = `EDU-${year}-${(0, crypto_1.randomBytes)(4).toString('hex').toUpperCase()}`;
+            const taken = await this.prisma.certificate.findUnique({
+                where: { certificateNumber },
+                select: { id: true },
+            });
+            if (taken)
+                continue;
+            return this.prisma.certificate.create({
+                data: {
+                    certificateNumber,
+                    studentId: dto.studentId,
+                    courseTitle: dto.courseTitle,
+                    grade: dto.grade || 'A+',
+                    issuedAt: new Date(),
+                },
+                include: {
+                    student: {
+                        select: {
+                            id: true,
+                            fullName: true,
+                            phone: true,
+                        },
                     },
                 },
-            },
-        });
+            });
+        }
+        throw new common_1.ConflictException("Sertifikat raqamini yaratib bo'lmadi, qayta urinib ko'ring");
     }
-    async findAll() {
+    async findAll(centerId) {
         return this.prisma.certificate.findMany({
+            where: centerId ? { student: { centerId } } : {},
             include: {
                 student: {
                     select: {

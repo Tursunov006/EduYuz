@@ -16,42 +16,27 @@ let GroupsService = class GroupsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(dto) {
-        let centerId = dto.centerId;
+    async create(dto, creatorId) {
+        const centerId = dto.centerId;
         if (!centerId) {
-            let center = await this.prisma.center.findFirst();
-            if (!center) {
-                center = await this.prisma.center.create({
-                    data: { name: "EdYuz Bosh Markaz", phone: "+998901234567" },
-                });
-            }
-            centerId = center.id;
+            throw new common_1.BadRequestException('Markaz aniqlanmadi');
         }
         let courseId = dto.courseId;
         if (!courseId) {
             let course = await this.prisma.course.findFirst({ where: { centerId } });
             if (!course) {
                 course = await this.prisma.course.create({
-                    data: { title: "Dasturlash Asoslari", price: 500000, centerId },
+                    data: { title: 'Dasturlash Asoslari', price: 500000, centerId },
                 });
             }
             courseId = course.id;
         }
         let teacherId = dto.teacherId;
         if (!teacherId) {
-            let teacher = await this.prisma.user.findFirst({ where: { centerId, role: 'teacher' } });
-            if (!teacher) {
-                teacher = await this.prisma.user.create({
-                    data: {
-                        centerId,
-                        fullName: "Bosh O'qituvchi",
-                        phone: "+998900000001",
-                        passwordHash: "defaultpasswordhash",
-                        role: 'teacher',
-                    },
-                });
-            }
-            teacherId = teacher.id;
+            const teacher = await this.prisma.user.findFirst({
+                where: { centerId, role: 'teacher', isActive: true },
+            });
+            teacherId = teacher?.id || creatorId;
         }
         let formattedDays = dto.days;
         if (typeof dto.days === 'string') {
@@ -101,6 +86,7 @@ let GroupsService = class GroupsService {
                     },
                 },
             },
+            orderBy: { createdAt: 'desc' },
         });
     }
     async findOne(id) {

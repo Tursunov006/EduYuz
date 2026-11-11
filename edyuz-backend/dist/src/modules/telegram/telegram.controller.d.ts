@@ -6,4 +6,8 @@ export declare class TelegramController {
         success: boolean;
         message: string;
     }>;
+    setBotToken(token: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
 }

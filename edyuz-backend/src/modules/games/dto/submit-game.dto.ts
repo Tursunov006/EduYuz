@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsInt, Max, MaxLength, Min, IsNotEmpty, IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class SubmitGameDto {
   @IsNotEmpty()
@@ -11,21 +11,29 @@ export class SubmitGameDto {
 
   @IsNotEmpty()
   @IsString()
+  @MaxLength(100)
   topic: string;
 
   @IsNotEmpty()
   @IsNumber()
+  @Min(0)
   score: number;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Min(0)
+  @Max(100)
   correctCount: number;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Min(1)
+  @Max(100)
   totalQuestions: number;
 
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(0)
+  @Max(100)
   comboStreak?: number;
 }

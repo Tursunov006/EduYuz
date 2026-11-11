@@ -3,7 +3,7 @@ import { AwardCoinsDto } from './dto/award-coins.dto';
 export declare class GamificationService {
     private prisma;
     constructor(prisma: PrismaService);
-    getLeaderboard(groupId?: string): Promise<{
+    getLeaderboard(groupId?: string, centerId?: string): Promise<{
         rank: number;
         id: string;
         fullName: string;
@@ -28,8 +28,8 @@ export declare class GamificationService {
     getStudentHistory(studentId: string): Promise<{
         id: string;
         createdAt: Date;
-        studentId: string;
         amount: number;
+        studentId: string;
         reason: string;
     }[]>;
 }

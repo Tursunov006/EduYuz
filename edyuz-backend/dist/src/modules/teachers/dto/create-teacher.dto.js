@@ -27,6 +27,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(6, { message: "Parol kamida 6 belgidan iborat bo'lishi kerak" }),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "password", void 0);
 __decorate([
@@ -42,6 +43,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsNumber)({}, { message: "Maosh stavkasi son bo'lishi kerak" }),
+    (0, class_validator_1.Min)(0),
     __metadata("design:type", Number)
 ], CreateTeacherDto.prototype, "salaryRate", void 0);
 __decorate([

@@ -17,7 +17,7 @@ export class CoursesService {
     }
 
     return this.prisma.course.create({
-      data: dto,
+      data: { centerId: dto.centerId, title: dto.title, price: dto.price },
     });
   }
 

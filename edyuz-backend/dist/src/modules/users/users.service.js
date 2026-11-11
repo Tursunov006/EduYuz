@@ -111,6 +111,7 @@ let UsersService = class UsersService {
         await this.findOne(id);
         return this.prisma.user.delete({
             where: { id },
+            select: { id: true, fullName: true, phone: true, role: true },
         });
     }
 };

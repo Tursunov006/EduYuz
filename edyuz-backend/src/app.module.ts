@@ -1,4 +1,8 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -25,6 +29,8 @@ import { InstagramModule } from './modules/instagram/instagram.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    // Umumiy so'rovlar chegarasi: bitta IP dan daqiqasiga 300 ta so'rov
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     PrismaModule,
     SmsModule,
     TelegramModule,
@@ -44,6 +50,13 @@ import { InstagramModule } from './modules/instagram/instagram.module';
     StudentsModule,
     AttendanceModule,
     PaymentsModule,
+  ],
+  providers: [
+    // Tartib muhim: avval so'rovlar chegarasi, keyin autentifikatsiya, keyin rol tekshiruvi.
+    // Barcha endpointlar sukut bo'yicha himoyalangan; ochiq qilish uchun @Public() qo'yiladi.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
 export class AppModule {}

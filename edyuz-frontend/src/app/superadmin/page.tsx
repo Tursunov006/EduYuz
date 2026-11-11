@@ -53,6 +53,17 @@ export default function SuperAdminPage() {
       window.location.href = '/login';
       return;
     }
+    // Bu panel faqat superadmin uchun (server ham buni alohida tekshiradi)
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.role !== 'superadmin') {
+        window.location.href = '/';
+        return;
+      }
+    } catch {
+      window.location.href = '/login';
+      return;
+    }
     loadCenters();
   }, []);
 
@@ -103,8 +114,11 @@ export default function SuperAdminPage() {
       setSuccessInfo({
         name: centerName.trim(),
         id: newCenter.id,
-        login: directorPhone.trim(),
-        password: 'admin123',
+        login: newCenter.directorLogin || directorPhone.trim(),
+        // Parol serverda tasodifiy yaratiladi va faqat shu yerda bir marta ko'rsatiladi
+        password:
+          newCenter.directorPassword ||
+          'Yaratilmadi — bu raqam boshqa hisobga biriktirilgan. «Parolni tiklash» tugmasidan foydalaning.',
       });
 
       setCenterName('');
@@ -153,15 +167,19 @@ export default function SuperAdminPage() {
 
   async function handleResetPassword(center: any) {
     const customPass = prompt(
-      `"${center.name}" direktori (${center.phone}) uchun yangi parolni kiriting:`,
-      'admin123',
+      `"${center.name}" direktori (${center.phone}) uchun yangi parolni kiriting (kamida 8 belgi).\nBo‘sh qoldirsangiz, tizim tasodifiy xavfsiz parol yaratadi:`,
+      '',
     );
-    if (!customPass) return;
+    if (customPass === null) return;
+    if (customPass.trim() && customPass.trim().length < 8) {
+      alert('Parol kamida 8 belgidan iborat bo‘lishi kerak');
+      return;
+    }
 
     try {
       const res = await apiFetch(`/centers/${center.id}/reset-password`, {
         method: 'POST',
-        body: JSON.stringify({ password: customPass }),
+        body: JSON.stringify(customPass.trim() ? { password: customPass.trim() } : {}),
       });
       alert(
         `🔐 Parol yangilandi!\n\nMarkaz: ${center.name}\nLogin: ${res.login}\nYangi parol: ${res.password}`,
@@ -495,7 +513,7 @@ export default function SuperAdminPage() {
                           <button
                             onClick={() => handleResetPassword(center)}
                             className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-300 transition cursor-pointer"
-                            title="Direktor parolini yangilash (admin123)"
+                            title="Direktor parolini yangilash"
                           >
                             <KeyRound size={15} />
                           </button>
@@ -577,7 +595,7 @@ export default function SuperAdminPage() {
                       className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-sm focus:outline-none focus:border-purple-500"
                     />
                     <p className="text-[11px] text-slate-400 mt-1.5">
-                      Tizim ushbu raqamga avtomatik <b>admin123</b> boshlang‘ich parolini biriktiradi.
+                      Tizim ushbu raqam uchun <b>tasodifiy boshlang‘ich parol</b> yaratadi va uni keyingi oynada bir marta ko‘rsatadi.
                     </p>
                   </div>
 
@@ -673,7 +691,7 @@ export default function SuperAdminPage() {
                 <input
                   required
                   type="text"
-                  placeholder="Masalan: 8842750173:AAH..."
+                  placeholder="Masalan: 123456789:AAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                   value={newBotToken}
                   onChange={(e) => setNewBotToken(e.target.value)}
                   className="w-full px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-white text-xs font-mono focus:outline-none focus:border-cyan-500"

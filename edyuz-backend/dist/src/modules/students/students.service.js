@@ -41,7 +41,7 @@ let StudentsService = class StudentsService {
                 ...(centerId && { centerId }),
                 ...(search && {
                     OR: [
-                        { fullName: { contains: search } },
+                        { fullName: { contains: search, mode: 'insensitive' } },
                         { phone: { contains: search } },
                         { parentPhone: { contains: search } },
                     ],
@@ -58,7 +58,13 @@ let StudentsService = class StudentsService {
                     },
                 },
             },
+            orderBy: { createdAt: 'desc' },
         });
+    }
+    async findOnePublic(id) {
+        const student = await this.findOne(id);
+        const { parentPhone, parentChatId, phone, centerId, ...safe } = student;
+        return safe;
     }
     async findOne(id) {
         const student = await this.prisma.student.findUnique({
@@ -115,12 +121,11 @@ let StudentsService = class StudentsService {
     }
     async remove(id) {
         await this.findOne(id);
-        await this.prisma.payment.deleteMany({
-            where: { studentId: id }
-        });
-        return this.prisma.student.delete({
-            where: { id },
-        });
+        const [, deleted] = await this.prisma.$transaction([
+            this.prisma.payment.deleteMany({ where: { studentId: id } }),
+            this.prisma.student.delete({ where: { id } }),
+        ]);
+        return deleted;
     }
 };
 exports.StudentsService = StudentsService;

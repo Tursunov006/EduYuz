@@ -1,53 +1,57 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   Param,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { RoleType } from '@prisma/client';
 import { Public } from '../../common/decorators/public.decorator';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('attendance')
 export class AttendanceController {
-  constructor(private readonly attendanceService: AttendanceService) {}
+  constructor(
+    private readonly attendanceService: AttendanceService,
+    private readonly access: AccessService,
+  ) {}
 
-  @Public()
   @Post('face-scan')
-  async faceScan(@Body('image') image: string) {
-    if (!image) throw new Error("Rasm yuborilmadi");
-    return this.attendanceService.processFaceScan(image);
+  async faceScan(@Body('image') image: string, @CurrentUser() user: AuthUser) {
+    if (!image || typeof image !== 'string') {
+      throw new BadRequestException('Rasm yuborilmadi');
+    }
+    return this.attendanceService.processFaceScan(image, user.centerId);
   }
 
-  @Public()
   @Post('mark')
-  markAttendance(
-    @Body() dto: MarkAttendanceDto,
-    @CurrentUser('id') userId: string,
-  ) {
-    return this.attendanceService.markGroupAttendance(dto, userId);
+  async markAttendance(@Body() dto: MarkAttendanceDto, @CurrentUser() user: AuthUser) {
+    await this.access.group(user, dto.groupId);
+    return this.attendanceService.markGroupAttendance(dto, user.id);
   }
 
-  @Public()
   @Get('group/:groupId')
-  findByGroupAndDate(
+  async findByGroupAndDate(
     @Param('groupId') groupId: string,
     @Query('date') date: string,
+    @CurrentUser() user: AuthUser,
   ) {
+    await this.access.group(user, groupId);
     return this.attendanceService.findByGroupAndDate(groupId, date);
   }
 
+  // O'quvchi portali uchun ochiq (UUID havola orqali); xodim uchun markaz tekshiriladi
+  @Public()
   @Get('student/:studentId')
-  getStudentAttendance(@Param('studentId') studentId: string) {
+  async getStudentAttendance(
+    @Param('studentId') studentId: string,
+    @CurrentUser() user?: AuthUser,
+  ) {
+    if (user) await this.access.student(user, studentId);
     return this.attendanceService.getStudentAttendance(studentId);
   }
 }

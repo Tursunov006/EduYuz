@@ -5,7 +5,7 @@ import { AddStudentToGroupDto } from './dto/add-student.dto';
 export declare class GroupsService {
     private prisma;
     constructor(prisma: PrismaService);
-    create(dto: CreateGroupDto): Promise<{
+    create(dto: CreateGroupDto, creatorId: string): Promise<{
         teacher: {
             id: string;
             phone: string;
@@ -72,8 +72,8 @@ export declare class GroupsService {
                 status: import(".prisma/client").$Enums.StudentStatus;
             };
         } & {
-            groupId: string;
             studentId: string;
+            groupId: string;
             joinedAt: Date;
         })[];
         teacher: {
@@ -136,13 +136,13 @@ export declare class GroupsService {
             status: import(".prisma/client").$Enums.StudentStatus;
         };
     } & {
-        groupId: string;
         studentId: string;
+        groupId: string;
         joinedAt: Date;
     }>;
     removeStudent(groupId: string, studentId: string): Promise<{
-        groupId: string;
         studentId: string;
+        groupId: string;
         joinedAt: Date;
     }>;
 }

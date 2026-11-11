@@ -14,8 +14,11 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SmsController = void 0;
 const common_1 = require("@nestjs/common");
+const throttler_1 = require("@nestjs/throttler");
+const client_1 = require("@prisma/client");
 const sms_service_1 = require("./sms.service");
 const send_sms_dto_1 = require("./dto/send-sms.dto");
+const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 let SmsController = class SmsController {
     constructor(smsService) {
         this.smsService = smsService;
@@ -29,6 +32,7 @@ let SmsController = class SmsController {
 };
 exports.SmsController = SmsController;
 __decorate([
+    (0, throttler_1.Throttle)({ default: { ttl: 60_000, limit: 30 } }),
     (0, common_1.Post)('send'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -36,12 +40,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SmsController.prototype, "sendSms", null);
 __decorate([
+    (0, roles_decorator_1.Roles)(client_1.RoleType.superadmin),
     (0, common_1.Get)('logs'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], SmsController.prototype, "getLogs", null);
 exports.SmsController = SmsController = __decorate([
+    (0, roles_decorator_1.Roles)(client_1.RoleType.admin),
     (0, common_1.Controller)('sms'),
     __metadata("design:paramtypes", [sms_service_1.SmsService])
 ], SmsController);

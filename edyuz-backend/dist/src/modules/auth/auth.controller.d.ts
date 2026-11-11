@@ -1,10 +1,11 @@
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { AuthUser } from '../../common/access/access.service';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
-    register(dto: RegisterDto): Promise<{
+    register(dto: RegisterDto, user: AuthUser): Promise<{
         message: string;
         user: {
             trialEndsAt: Date;
@@ -17,13 +18,13 @@ export declare class AuthController {
             role: import(".prisma/client").$Enums.RoleType;
             isActive: boolean;
         };
-        accessToken: string;
     }>;
     login(dto: LoginDto): Promise<{
         message: string;
         user: {
             id: string;
             centerId: string;
+            centerName: string;
             fullName: string;
             phone: string;
             role: import(".prisma/client").$Enums.RoleType;
@@ -32,8 +33,8 @@ export declare class AuthController {
         };
         accessToken: string;
     }>;
-    getProfile(user: any): {
+    getProfile(user: AuthUser): {
         success: boolean;
-        user: any;
+        user: AuthUser;
     };
 }

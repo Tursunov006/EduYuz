@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { IssueCertificateDto } from './dto/issue-certificate.dto';
 
@@ -13,34 +14,46 @@ export class CertificatesService {
     });
     if (!student) throw new NotFoundException('O\'quvchi topilmadi');
 
-    // Takrorlanmas sertifikat raqami: EDU-2026-XXXX
-    const randomCode = Math.floor(1000 + Math.random() * 9000);
+    // Takrorlanmas sertifikat raqami: EDU-2026-XXXXXXXX
+    // Avval atigi 4 xonali tasodifiy son edi (9000 variant): raqamlar tez-tez to'qnashib
+    // 500 xato berardi va ketma-ket sinab ko'rish bilan begona sertifikatlarni topish oson edi.
     const year = new Date().getFullYear();
-    const certificateNumber = `EDU-${year}-${randomCode}`;
 
-    return this.prisma.certificate.create({
-      data: {
-        certificateNumber,
-        studentId: dto.studentId,
-        courseTitle: dto.courseTitle,
-        grade: dto.grade || 'A+',
-        issuedAt: new Date(),
-      },
-      include: {
-        student: {
-          select: {
-            id: true,
-            fullName: true,
-            phone: true,
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const certificateNumber = `EDU-${year}-${randomBytes(4).toString('hex').toUpperCase()}`;
+      const taken = await this.prisma.certificate.findUnique({
+        where: { certificateNumber },
+        select: { id: true },
+      });
+      if (taken) continue;
+
+      return this.prisma.certificate.create({
+        data: {
+          certificateNumber,
+          studentId: dto.studentId,
+          courseTitle: dto.courseTitle,
+          grade: dto.grade || 'A+',
+          issuedAt: new Date(),
+        },
+        include: {
+          student: {
+            select: {
+              id: true,
+              fullName: true,
+              phone: true,
+            },
           },
         },
-      },
-    });
+      });
+    }
+
+    throw new ConflictException("Sertifikat raqamini yaratib bo'lmadi, qayta urinib ko'ring");
   }
 
   // 2. Barcha sertifikatlar ro'yxati
-  async findAll() {
+  async findAll(centerId?: string) {
     return this.prisma.certificate.findMany({
+      where: centerId ? { student: { centerId } } : {},
       include: {
         student: {
           select: {

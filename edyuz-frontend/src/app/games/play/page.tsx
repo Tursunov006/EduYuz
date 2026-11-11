@@ -152,11 +152,8 @@ function GameArenaContent() {
     // Talabaga mukofot yuborish
     try {
       let stId = initialStudentId;
-      if (!stId) {
-        // Agar parametr berilmagan bo'lsa, bazadagi 1-o'quvchini olish
-        const stdRes = await api.get('/students');
-        stId = stdRes.data?.[0]?.id || '';
-      }
+      // O'quvchi ID si berilmagan bo'lsa natija hech kimga yozilmaydi.
+      // (Avval mukofot bazadagi birinchi uchragan — begona — o'quvchiga berilardi.)
 
       if (stId) {
         const res = await api.post('/games/submit-score', {

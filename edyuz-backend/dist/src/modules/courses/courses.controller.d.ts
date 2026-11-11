@@ -1,17 +1,19 @@
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 export declare class CoursesController {
     private readonly coursesService;
-    constructor(coursesService: CoursesService);
-    create(dto: CreateCourseDto): Promise<{
+    private readonly access;
+    constructor(coursesService: CoursesService, access: AccessService);
+    create(dto: CreateCourseDto, user: AuthUser): Promise<{
         id: string;
         createdAt: Date;
         centerId: string;
         title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
-    findAll(centerId?: string): Promise<({
+    findAll(user: AuthUser, centerId?: string): Promise<({
         _count: {
             groups: number;
         };
@@ -22,7 +24,7 @@ export declare class CoursesController {
         title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     })[]>;
-    findOne(id: string): Promise<{
+    findOne(id: string, user: AuthUser): Promise<{
         groups: ({
             teacher: {
                 id: string;
@@ -47,14 +49,14 @@ export declare class CoursesController {
         title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
-    update(id: string, dto: UpdateCourseDto): Promise<{
+    update(id: string, dto: UpdateCourseDto, user: AuthUser): Promise<{
         id: string;
         createdAt: Date;
         centerId: string;
         title: string;
         price: import("@prisma/client/runtime/library").Decimal;
     }>;
-    remove(id: string): Promise<{
+    remove(id: string, user: AuthUser): Promise<{
         id: string;
         createdAt: Date;
         centerId: string;

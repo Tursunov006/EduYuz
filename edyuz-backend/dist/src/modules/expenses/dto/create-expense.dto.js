@@ -23,6 +23,7 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsNotEmpty)({ message: "Miqdor kiritilishi shart" }),
     (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)({ message: "Miqdor musbat son bo'lishi kerak" }),
     __metadata("design:type", Number)
 ], CreateExpenseDto.prototype, "amount", void 0);
 __decorate([

@@ -7,50 +7,68 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
+import { RoleType } from '@prisma/client';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
 import { Public } from '../../common/decorators/public.decorator';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { AccessService, AuthUser } from '../../common/access/access.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(
+    private readonly studentsService: StudentsService,
+    private readonly access: AccessService,
+  ) {}
 
-  @Public()
+  @Roles(RoleType.admin)
   @Post()
-  create(@Body() dto: CreateStudentDto) {
+  create(@Body() dto: CreateStudentDto, @CurrentUser() user: AuthUser) {
+    dto.centerId = this.access.centerForCreate(user, dto.centerId);
     return this.studentsService.create(dto);
   }
 
-  @Public()
+  // Ro'yxat faqat xodimlar uchun va faqat o'z markazi doirasida
   @Get()
   findAll(
+    @CurrentUser() user: AuthUser,
     @Query('centerId') centerId?: string,
     @Query('search') search?: string,
   ) {
-    return this.studentsService.findAll(centerId, search);
+    return this.studentsService.findAll(this.access.scopeCenter(user, centerId), search);
   }
 
+  // O'quvchi/ota-ona portali (/portal, /app) shu endpoint orqali ishlaydi:
+  // taxmin qilib bo'lmaydigan UUID havola "kalit" vazifasini bajaradi.
+  // Anonim so'rovga faqat portal uchun kerakli maydonlar qaytariladi.
   @Public()
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.studentsService.findOne(id);
+  async findOne(@Param('id') id: string, @CurrentUser() user?: AuthUser) {
+    if (user) {
+      await this.access.student(user, id);
+      return this.studentsService.findOne(id);
+    }
+    return this.studentsService.findOnePublic(id);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateStudentDto) {
+  async update(
+    @Param('id') id: string,
+    @Body() dto: UpdateStudentDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.student(user, id);
     return this.studentsService.update(id, dto);
   }
 
-  @Public()
+  @Roles(RoleType.admin)
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.student(user, id);
     return this.studentsService.remove(id);
   }
 }

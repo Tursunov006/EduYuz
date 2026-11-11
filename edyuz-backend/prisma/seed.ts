@@ -1,5 +1,6 @@
 import { PrismaClient, RoleType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +23,9 @@ async function main() {
   const adminPhone = '+998901234567';
   let admin = await prisma.user.findUnique({ where: { phone: adminPhone } });
   if (!admin) {
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    // Parol kodda qat'iy yozilmaydi: SEED_ADMIN_PASSWORD berilmasa tasodifiy parol yaratiladi
+    const adminPassword = process.env.SEED_ADMIN_PASSWORD || randomBytes(9).toString('base64url');
+    const passwordHash = await bcrypt.hash(adminPassword, 10);
     admin = await prisma.user.create({
       data: {
         centerId: center.id,
@@ -33,14 +36,16 @@ async function main() {
         isActive: true,
       },
     });
-    console.log('✅ Superadmin yaratildi: login: +998901234567, parol: admin123');
+    console.log(`✅ Superadmin yaratildi: login: ${adminPhone}, parol: ${adminPassword}`);
+    console.log('   ⚠️ Bu parol faqat hozir ko\'rsatiladi — saqlab qo\'ying.');
   }
 
   // 3. O'qituvchi
   const teacherPhone = '+998909876543';
   let teacher = await prisma.user.findUnique({ where: { phone: teacherPhone } });
   if (!teacher) {
-    const passwordHash = await bcrypt.hash('teacher123', 10);
+    const teacherPassword = process.env.SEED_TEACHER_PASSWORD || randomBytes(9).toString('base64url');
+    const passwordHash = await bcrypt.hash(teacherPassword, 10);
     teacher = await prisma.user.create({
       data: {
         centerId: center.id,
@@ -51,7 +56,7 @@ async function main() {
         isActive: true,
       },
     });
-    console.log('✅ O\'qituvchi yaratildi: login: +998909876543, parol: teacher123');
+    console.log(`✅ O'qituvchi yaratildi: login: ${teacherPhone}, parol: ${teacherPassword}`);
   }
 
   // 4. Namunaviy kurslar

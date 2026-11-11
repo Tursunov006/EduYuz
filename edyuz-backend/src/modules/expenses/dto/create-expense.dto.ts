@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsIn } from 'class-validator';
+import { IsPositive, IsNotEmpty, IsNumber, IsOptional, IsString, IsIn } from 'class-validator';
 import { ExpenseCategory, PaymentType } from '@prisma/client';
 
 export class CreateExpenseDto {
@@ -8,6 +8,7 @@ export class CreateExpenseDto {
 
   @IsNotEmpty({ message: "Miqdor kiritilishi shart" })
   @IsNumber()
+  @IsPositive({ message: "Miqdor musbat son bo'lishi kerak" })
   amount: number;
 
   @IsOptional()

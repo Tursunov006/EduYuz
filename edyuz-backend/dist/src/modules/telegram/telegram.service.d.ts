@@ -9,13 +9,20 @@ export declare class TelegramService implements OnModuleInit {
     private readonly logger;
     private botToken;
     private isPolling;
+    private userState;
     constructor(configService: ConfigService, prisma: PrismaService, aiService: AiService);
-    onModuleInit(): void;
+    onModuleInit(): Promise<void>;
+    clearWebhookAndSetupMenu(): Promise<void>;
+    updateBotToken(newToken: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     sendMessage(chatId: string | number | bigint, text: string, replyMarkup?: any): Promise<boolean>;
     sendPhotoBase64(chatId: string | number | bigint, base64Data: string, caption?: string): Promise<boolean>;
     sendAttendanceAlert(parentChatId: bigint | string | null | undefined, studentName: string, groupName: string, status: string, date: string): Promise<void>;
     sendPaymentReceipt(parentChatId: bigint | string | null | undefined, studentName: string, amount: number, method: string, newBalance: number, comment?: string | null): Promise<void>;
     sendDebtAlert(parentChatId: bigint | string | null | undefined, studentName: string, debtAmount: number, groupName: string): Promise<void>;
     private startPolling;
+    private findLinkedStudent;
     private handleUpdate;
 }

@@ -134,7 +134,15 @@ export default function TeachersPage() {
         if (!payload.password) delete payload.password;
         await axios.patch(`http://localhost:3000/api/v1/teachers/${editingTeacher.id}`, payload);
       } else {
-        await axios.post('http://localhost:3000/api/v1/teachers', form);
+        const payload: any = { ...form };
+        if (!payload.password) delete payload.password;
+        const res = await axios.post('http://localhost:3000/api/v1/teachers', payload);
+        // Parol kiritilmagan bo'lsa server tasodifiy vaqtinchalik parol yaratadi
+        if (res.data?.temporaryPassword) {
+          alert(
+            `O‘qituvchi qo‘shildi!\n\nLogin: ${res.data.phone}\nVaqtinchalik parol: ${res.data.temporaryPassword}\n\nBu parol faqat hozir ko‘rsatiladi — o‘qituvchiga yetkazing.`,
+          );
+        }
       }
       setIsCreateModalOpen(false);
       loadTeachers();
