@@ -41,6 +41,13 @@ export class StudentsController {
     return this.studentsService.findAll(this.access.scopeCenter(user, centerId), search);
   }
 
+  // Arxiv: barcha o'quvchilar bazasi (pasport ma'lumotlari bilan) — faqat admin
+  @Roles(RoleType.admin)
+  @Get('registry')
+  registry(@CurrentUser() user: AuthUser, @Query('centerId') centerId?: string) {
+    return this.studentsService.registry(this.access.scopeCenter(user, centerId));
+  }
+
   // O'quvchi/ota-ona portali (/portal, /app) shu endpoint orqali ishlaydi:
   // taxmin qilib bo'lmaydigan UUID havola "kalit" vazifasini bajaradi.
   // Anonim so'rovga faqat portal uchun kerakli maydonlar qaytariladi.

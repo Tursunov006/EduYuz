@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { RotateCcw, Search, Trash2 } from 'lucide-react';
+import { FileSpreadsheet, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { exportToExcel } from '@/lib/excelExport';
 
-// Arxiv: kursni tugatgan o'quvchilar va yopilgan guruhlar.
-// Bu yerdan ularni qayta faollashtirish yoki butunlay o'chirish mumkin.
-type Tab = 'students' | 'groups';
+// Arxiv:
+//  - O'quvchilar bazasi: barcha o'quvchilarning ma'lumotlari (pasport, telefon, sertifikatlar), Excel'ga yuklab olinadi.
+//    O'quvchi qo'shilganda ma'lumotlari serverda avtomatik zaxiralanadi, o'chirilgan o'quvchi ham shu yerda qoladi.
+//  - Kursni tugatgan o'quvchilar va yopilgan guruhlar: qayta faollashtirish yoki butunlay o'chirish.
+type Tab = 'registry' | 'students' | 'groups';
 
 const fmt = (n: number) => Math.round(n).toLocaleString('uz-UZ').replace(/,/g, ' ');
 const fmtDate = (d?: string) => {
@@ -17,7 +20,8 @@ const fmtDate = (d?: string) => {
 };
 
 export default function ArchivePage() {
-  const [tab, setTab] = useState<Tab>('students');
+  const [tab, setTab] = useState<Tab>('registry');
+  const [registry, setRegistry] = useState<any[]>([]);
   const [students, setStudents] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,10 +31,12 @@ export default function ArchivePage() {
   async function load() {
     setLoading(true);
     try {
-      const [st, gr] = await Promise.all([
+      const [st, gr, reg] = await Promise.all([
         apiFetch('/students').catch(() => []),
         apiFetch('/groups?archived=true').catch(() => []),
+        apiFetch('/students/registry').catch(() => []),
       ]);
+      setRegistry(Array.isArray(reg) ? reg : []);
       setStudents((Array.isArray(st) ? st : []).filter((s: any) => s.status !== 'active'));
       setGroups((Array.isArray(gr) ? gr : []).filter((g: any) => g.archivedAt));
     } finally {
@@ -40,7 +46,7 @@ export default function ArchivePage() {
 
   useEffect(() => {
     const fromUrl = new URLSearchParams(window.location.search).get('tab');
-    if (fromUrl === 'groups') setTab('groups');
+    if (fromUrl === 'groups' || fromUrl === 'students') setTab(fromUrl);
     load();
   }, []);
 
@@ -48,6 +54,19 @@ export default function ArchivePage() {
   const visibleStudents = useMemo(
     () => students.filter((s) => !q || `${s.fullName} ${s.phone || ''} ${s.parentPhone || ''}`.toLowerCase().includes(q)),
     [students, q],
+  );
+  const visibleRegistry = useMemo(
+    () =>
+      registry.filter(
+        (s) =>
+          !q ||
+          `${s.fullName} ${s.phone || ''} ${s.parentPhone || ''} ${s.passport || ''} ${(s.certificates || [])
+            .map((c: any) => c.number)
+            .join(' ')}`
+            .toLowerCase()
+            .includes(q),
+      ),
+    [registry, q],
   );
   const visibleGroups = useMemo(
     () =>
@@ -117,8 +136,39 @@ export default function ArchivePage() {
     }
   }
 
+  function exportRegistry() {
+    const statusLabel = (r: any) => (r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : 'Kursni tugatgan');
+    exportToExcel(
+      `EduYuz_Oquvchilar_bazasi_${new Date().toISOString().split('T')[0]}`,
+      [
+        { header: '№', key: 'n', width: 40, align: 'center', format: (_v, _r, i) => i + 1 },
+        { header: 'F.I.Sh', key: 'fullName', width: 220 },
+        { header: 'Telefon', key: 'phone', width: 140, align: 'center', format: (v) => v || '—' },
+        { header: 'Ota-ona telefoni', key: 'parentPhone', width: 140, align: 'center', format: (v) => v || '—' },
+        { header: 'Pasport', key: 'passport', width: 120, align: 'center', format: (v) => v || '—' },
+        { header: 'Tug‘ilgan sana', key: 'birthDate', width: 110, align: 'center', format: (v) => fmtDate(v) || '—' },
+        { header: 'Manzil', key: 'address', width: 200, format: (v) => v || '—' },
+        { header: 'Guruhlar', key: 'groups', width: 180, format: (v) => (v || []).join(', ') || '—' },
+        {
+          header: 'Sertifikatlar',
+          key: 'certificates',
+          width: 260,
+          format: (v) =>
+            (v || []).map((c: any) => `${c.number} (${c.course}, ${c.grade}, ${fmtDate(c.issuedAt)})`).join('; ') || '—',
+        },
+        { header: 'Jami to‘lagan (so‘m)', key: 'totalPaid', width: 130, align: 'right', isCurrency: true },
+        { header: 'Balans (so‘m)', key: 'balance', width: 120, align: 'right', isCurrency: true },
+        { header: 'Holati', key: 'status', width: 120, align: 'center', format: (_v, r) => statusLabel(r) },
+        { header: 'Qo‘shilgan sana', key: 'joinedAt', width: 110, align: 'center', format: (v) => fmtDate(v) },
+      ],
+      visibleRegistry,
+      { title: 'EduYuz — O‘quvchilar bazasi', subtitle: `Jami: ${visibleRegistry.length} ta o‘quvchi` },
+    );
+  }
+
   const tabs: { key: Tab; label: string; count: number }[] = [
-    { key: 'students', label: 'O‘quvchilar', count: students.length },
+    { key: 'registry', label: 'O‘quvchilar bazasi', count: registry.length },
+    { key: 'students', label: 'Kursni tugatganlar', count: students.length },
     { key: 'groups', label: 'Guruhlar', count: groups.length },
   ];
 
@@ -129,7 +179,9 @@ export default function ArchivePage() {
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       <div>
         <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Arxiv</h1>
-        <p className="text-sm text-slate-500 mt-1">Kursni tugatgan o‘quvchilar va yopilgan guruhlar</p>
+        <p className="text-sm text-slate-500 mt-1">
+          Barcha o‘quvchilar ma’lumotlari, kursni tugatganlar va yopilgan guruhlar
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -152,17 +204,113 @@ export default function ArchivePage() {
           <Search size={16} className="text-slate-500 shrink-0" />
           <input
             type="text"
-            placeholder={tab === 'students' ? 'Ism yoki telefon bo‘yicha qidirish' : 'Guruh, kurs yoki o‘qituvchi'}
+            placeholder={
+              tab === 'groups'
+                ? 'Guruh, kurs yoki o‘qituvchi'
+                : tab === 'registry'
+                  ? 'Ism, telefon, pasport yoki sertifikat'
+                  : 'Ism yoki telefon bo‘yicha qidirish'
+            }
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 min-w-0 bg-transparent text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none"
           />
         </label>
+        {tab === 'registry' && (
+          <button
+            type="button"
+            onClick={exportRegistry}
+            disabled={visibleRegistry.length === 0}
+            className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 transition"
+          >
+            <FileSpreadsheet size={16} /> Excel yuklab olish
+          </button>
+        )}
       </div>
 
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
         {loading ? (
           <div className="py-24 text-center text-sm text-slate-500">Yuklanmoqda...</div>
+        ) : tab === 'registry' ? (
+          visibleRegistry.length === 0 ? (
+            <Empty
+              title={q ? 'Hech narsa topilmadi' : 'Hali o‘quvchi yo‘q'}
+              text={
+                q
+                  ? `«${search}» bo‘yicha o‘quvchi topilmadi`
+                  : 'O‘quvchi qo‘shilishi bilan uning ma’lumotlari shu yerga avtomatik zaxiralanadi'
+              }
+              link={{ href: '/students', label: 'O‘quvchi qo‘shish' }}
+            />
+          ) : (
+            <>
+              <p className="px-5 py-3 text-xs text-slate-500 border-b border-slate-200 bg-slate-50">
+                O‘quvchi qo‘shilganda yoki o‘zgartirilganda ma’lumotlari avtomatik zaxiralanadi. O‘chirilgan
+                o‘quvchilar ham shu ro‘yxatda qoladi.
+              </p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm min-w-[1100px]">
+                  <thead className="bg-slate-50 text-xs font-semibold text-slate-500">
+                    <tr>
+                      <th className="h-11 px-5 font-semibold">O‘quvchi</th>
+                      <th className="h-11 px-5 font-semibold">Telefonlar</th>
+                      <th className="h-11 px-5 font-semibold">Pasport</th>
+                      <th className="h-11 px-5 font-semibold">Tug‘ilgan sana</th>
+                      <th className="h-11 px-5 font-semibold">Sertifikatlar</th>
+                      <th className="h-11 px-5 font-semibold">To‘lagan</th>
+                      <th className="h-11 px-5 font-semibold">Holati</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {visibleRegistry.map((r) => (
+                      <tr key={r.id} className="border-t border-slate-200 align-top">
+                        <td className="px-5 py-3.5">
+                          <p className="font-semibold text-slate-900">{r.fullName}</p>
+                          <p className="text-xs text-slate-500">
+                            {(r.groups || []).join(', ') || 'Guruhsiz'}
+                            {r.address ? ` · ${r.address}` : ''}
+                          </p>
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-600 whitespace-nowrap">
+                          <p>{r.phone || '—'}</p>
+                          <p className="text-xs text-slate-500">Ota-ona: {r.parentPhone || '—'}</p>
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-700 font-medium whitespace-nowrap">{r.passport || '—'}</td>
+                        <td className="px-5 py-3.5 text-slate-600 whitespace-nowrap">{fmtDate(r.birthDate) || '—'}</td>
+                        <td className="px-5 py-3.5 text-slate-600">
+                          {(r.certificates || []).length === 0 ? (
+                            '—'
+                          ) : (
+                            <ul className="space-y-0.5">
+                              {r.certificates.map((c: any) => (
+                                <li key={c.number} className="text-xs">
+                                  <span className="font-semibold text-slate-800">{c.number}</span> · {c.course} · {c.grade}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </td>
+                        <td className="px-5 py-3.5 text-slate-700 whitespace-nowrap">{fmt(Number(r.totalPaid || 0))} so‘m</td>
+                        <td className="px-5 py-3.5">
+                          <span
+                            className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold whitespace-nowrap ${
+                              r.deleted
+                                ? 'bg-rose-500/10 text-rose-600'
+                                : r.status === 'active'
+                                  ? 'bg-emerald-500/10 text-emerald-600'
+                                  : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : 'Kursni tugatgan'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )
         ) : tab === 'students' ? (
           visibleStudents.length === 0 ? (
             <Empty

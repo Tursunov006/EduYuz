@@ -129,6 +129,10 @@ model Student {
   coins        Int           @default(0)
   points       Int           @default(0)
   status       StudentStatus @default(active)
+  // Shaxsiy ma'lumotlar (ixtiyoriy)
+  passport     String?       @db.VarChar(20) // seriya va raqam, masalan AA1234567
+  birthDate    DateTime?     @map("birth_date") @db.Date
+  address      String?       @db.VarChar(255)
   createdAt    DateTime      @default(now()) @map("created_at")
 
   center           Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
@@ -263,6 +267,21 @@ model CoinTransaction {
 
   @@index([studentId])
   @@map("coin_transactions")
+}
+
+// O'quvchi ma'lumotlarining zaxira nusxasi (Arxiv bo'limi uchun).
+// O'quvchi qo'shilganda va o'zgarganda avtomatik yangilanadi; o'quvchi o'chirilsa ham bu yozuv qoladi.
+// Student bilan bog'lanmagan, shuning uchun o'chirishda kaskad bilan yo'qolmaydi.
+model StudentBackup {
+  studentId String    @id @map("student_id") @db.VarChar(36)
+  centerId  String    @map("center_id") @db.VarChar(36)
+  data      Json
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@index([centerId])
+  @@map("student_backups")
 }
 
 model Certificate {

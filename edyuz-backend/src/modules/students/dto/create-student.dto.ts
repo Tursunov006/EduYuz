@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, MaxLength, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { StudentStatus } from '@prisma/client';
 
 export class CreateStudentDto {
@@ -29,4 +29,19 @@ export class CreateStudentDto {
   @IsOptional()
   @IsEnum(StudentStatus)
   status?: StudentStatus;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  passport?: string;
+
+  // YYYY-MM-DD
+  @IsOptional()
+  @IsDateString({}, { message: 'Tug\'ilgan sana formati noto\'g\'ri' })
+  birthDate?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  address?: string;
 }

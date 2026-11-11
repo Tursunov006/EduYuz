@@ -29,6 +29,9 @@ export default function StudentsPage() {
     parentPhone: '',
     balance: 0,
     status: 'active',
+    passport: '',
+    birthDate: '',
+    address: '',
   });
 
   async function fetchStudents() {
@@ -72,6 +75,9 @@ export default function StudentsPage() {
       parentPhone: '',
       balance: 0,
       status: 'active',
+      passport: '',
+      birthDate: '',
+      address: '',
     });
     setIsModalOpen(true);
   }
@@ -85,6 +91,9 @@ export default function StudentsPage() {
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
       status: student.status || 'active',
+      passport: student.passport || '',
+      birthDate: student.birthDate ? String(student.birthDate).slice(0, 10) : '',
+      address: student.address || '',
     });
     setIsModalOpen(true);
   }
@@ -103,7 +112,8 @@ export default function StudentsPage() {
   async function handleDelete(id: string, name: string) {
     const ok = confirm(
       `"${name}"ni butunlay o'chirmoqchimisiz?\n\n` +
-        `Diqqat: o'quvchining barcha to'lovlari ham o'chadi va kassa hisobotidan chiqib ketadi. ` +
+        `Diqqat: o'quvchining barcha to'lovlari ham o'chadi va kassa hisobotidan chiqib ketadi ` +
+        `(shaxsiy ma'lumotlari Arxivdagi "O'quvchilar bazasi"da saqlanib qoladi). ` +
         `Kursni tugatgan o'quvchini o'chirmasdan, "Arxivga olish" tugmasi bilan arxivga o'tkazish tavsiya etiladi.`,
     );
     if (!ok) return;
@@ -127,6 +137,9 @@ export default function StudentsPage() {
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
             status: form.status,
+            passport: form.passport,
+            birthDate: form.birthDate || undefined,
+            address: form.address,
           }),
         });
       } else {
@@ -135,6 +148,7 @@ export default function StudentsPage() {
           body: JSON.stringify({
             ...form,
             balance: Number(form.balance),
+            birthDate: form.birthDate || undefined,
           }),
         });
       }
@@ -383,7 +397,7 @@ export default function StudentsPage() {
       {/* O'quvchi qo'shish / tahrirlash Modali */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">
               {editingStudent ? "O'quvchini Tahrirlash" : "Yangi O'quvchi Qo'shish"}
             </h2>
@@ -432,6 +446,40 @@ export default function StudentsPage() {
                   placeholder="+998901234567"
                   value={form.parentPhone}
                   onChange={(e) => setForm({ ...form, parentPhone: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                />
+              </div>
+              {/* Shaxsiy ma'lumotlar: Arxivdagi o'quvchilar bazasiga avtomatik zaxiralanadi */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Pasport (seriya va raqam)</label>
+                  <input
+                    type="text"
+                    placeholder="AA1234567"
+                    maxLength={20}
+                    value={form.passport}
+                    onChange={(e) => setForm({ ...form, passport: e.target.value.toUpperCase() })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 uppercase"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Tug‘ilgan sana</label>
+                  <input
+                    type="date"
+                    value={form.birthDate}
+                    onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Manzil</label>
+                <input
+                  type="text"
+                  placeholder="Shahar, tuman, ko‘cha"
+                  maxLength={255}
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
