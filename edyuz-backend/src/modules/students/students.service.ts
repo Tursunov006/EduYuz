@@ -27,6 +27,7 @@ export class StudentsService {
         passport: dto.passport?.trim().toUpperCase() || null,
         birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
         address: dto.address?.trim() || null,
+        notes: dto.notes?.trim() || null,
       },
     });
     // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
@@ -160,7 +161,7 @@ export class StudentsService {
   // Portal uchun: ota-ona telefoni, Telegram chat ID kabi ichki maydonlarsiz
   async findOnePublic(id: string) {
     const student = await this.findOne(id);
-    const { parentPhone, parentChatId, phone, centerId, passport, birthDate, address, ...safe } = student as any;
+    const { parentPhone, parentChatId, phone, centerId, passport, birthDate, address, notes, ...safe } = student as any;
     return safe;
   }
 
@@ -213,6 +214,7 @@ export class StudentsService {
     if (dto.passport !== undefined) dataToUpdate.passport = dto.passport?.trim().toUpperCase() || null;
     if (dto.birthDate !== undefined) dataToUpdate.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
     if (dto.address !== undefined) dataToUpdate.address = dto.address?.trim() || null;
+    if (dto.notes !== undefined) dataToUpdate.notes = dto.notes?.trim() || null;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;
