@@ -44,4 +44,9 @@ export class CreateStudentDto {
   @IsString()
   @MaxLength(255)
   address?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  notes?: string;
 }

@@ -32,6 +32,7 @@ export default function StudentsPage() {
     passport: '',
     birthDate: '',
     address: '',
+    notes: '',
   });
 
   async function fetchStudents() {
@@ -78,6 +79,7 @@ export default function StudentsPage() {
       passport: '',
       birthDate: '',
       address: '',
+      notes: '',
     });
     setIsModalOpen(true);
   }
@@ -94,6 +96,7 @@ export default function StudentsPage() {
       passport: student.passport || '',
       birthDate: student.birthDate ? String(student.birthDate).slice(0, 10) : '',
       address: student.address || '',
+      notes: student.notes || '',
     });
     setIsModalOpen(true);
   }
@@ -140,6 +143,7 @@ export default function StudentsPage() {
             passport: form.passport,
             birthDate: form.birthDate || undefined,
             address: form.address,
+            notes: form.notes,
           }),
         });
       } else {
@@ -481,6 +485,17 @@ export default function StudentsPage() {
                   value={form.address}
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Izoh</label>
+                <textarea
+                  rows={3}
+                  maxLength={2000}
+                  placeholder="Masalan: to‘lovni kech qiladi, ota-onasi bilan gaplashish kerak"
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 resize-y"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">

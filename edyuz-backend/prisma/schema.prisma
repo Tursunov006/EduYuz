@@ -133,6 +133,7 @@ model Student {
   passport     String?       @db.VarChar(20) // seriya va raqam, masalan AA1234567
   birthDate    DateTime?     @map("birth_date") @db.Date
   address      String?       @db.VarChar(255)
+  notes        String?       @db.Text // Izoh (ichki, faqat xodimlar uchun)
   createdAt    DateTime      @default(now()) @map("created_at")
 
   center           Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
