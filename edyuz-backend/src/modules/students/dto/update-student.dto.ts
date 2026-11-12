@@ -1,4 +1,4 @@
-import { IsDateString, IsEnum, MaxLength, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsDateString, IsEnum, MaxLength, IsNumber, IsOptional, IsString } from 'class-validator';
 import { StudentStatus } from '@prisma/client';
 
 export class UpdateStudentDto {
@@ -50,4 +50,9 @@ export class UpdateStudentDto {
   @IsString()
   @MaxLength(100)
   middleName?: string;
+
+  // O'quvchi yoki talaba
+  @IsOptional()
+  @IsIn(['oquvchi', 'talaba'], { message: 'Turi noto\'g\'ri (oquvchi yoki talaba)' })
+  kind?: string;
 }
