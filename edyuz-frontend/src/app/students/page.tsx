@@ -304,7 +304,7 @@ export default function StudentsPage() {
                               {s.groups?.[0]?.group?.name || 'Guruhsiz'}
                             </p>
                             {s.notes && (
-                              <p className="text-xs text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-1 truncate max-w-[280px]" title={s.notes}>
+                              <p className="text-xs text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-1 w-max min-w-0 max-w-[300px] whitespace-pre-wrap break-words">
                                 Izoh: {s.notes}
                               </p>
                             )}
