@@ -44,4 +44,10 @@ export class UpdateStudentDto {
   @IsString()
   @MaxLength(2000)
   notes?: string;
+
+  // Otasining ismi
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  middleName?: string;
 }

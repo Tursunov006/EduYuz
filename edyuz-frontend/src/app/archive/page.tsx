@@ -143,6 +143,7 @@ export default function ArchivePage() {
       [
         { header: '№', key: 'n', width: 40, align: 'center', format: (_v, _r, i) => i + 1 },
         { header: 'F.I.Sh', key: 'fullName', width: 220 },
+        { header: 'Otasining ismi', key: 'middleName', width: 150, format: (v) => v || '—' },
         { header: 'Telefon', key: 'phone', width: 140, align: 'center', format: (v) => v || '—' },
         { header: 'Ota-ona telefoni', key: 'parentPhone', width: 140, align: 'center', format: (v) => v || '—' },
         { header: 'Izoh', key: 'notes', width: 220, format: (v) => v || '—' },
@@ -266,7 +267,10 @@ export default function ArchivePage() {
                     {visibleRegistry.map((r) => (
                       <tr key={r.id} className="border-t border-slate-200 align-top">
                         <td className="px-5 py-3.5">
-                          <p className="font-semibold text-slate-900">{r.fullName}</p>
+                          <p className="font-semibold text-slate-900">
+                            {r.fullName}
+                            {r.middleName ? ` ${r.middleName}` : ''}
+                          </p>
                           <p className="text-xs text-slate-500">
                             {(r.groups || []).join(', ') || 'Guruhsiz'}
                             {r.address ? ` · ${r.address}` : ''}
