@@ -163,7 +163,7 @@ function PortalContent() {
 
   const copyCardNumber = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText('9860120135408280');
+      navigator.clipboard.writeText('8600060925939614');
     }
     setCopiedCard(true);
     setTimeout(() => setCopiedCard(false), 2500);
@@ -614,14 +614,14 @@ function PortalContent() {
                       <CreditCard size={13} /> O'quv Markazi Rasmiy Kartasi
                     </span>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
-                      HUMO
+                      UZCARD
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between bg-white border border-slate-200 rounded-xl px-3 py-2.5">
                     <div className="flex items-center gap-2">
                       <span className="font-mono font-bold text-sm sm:text-base text-slate-900 tracking-widest selection:bg-emerald-500">
-                        9860 1201 3540 8280
+                        8600 0609 2593 9614
                       </span>
                     </div>
                     <button
@@ -666,7 +666,7 @@ function PortalContent() {
 
                 <div className="flex gap-2 w-full pt-1 relative z-10">
                   <a 
-                    href="https://my.click.uz/pay?card=9860120135408280"
+                    href="https://my.click.uz/pay?card=8600060925939614"
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-slate-900 font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-sm"
@@ -674,7 +674,7 @@ function PortalContent() {
                     Click Ilovasi
                   </a>
                   <a 
-                    href="https://payme.uz/fallback/transfer/9860120135408280"
+                    href="https://payme.uz/fallback/transfer/8600060925939614"
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 text-white font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-sm bg-teal-600 hover:bg-teal-500"
@@ -869,7 +869,7 @@ function PortalContent() {
 
                 <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-2.5 text-[10px] text-slate-500 flex items-center justify-between">
                   <span>Qabul qiluvchi markaz kartasi:</span>
-                  <span className="font-mono font-bold text-emerald-600">9860 1201 3540 8280</span>
+                  <span className="font-mono font-bold text-emerald-600">8600 0609 2593 9614</span>
                 </div>
 
                 <button 
@@ -964,7 +964,7 @@ function PortalContent() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Qabul qiluvchi:</span>
-                    <span className="text-emerald-700 font-bold">9860 1201 3540 8280 (Humo)</span>
+                    <span className="text-emerald-700 font-bold">8600 0609 2593 9614 (UzCard)</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t border-slate-200">
                     <span className="text-slate-500">Holat:</span>
