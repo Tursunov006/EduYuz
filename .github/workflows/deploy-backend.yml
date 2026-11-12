@@ -1,0 +1,40 @@
+# Backend (Render) avtomatik deploy.
+# Render'ning o'z avtomatik deployi GitHub o'zgarishlarini ko'rmayapti (barcha deploylar qo'lda
+# bosilgan), shuning uchun server eski versiyada qolib, yangi sayt bilan mos kelmay qolardi.
+# Bu workflow main'ga backend o'zgarishi tushganda Render Deploy Hook'ini chaqiradi.
+#
+# Bir martalik sozlash:
+#   1) Render → eduyuz xizmati → Settings → Deploy Hook → manzilni nusxalang
+#   2) GitHub → repozitoriy → Settings → Secrets and variables → Actions → New repository secret
+#      Name: RENDER_DEPLOY_HOOK_URL   Secret: (nusxalangan manzil)
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'edyuz-backend/**'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger Render deploy
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::warning::RENDER_DEPLOY_HOOK_URL sozlanmagan. Render'da Manual Deploy bosing yoki faylning boshidagi yo'riqnomaga ko'ra kalitni qo'shing."
+            exit 0
+          fi
+          code=$(curl -s -o /tmp/out -w '%{http_code}' -X POST "$HOOK")
+          echo "Render javobi: HTTP $code"
+          [ "$code" -ge 200 ] && [ "$code" -lt 300 ] || { echo "Deploy boshlanmadi"; exit 1; }
