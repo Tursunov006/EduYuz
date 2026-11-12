@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { api, apiFetch } from '@/lib/api';
 import ThemeToggle from '@/components/ThemeToggle';
+import AnketaLinkButton from '@/components/AnketaLinkButton';
 
 // Figma: "EduYuz Dashboard v2"
 const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
@@ -161,6 +162,7 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-500 mt-0.5">Markaz holati va asosiy ko‘rsatkichlar</p>
         </div>
         <div className="flex items-center gap-3">
+          <AnketaLinkButton students={students} />
           <span className="hidden sm:inline-flex items-center h-10 px-3.5 rounded-[10px] bg-white border border-slate-200 text-[13px] font-medium text-slate-700">
             {dateLabel}
           </span>
