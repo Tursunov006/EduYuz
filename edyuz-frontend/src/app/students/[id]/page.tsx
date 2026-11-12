@@ -39,7 +39,8 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
   async function makeAnketaLink() {
     try {
       const { key } = await apiFetch(`/students/${id}/anketa-link`);
-      setAnketaUrl(`${window.location.origin}/anketa/${id}?k=${key}`);
+      // Mustaqil HTML anketa (public/anketa.html): to'ldirilgan ma'lumot shu profilga tushadi
+      setAnketaUrl(`${window.location.origin}/anketa.html?id=${encodeURIComponent(id)}&k=${encodeURIComponent(key)}`);
       setCopied(false);
     } catch (e: any) {
       alert(e?.message || 'Havolani yaratib bo‘lmadi');
