@@ -589,18 +589,20 @@ function PortalContent() {
                 <div className="absolute top-0 right-0 p-2 opacity-10">
                   <QrCode size={80} />
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod (Click)</h4>
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod</h4>
                 <p className="text-[11px] text-slate-600 relative z-10">
-                  Ota-onangiz o'z telefonlaridagi Click yoki Uzum ilovasi orqali bu QR kodni skaner qilib, to'g'ridan-to'g'ri to'lov qilishlari mumkin!
+                  QR kodni bank ilovasi (Click, Payme, Uzum) yoki telefon kamerasi bilan skaner qiling: o‘quv markazining karta raqami chiqadi, shu kartaga pul o‘tkazing.
                 </p>
                 
                 {/* QR KOD RASMI */}
                 <div className="p-2 bg-white rounded-2xl shadow-sm relative z-10 mx-auto max-w-[200px] border border-slate-200">
-                  <img 
-                    src="/payment-qr.png"
-                    alt="To'lov QR va Shtrix Kodi"
+                  {/* O'quv markazi kartasi (UzCard 8600 0609 2593 9614) raqamini saqlovchi QR */}
+                  <img
+                    src="/card-qr.svg"
+                    alt="O‘quv markazi karta raqami QR kodi: 8600 0609 2593 9614"
                     className="w-full h-auto object-contain rounded-xl"
                   />
+                  <p className="text-center font-mono text-xs font-bold text-slate-800 pb-1">8600 0609 2593 9614</p>
                 </div>
 
                 <p className="text-[11px] font-mono bg-white px-3 py-1.5 rounded-lg text-slate-600 relative z-10">
