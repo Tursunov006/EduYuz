@@ -5,7 +5,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrend
 axios.defaults.baseURL = API_URL;
 
 // Login talab qilmaydigan (o'quvchi/ota-ona va ochiq) sahifalar
-const PUBLIC_PATH_PREFIXES = ['/login', '/portal', '/app', '/games/play', '/insta', '/verify'];
+const PUBLIC_PATH_PREFIXES = ['/login', '/portal', '/app', '/games/play', '/insta', '/verify', '/anketa'];
 
 function isPublicPage(): boolean {
   if (typeof window === 'undefined') return true;

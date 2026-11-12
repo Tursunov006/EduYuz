@@ -59,7 +59,8 @@ export default function Sidebar() {
     pathname === '/portal' ||
     pathname.startsWith('/app') ||
     pathname.startsWith('/games/play') ||
-    pathname.startsWith('/verify')
+    pathname.startsWith('/verify') ||
+    pathname.startsWith('/anketa')
   ) {
     return null;
   }

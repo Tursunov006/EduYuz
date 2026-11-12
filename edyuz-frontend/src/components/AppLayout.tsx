@@ -27,6 +27,7 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
     pathname.startsWith('/app') || 
     pathname.startsWith('/games/play') || 
     pathname.startsWith('/verify') ||
+    pathname.startsWith('/anketa') ||
     pathname.startsWith('/superadmin');
 
   useEffect(() => {

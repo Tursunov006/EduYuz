@@ -1,4 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { createHmac, timingSafeEqual } from 'crypto';
+import { resolveJwtSecret } from '../../common/jwt-secret';
+import { AnketaDto } from './dto/anketa.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
@@ -134,6 +137,66 @@ export class StudentsService {
       .filter((b) => !liveIds.has(b.studentId))
       .map((b) => ({ id: b.studentId, ...(b.data as any), deleted: true, deletedAt: b.deletedAt || b.updatedAt }));
     return [...live, ...removed];
+  }
+
+  // --- O'quvchi o'zi to'ldiradigan anketa ---
+  // Havola: /anketa/<id>?k=<kalit>. Kalit server sirida imzolangan, uni taxmin qilib bo'lmaydi
+  // va faqat shu o'quvchiga tegishli. Anketa orqali faqat shaxsiy ma'lumotlar o'zgaradi.
+  anketaKey(studentId: string): string {
+    return createHmac('sha256', resolveJwtSecret()).update(`anketa:${studentId}`).digest('hex').slice(0, 32);
+  }
+
+  private checkAnketaKey(studentId: string, key?: string) {
+    const a = Buffer.from(String(key || ''));
+    const b = Buffer.from(this.anketaKey(studentId));
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      // 404: havola noto'g'ri bo'lsa o'quvchi mavjudligini ham bildirmaymiz
+      throw new NotFoundException('Havola noto‘g‘ri yoki eskirgan');
+    }
+  }
+
+  async getAnketa(studentId: string, key?: string) {
+    this.checkAnketaKey(studentId, key);
+    const st = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      select: {
+        fullName: true,
+        middleName: true,
+        phone: true,
+        parentPhone: true,
+        passport: true,
+        birthDate: true,
+        address: true,
+        center: { select: { name: true } },
+      },
+    });
+    if (!st) throw new NotFoundException('Havola noto‘g‘ri yoki eskirgan');
+    return {
+      ...st,
+      birthDate: st.birthDate ? st.birthDate.toISOString().slice(0, 10) : null,
+      centerName: st.center?.name || null,
+      center: undefined,
+    };
+  }
+
+  async saveAnketa(studentId: string, key: string | undefined, dto: AnketaDto) {
+    this.checkAnketaKey(studentId, key);
+    const exists = await this.prisma.student.findUnique({ where: { id: studentId }, select: { id: true } });
+    if (!exists) throw new NotFoundException('Havola noto‘g‘ri yoki eskirgan');
+    await this.prisma.student.update({
+      where: { id: studentId },
+      data: {
+        fullName: dto.fullName.trim(),
+        middleName: dto.middleName?.trim() || null,
+        phone: dto.phone?.trim() || null,
+        parentPhone: dto.parentPhone.trim(),
+        passport: dto.passport?.trim().toUpperCase() || null,
+        birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
+        address: dto.address?.trim() || null,
+      },
+    });
+    await this.backup(studentId);
+    return { success: true };
   }
 
   async findAll(centerId?: string, search?: string) {
