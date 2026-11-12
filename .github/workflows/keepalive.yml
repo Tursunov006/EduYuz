@@ -1,0 +1,28 @@
+# Bepul serverlarni "uyg'oq" saqlash.
+# - Render bepul serveri 15 daqiqa so'rov kelmasa uxlaydi (bot va sayt sekin javob beradi).
+# - Supabase bepul bazasi bir hafta ishlatilmasa to'xtatib qo'yiladi.
+# Shu workflow har 10 daqiqada /health ga murojaat qiladi: u serverni uyg'otadi va bazaga
+# kichik so'rov (SELECT 1) yuboradi. Ochiq repozitoriyda GitHub Actions bepul.
+name: Keep alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping backend health
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /tmp/out -w '%{http_code}' --max-time 90 https://eduyuz.onrender.com/api/v1/health) || code=000
+            echo "Urinish $i: HTTP $code"; cat /tmp/out 2>/dev/null; echo
+            [ "$code" = "200" ] && exit 0
+            sleep 20
+          done
+          echo "Server yoki baza javob bermadi"; exit 1

@@ -23,6 +23,7 @@ import { SmsModule } from './modules/sms/sms.module';
 import { AiModule } from './modules/ai/ai.module';
 import { GamesModule } from './modules/games/games.module';
 import { InstagramModule } from './modules/instagram/instagram.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { InstagramModule } from './modules/instagram/instagram.module';
     // Umumiy so'rovlar chegarasi: bitta IP dan daqiqasiga 300 ta so'rov
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     PrismaModule,
+    HealthModule,
     SmsModule,
     TelegramModule,
     LmsModule,
