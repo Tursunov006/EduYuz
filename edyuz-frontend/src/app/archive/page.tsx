@@ -145,6 +145,7 @@ export default function ArchivePage() {
         { header: 'F.I.Sh', key: 'fullName', width: 220 },
         { header: 'Telefon', key: 'phone', width: 140, align: 'center', format: (v) => v || '—' },
         { header: 'Ota-ona telefoni', key: 'parentPhone', width: 140, align: 'center', format: (v) => v || '—' },
+        { header: 'Izoh', key: 'notes', width: 220, format: (v) => v || '—' },
         { header: 'Pasport', key: 'passport', width: 120, align: 'center', format: (v) => v || '—' },
         { header: 'Tug‘ilgan sana', key: 'birthDate', width: 110, align: 'center', format: (v) => fmtDate(v) || '—' },
         { header: 'Manzil', key: 'address', width: 200, format: (v) => v || '—' },
