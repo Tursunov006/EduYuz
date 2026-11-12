@@ -269,16 +269,15 @@ export default function StudentsPage() {
                 <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
                 <th className="h-11 px-5 font-semibold">Balans</th>
                 <th className="h-11 px-5 font-semibold">Holat</th>
-                <th className="h-11 px-5 font-semibold whitespace-nowrap">Otasining ismi</th>
                 <th className="h-11 px-5" />
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
+                <tr><td colSpan={6} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
               ) : visibleStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-24 px-4 text-center">
+                  <td colSpan={6} className="py-24 px-4 text-center">
                     <p className="text-[15px] font-semibold text-slate-600">
                       {search ? 'Hech narsa topilmadi' : 'Hali faol o‘quvchi yo‘q'}
                     </p>
@@ -337,15 +336,6 @@ export default function StudentsPage() {
                         ) : (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Kursni tugatgan</span>
                         )}
-                      </td>
-                      <td className="px-5 py-3.5 whitespace-nowrap">
-                        <Link
-                          href={`/students/${s.id}`}
-                          title="O‘quvchi ma’lumotlarini ochish"
-                          className="text-slate-700 hover:text-indigo-600 hover:underline"
-                        >
-                          {s.middleName || <span className="text-slate-400">Ochish</span>}
-                        </Link>
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
