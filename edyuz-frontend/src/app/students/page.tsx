@@ -13,6 +13,8 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
+  // Ro'yxat filtri: hammasi / o'quvchilar / talabalar
+  const [kindFilter, setKindFilter] = useState<'all' | 'oquvchi' | 'talaba'>('all');
   // Faol / kursni tugatgan (nofaol) / barchasi
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +28,7 @@ export default function StudentsPage() {
     centerId: '',
     fullName: '',
     middleName: '',
+    kind: 'oquvchi',
     phone: '',
     parentPhone: '',
     balance: 0,
@@ -74,6 +77,7 @@ export default function StudentsPage() {
       centerId: centers[0]?.id || '',
       fullName: '',
       middleName: '',
+      kind: 'oquvchi',
       phone: '',
       parentPhone: '',
       balance: 0,
@@ -92,6 +96,7 @@ export default function StudentsPage() {
       centerId: student.centerId || centers[0]?.id || '',
       fullName: student.fullName,
       middleName: student.middleName || '',
+      kind: student.kind || 'oquvchi',
       phone: student.phone || '',
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
@@ -140,6 +145,7 @@ export default function StudentsPage() {
           body: JSON.stringify({
             fullName: form.fullName,
             middleName: form.middleName,
+            kind: form.kind,
             phone: form.phone,
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
@@ -174,6 +180,7 @@ export default function StudentsPage() {
       [
         { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
         { header: 'Otasining ismi', key: 'middleName', width: 160, format: (v) => v || '—' },
+        { header: 'Turi', key: 'kind', width: 90, align: 'center', format: (v) => (v === 'talaba' ? 'Talaba' : 'O‘quvchi') },
         { header: t('students.phone', 'Shaxsiy Telefon'), key: 'phone', width: 160, align: 'center' },
         { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
         { header: 'Izoh', key: 'notes', width: 260, format: (v) => v || '—' },
@@ -209,8 +216,10 @@ export default function StudentsPage() {
   }
 
   // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
-  const visibleStudents = students.filter((x) => x.status === 'active');
-  const archivedCount = students.length - visibleStudents.length;
+  const activeAll = students.filter((x) => x.status === 'active');
+  const kindOf = (x: any) => (x.kind === 'talaba' ? 'talaba' : 'oquvchi');
+  const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || kindOf(x) === kindFilter);
+  const archivedCount = students.length - activeAll.length;
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
@@ -258,6 +267,29 @@ export default function StudentsPage() {
         </div>
       </div>
 
+      {/* O'quvchi / talaba */}
+      <div className="flex flex-wrap items-center gap-2">
+        {([
+          { key: 'all', label: 'Barchasi', count: activeAll.length },
+          { key: 'oquvchi', label: 'O‘quvchilar', count: activeAll.filter((x) => kindOf(x) === 'oquvchi').length },
+          { key: 'talaba', label: 'Talabalar', count: activeAll.filter((x) => kindOf(x) === 'talaba').length },
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            onClick={() => setKindFilter(f.key)}
+            className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-medium border transition ${
+              kindFilter === f.key
+                ? 'bg-indigo-600 border-indigo-600 text-white'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+          >
+            {f.label}
+            <span className={`text-xs ${kindFilter === f.key ? 'text-indigo-100' : 'text-slate-400'}`}>{f.count}</span>
+          </button>
+        ))}
+      </div>
+
       {/* Jadval */}
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -279,14 +311,16 @@ export default function StudentsPage() {
                 <tr>
                   <td colSpan={6} className="py-24 px-4 text-center">
                     <p className="text-[15px] font-semibold text-slate-600">
-                      {search ? 'Hech narsa topilmadi' : 'Hali faol o‘quvchi yo‘q'}
+                      {search || kindFilter !== 'all' ? 'Hech narsa topilmadi' : 'Hali faol o‘quvchi yo‘q'}
                     </p>
                     <p className="text-xs text-slate-500 mt-1">
                       {search
                         ? `«${search}» bo‘yicha o‘quvchi yo‘q. Boshqa ism yoki raqam bilan qidiring`
-                        : '«O‘quvchi qo‘shish» tugmasi bilan birinchi o‘quvchini kiriting'}
+                        : kindFilter !== 'all'
+                          ? `Bu bo‘limda hali ${kindFilter === 'talaba' ? 'talaba' : 'o‘quvchi'} yo‘q. Turini o‘quvchi tahrirlash oynasida belgilang`
+                          : '«O‘quvchi qo‘shish» tugmasi bilan birinchi o‘quvchini kiriting'}
                     </p>
-                    {!search && (
+                    {!search && kindFilter === 'all' && (
                       <button onClick={handleOpenCreate} className="mt-3 text-xs font-semibold text-indigo-600 hover:underline">
                         O‘quvchi qo‘shish
                       </button>
@@ -304,9 +338,14 @@ export default function StudentsPage() {
                             {(s.fullName || '?')[0]}
                           </span>
                           <div className="min-w-0">
-                            <Link href={`/students/${s.id}`} className="block font-semibold text-slate-800 truncate hover:text-indigo-600">
-                              {s.fullName}
-                            </Link>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Link href={`/students/${s.id}`} className="font-semibold text-slate-800 truncate hover:text-indigo-600">
+                                {s.fullName}
+                              </Link>
+                              {kindOf(s) === 'talaba' && (
+                                <span className="inline-flex items-center h-5 px-2 rounded-md bg-violet-500/10 text-violet-600 text-[11px] font-semibold shrink-0">Talaba</span>
+                              )}
+                            </div>
                             <p className="text-xs text-slate-500 truncate">
                               {s.groups?.[0]?.group?.name || 'Guruhsiz'}
                             </p>
@@ -444,6 +483,23 @@ export default function StudentsPage() {
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Turi</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {([['oquvchi', 'O‘quvchi'], ['talaba', 'Talaba']] as const).map(([val, label]) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setForm({ ...form, kind: val })}
+                      className={`h-10 rounded-xl border text-sm font-semibold transition ${
+                        form.kind === val ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Otasining ismi</label>

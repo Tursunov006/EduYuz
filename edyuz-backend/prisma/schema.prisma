@@ -135,6 +135,8 @@ model Student {
   birthDate    DateTime?     @map("birth_date") @db.Date
   address      String?       @db.VarChar(255)
   notes        String?       @db.Text // Izoh (ichki, faqat xodimlar uchun)
+  // Turi: 'oquvchi' (maktab yoshidagi) yoki 'talaba'
+  kind         String        @default("oquvchi") @db.VarChar(20)
   createdAt    DateTime      @default(now()) @map("created_at")
 
   center           Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)

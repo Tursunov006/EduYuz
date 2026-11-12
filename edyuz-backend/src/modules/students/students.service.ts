@@ -32,6 +32,7 @@ export class StudentsService {
         address: dto.address?.trim() || null,
         notes: dto.notes?.trim() || null,
         middleName: dto.middleName?.trim() || null,
+        kind: dto.kind || 'oquvchi',
       },
     });
     // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
@@ -58,6 +59,7 @@ export class StudentsService {
       const data = {
         fullName: st.fullName,
         middleName: st.middleName,
+        kind: st.kind,
         phone: st.phone,
         parentPhone: st.parentPhone,
         passport: st.passport,
@@ -113,6 +115,7 @@ export class StudentsService {
       id: st.id,
       fullName: st.fullName,
       middleName: st.middleName,
+      kind: st.kind,
       phone: st.phone,
       parentPhone: st.parentPhone,
       passport: st.passport,
@@ -285,6 +288,7 @@ export class StudentsService {
     if (dto.address !== undefined) dataToUpdate.address = dto.address?.trim() || null;
     if (dto.notes !== undefined) dataToUpdate.notes = dto.notes?.trim() || null;
     if (dto.middleName !== undefined) dataToUpdate.middleName = dto.middleName?.trim() || null;
+    if (dto.kind !== undefined) dataToUpdate.kind = dto.kind;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;
