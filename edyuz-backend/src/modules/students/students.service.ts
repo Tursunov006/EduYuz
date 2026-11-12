@@ -197,6 +197,7 @@ export class StudentsService {
           orderBy: { date: 'desc' },
           take: 10,
         },
+        certificates: { orderBy: { issuedAt: 'desc' } },
       },
     });
 

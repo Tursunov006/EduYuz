@@ -269,7 +269,7 @@ export default function StudentsPage() {
                 <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
                 <th className="h-11 px-5 font-semibold">Balans</th>
                 <th className="h-11 px-5 font-semibold">Holat</th>
-                <th className="h-11 px-5 font-semibold">Otasining ismi</th>
+                <th className="h-11 px-5 font-semibold whitespace-nowrap">Otasining ismi</th>
                 <th className="h-11 px-5" />
               </tr>
             </thead>
@@ -305,7 +305,9 @@ export default function StudentsPage() {
                             {(s.fullName || '?')[0]}
                           </span>
                           <div className="min-w-0">
-                            <p className="font-semibold text-slate-800 truncate">{s.fullName}</p>
+                            <Link href={`/students/${s.id}`} className="block font-semibold text-slate-800 truncate hover:text-indigo-600">
+                              {s.fullName}
+                            </Link>
                             <p className="text-xs text-slate-500 truncate">
                               {s.groups?.[0]?.group?.name || 'Guruhsiz'}
                             </p>
@@ -336,7 +338,15 @@ export default function StudentsPage() {
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Kursni tugatgan</span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5 text-slate-700 whitespace-nowrap">{s.middleName || <span className="text-slate-400">—</span>}</td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <Link
+                          href={`/students/${s.id}`}
+                          title="O‘quvchi ma’lumotlarini ochish"
+                          className="text-slate-700 hover:text-indigo-600 hover:underline"
+                        >
+                          {s.middleName || <span className="text-slate-400">Ochish</span>}
+                        </Link>
+                      </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <Link
