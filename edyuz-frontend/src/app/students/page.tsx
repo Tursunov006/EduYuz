@@ -171,6 +171,7 @@ export default function StudentsPage() {
         { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
         { header: t('students.phone', 'Shaxsiy Telefon'), key: 'phone', width: 160, align: 'center' },
         { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
+        { header: 'Izoh', key: 'notes', width: 260, format: (v) => v || '—' },
         {
           header: t('students.balance', 'Hisob Balansi (so‘m)'),
           key: 'balance',
@@ -302,6 +303,11 @@ export default function StudentsPage() {
                             <p className="text-xs text-slate-500 truncate">
                               {s.groups?.[0]?.group?.name || 'Guruhsiz'}
                             </p>
+                            {s.notes && (
+                              <p className="text-xs text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-1 truncate max-w-[280px]" title={s.notes}>
+                                Izoh: {s.notes}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </td>
