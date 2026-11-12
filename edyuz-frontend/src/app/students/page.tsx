@@ -25,6 +25,7 @@ export default function StudentsPage() {
   const [form, setForm] = useState({
     centerId: '',
     fullName: '',
+    middleName: '',
     phone: '',
     parentPhone: '',
     balance: 0,
@@ -72,6 +73,7 @@ export default function StudentsPage() {
     setForm({
       centerId: centers[0]?.id || '',
       fullName: '',
+      middleName: '',
       phone: '',
       parentPhone: '',
       balance: 0,
@@ -89,6 +91,7 @@ export default function StudentsPage() {
     setForm({
       centerId: student.centerId || centers[0]?.id || '',
       fullName: student.fullName,
+      middleName: student.middleName || '',
       phone: student.phone || '',
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
@@ -136,6 +139,7 @@ export default function StudentsPage() {
           method: 'PATCH',
           body: JSON.stringify({
             fullName: form.fullName,
+            middleName: form.middleName,
             phone: form.phone,
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
@@ -169,6 +173,7 @@ export default function StudentsPage() {
       `EduYuz_Oquvchilar_${new Date().toISOString().split('T')[0]}`,
       [
         { header: t('students.name', 'O‘quvchi F.I.SH'), key: 'fullName', width: 240 },
+        { header: 'Otasining ismi', key: 'middleName', width: 160, format: (v) => v || '—' },
         { header: t('students.phone', 'Shaxsiy Telefon'), key: 'phone', width: 160, align: 'center' },
         { header: 'Ota-ona telefoni', key: 'parentPhone', width: 160, align: 'center' },
         { header: 'Izoh', key: 'notes', width: 260, format: (v) => v || '—' },
@@ -264,15 +269,16 @@ export default function StudentsPage() {
                 <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
                 <th className="h-11 px-5 font-semibold">Balans</th>
                 <th className="h-11 px-5 font-semibold">Holat</th>
+                <th className="h-11 px-5 font-semibold">Otasining ismi</th>
                 <th className="h-11 px-5" />
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
+                <tr><td colSpan={7} className="py-24 text-center text-slate-500">Yuklanmoqda...</td></tr>
               ) : visibleStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-24 px-4 text-center">
+                  <td colSpan={7} className="py-24 px-4 text-center">
                     <p className="text-[15px] font-semibold text-slate-600">
                       {search ? 'Hech narsa topilmadi' : 'Hali faol o‘quvchi yo‘q'}
                     </p>
@@ -330,6 +336,7 @@ export default function StudentsPage() {
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Kursni tugatgan</span>
                         )}
                       </td>
+                      <td className="px-5 py-3.5 text-slate-700 whitespace-nowrap">{s.middleName || <span className="text-slate-400">—</span>}</td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <Link
@@ -428,13 +435,24 @@ export default function StudentsPage() {
                 </div>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">To'liq ism-familiyasi</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Familiya va ism</label>
                 <input
                   required
                   type="text"
                   placeholder="Masalan: Ali Valiyev"
                   value={form.fullName}
                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Otasining ismi</label>
+                <input
+                  type="text"
+                  placeholder="Masalan: Karimovich / Karimovna"
+                  maxLength={100}
+                  value={form.middleName}
+                  onChange={(e) => setForm({ ...form, middleName: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>

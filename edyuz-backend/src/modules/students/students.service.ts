@@ -28,6 +28,7 @@ export class StudentsService {
         birthDate: dto.birthDate ? new Date(dto.birthDate) : null,
         address: dto.address?.trim() || null,
         notes: dto.notes?.trim() || null,
+        middleName: dto.middleName?.trim() || null,
       },
     });
     // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
@@ -53,6 +54,7 @@ export class StudentsService {
       });
       const data = {
         fullName: st.fullName,
+        middleName: st.middleName,
         phone: st.phone,
         parentPhone: st.parentPhone,
         passport: st.passport,
@@ -107,6 +109,7 @@ export class StudentsService {
     const live = students.map((st) => ({
       id: st.id,
       fullName: st.fullName,
+      middleName: st.middleName,
       phone: st.phone,
       parentPhone: st.parentPhone,
       passport: st.passport,
@@ -217,6 +220,7 @@ export class StudentsService {
     if (dto.birthDate !== undefined) dataToUpdate.birthDate = dto.birthDate ? new Date(dto.birthDate) : null;
     if (dto.address !== undefined) dataToUpdate.address = dto.address?.trim() || null;
     if (dto.notes !== undefined) dataToUpdate.notes = dto.notes?.trim() || null;
+    if (dto.middleName !== undefined) dataToUpdate.middleName = dto.middleName?.trim() || null;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;

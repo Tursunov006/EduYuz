@@ -122,6 +122,7 @@ model Student {
   id           String        @id @default(uuid()) @db.VarChar(36)
   centerId     String        @map("center_id") @db.VarChar(36)
   fullName     String        @map("full_name") @db.VarChar(100)
+  middleName   String?       @map("middle_name") @db.VarChar(100) // Otasining ismi
   phone        String?       @db.VarChar(20)
   parentPhone  String        @map("parent_phone") @db.VarChar(20)
   parentChatId BigInt?       @map("parent_chat_id")
