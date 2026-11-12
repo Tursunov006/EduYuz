@@ -58,9 +58,11 @@ export class TelegramService implements OnModuleInit {
 
   // Webhook orqali kelgan yangilanish (javob kutmasdan qayta ishlanadi)
   handleWebhookUpdate(update: any) {
-    this.handleUpdate(update).catch((err: any) =>
-      this.logger.warn(`Telegram yangilanishini qayta ishlashda xato: ${err?.message || err}`),
-    );
+    this.handleUpdate(update)
+      .then(() => this.logger.log(`Telegram yangilanishi qayta ishlandi (update_id=${update?.update_id})`))
+      .catch((err: any) =>
+        this.logger.warn(`Telegram yangilanishini qayta ishlashda xato: ${err?.message || err}`),
+      );
   }
 
   // Webhook mumkin bo'lsa webhook, aks holda polling
