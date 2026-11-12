@@ -12,6 +12,7 @@ import { RoleType } from '@prisma/client';
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import { AnketaDto } from './dto/anketa.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -39,6 +40,27 @@ export class StudentsController {
     @Query('search') search?: string,
   ) {
     return this.studentsService.findAll(this.access.scopeCenter(user, centerId), search);
+  }
+
+  // O'quvchiga yuboriladigan anketa havolasi uchun kalit (faqat admin)
+  @Roles(RoleType.admin)
+  @Get(':id/anketa-link')
+  async anketaLink(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.student(user, id);
+    return { key: this.studentsService.anketaKey(id) };
+  }
+
+  // O'quvchi o'zi ochadigan anketa (login'siz, faqat to'g'ri kalit bilan)
+  @Public()
+  @Get('anketa/:id')
+  getAnketa(@Param('id') id: string, @Query('k') key?: string) {
+    return this.studentsService.getAnketa(id, key);
+  }
+
+  @Public()
+  @Post('anketa/:id')
+  saveAnketa(@Param('id') id: string, @Query('k') key: string, @Body() dto: AnketaDto) {
+    return this.studentsService.saveAnketa(id, key, dto);
   }
 
   // Arxiv: barcha o'quvchilar bazasi (pasport ma'lumotlari bilan) — faqat admin

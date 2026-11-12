@@ -2,7 +2,7 @@
 
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check, Copy, Send } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
 // O'quvchi profili: o'quvchilar ro'yxatida ism yoki "Otasining ismi" bosilganda ochiladi
@@ -32,6 +32,28 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
   const { id } = use(params);
   const [s, setS] = useState<any>(null);
   const [error, setError] = useState('');
+  const [anketaUrl, setAnketaUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  // O'quvchi o'zi to'ldiradigan anketa havolasi
+  async function makeAnketaLink() {
+    try {
+      const { key } = await apiFetch(`/students/${id}/anketa-link`);
+      setAnketaUrl(`${window.location.origin}/anketa/${id}?k=${key}`);
+      setCopied(false);
+    } catch (e: any) {
+      alert(e?.message || 'Havolani yaratib bo‘lmadi');
+    }
+  }
+
+  async function copyAnketa() {
+    try {
+      await navigator.clipboard.writeText(anketaUrl);
+      setCopied(true);
+    } catch {
+      prompt('Havolani nusxalang:', anketaUrl);
+    }
+  }
 
   useEffect(() => {
     apiFetch(`/students/${id}`)
@@ -86,6 +108,52 @@ export default function StudentProfilePage({ params }: { params: Promise<{ id: s
             {bal < 0 ? `Qarz: ${fmt(Math.abs(bal))} so‘m` : `Balans: ${fmt(bal)} so‘m`}
           </span>
         </div>
+      </div>
+
+      {/* Anketa: o'quvchiga havola yuboriladi, u ma'lumotlarini o'zi to'ldiradi */}
+      <div className="rounded-2xl bg-white border border-slate-200 p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">O‘quvchi anketasi</h2>
+            <p className="text-sm text-slate-500 mt-0.5">
+              Havolani o‘quvchiga yuboring: u ma’lumotlarini o‘zi to‘ldiradi va ular shu profilga avtomatik saqlanadi.
+            </p>
+          </div>
+          {!anketaUrl && (
+            <button
+              type="button"
+              onClick={makeAnketaLink}
+              className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 transition shrink-0"
+            >
+              <Send size={16} /> Anketa havolasini olish
+            </button>
+          )}
+        </div>
+        {anketaUrl && (
+          <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
+            <input
+              readOnly
+              value={anketaUrl}
+              onFocus={(e) => e.target.select()}
+              className="flex-1 min-w-0 h-10 px-3.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700"
+            />
+            <button
+              type="button"
+              onClick={copyAnketa}
+              className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl border border-slate-200 text-sm font-semibold text-slate-800 hover:bg-slate-50 transition"
+            >
+              {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />} {copied ? 'Nusxalandi' : 'Nusxalash'}
+            </button>
+            <a
+              href={`https://t.me/share/url?url=${encodeURIComponent(anketaUrl)}&text=${encodeURIComponent('Iltimos, o‘quvchi anketasini to‘ldiring:')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-xl bg-sky-500 text-sm font-semibold text-white hover:bg-sky-400 transition"
+            >
+              <Send size={16} /> Telegram orqali yuborish
+            </a>
+          </div>
+        )}
       </div>
 
       {s.notes && (
