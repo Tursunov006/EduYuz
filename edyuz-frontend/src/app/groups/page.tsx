@@ -16,6 +16,7 @@ interface Group {
   endTime: string;
   course?: { id: string; title: string; price: number };
   teacher?: { id: string; fullName: string };
+  room?: string | null;
   _count?: { students: number };
 }
 
@@ -60,10 +61,13 @@ export default function GroupsPage() {
   const [activeTab, setActiveTab] = useState<'cards' | 'timetable'>('cards');
   // Tahrirlanayotgan guruh (null bo'lsa, yangi guruh ochiladi)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  // Dars jadvali: toq yoki juft kunlar
+  const [dayType, setDayType] = useState<'odd' | 'even'>('odd');
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
     name: '',
+    room: '',
     courseId: '',
     teacherId: '',
     startTime: '14:00',
@@ -116,6 +120,7 @@ export default function GroupsPage() {
 
   const emptyForm = () => ({
     name: '',
+    room: '',
     courseId: courses[0]?.id || '',
     teacherId: teachers[0]?.id || '',
     startTime: '14:00',
@@ -139,6 +144,7 @@ export default function GroupsPage() {
     setEditingGroupId(g.id);
     setFormData({
       name: g.name,
+      room: g.room || '',
       courseId: g.course?.id || courses[0]?.id || '',
       teacherId: g.teacher?.id || teachers[0]?.id || '',
       startTime: g.startTime || '14:00',
@@ -217,56 +223,99 @@ export default function GroupsPage() {
     (g.teacher?.fullName || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Dars jadvali soatlari
-  const TIME_SLOTS = [
-    { start: '08:00', end: '10:00', label: 'Ertalab' },
-    { start: '10:00', end: '12:00', label: 'Ertalab' },
-    { start: '14:00', end: '16:00', label: 'Kunduzi' },
-    { start: '16:00', end: '18:00', label: 'Kunduzi' },
-    { start: '18:00', end: '20:00', label: 'Kechqurun' },
+  // --- Dars jadvali: xonalar ustun, soatlar qator, dars bloklari vaqtga qarab joylashadi ---
+  const HOUR_H = 64; // bir soat balandligi (px)
+  const NO_ROOM = 'Xona belgilanmagan';
+  const DAY_OPTIONS = [
+    { type: 'odd' as const, title: 'Toq kunlar', days: 'Dush · Chor · Jum', formDays: 'Dush-Chor-Jum' },
+    { type: 'even' as const, title: 'Juft kunlar', days: 'Sesh · Pay · Shan', formDays: 'Sesh-Pay-Shan' },
   ];
-
-  const DAY_COLUMNS = [
-    { type: 'odd' as const, title: 'Toq kunlar', days: 'Dushanba · Chorshanba · Juma', dot: 'bg-indigo-500', accent: 'border-l-indigo-500', formDays: 'Dush-Chor-Jum' },
-    { type: 'even' as const, title: 'Juft kunlar', days: 'Seshanba · Payshanba · Shanba', dot: 'bg-emerald-500', accent: 'border-l-emerald-500', formDays: 'Sesh-Pay-Shan' },
+  const BLOCK_COLORS = [
+    'bg-rose-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500',
+    'bg-sky-500', 'bg-violet-500', 'bg-teal-500', 'bg-pink-500',
   ];
 
   const toMinutes = (t?: string) => {
     const [h, m] = String(t || '14:00').split(':').map((x) => parseInt(x, 10));
     return (isNaN(h) ? 14 : h) * 60 + (isNaN(m) ? 0 : m);
   };
+  const fmtHour = (h: number) => `${String(h).padStart(2, '0')}:00`;
 
-  // Har bir guruh faqat bitta qatorga tushadi: boshlanish vaqtidan oldingi eng yaqin smena
-  const slotIndexOf = (g: Group) => {
-    const start = toMinutes(g.startTime);
-    let idx = 0;
-    TIME_SLOTS.forEach((s, i) => {
-      if (toMinutes(s.start) <= start) idx = i;
-    });
-    return idx;
+  // Bir kursning guruhlari bir xil rangda chiqadi
+  const colorOf = (g: Group) => {
+    const key = String(g.course?.id || g.course?.title || g.name);
+    let h = 0;
+    for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return BLOCK_COLORS[h % BLOCK_COLORS.length];
   };
 
-  const dayTypeMatches = (g: Group, dayType: 'odd' | 'even') => {
+  const dayTypeMatches = (g: Group, type: 'odd' | 'even') => {
     const d = (Array.isArray(g.days) ? g.days.join(' ') : String(g.days || '')).toLowerCase();
     if (d.includes('har kuni')) return true;
-    if (dayType === 'odd') return d.includes('dush') || d.includes('chor') || d.includes('jum') || d.includes('toq');
+    if (type === 'odd') return d.includes('dush') || d.includes('chor') || d.includes('jum') || d.includes('toq');
     return d.includes('sesh') || d.includes('pay') || d.includes('shan') || d.includes('juft') || d.includes('dam');
   };
 
-  const getGroupsForSlot = (slotIdx: number, dayType: 'odd' | 'even') =>
-    filteredGroups
-      .filter((g) => slotIndexOf(g) === slotIdx && dayTypeMatches(g, dayType))
-      .sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime));
+  const dayGroups = filteredGroups.filter((g) => dayTypeMatches(g, dayType));
+  const scheduledCount = dayGroups.length;
 
-  const scheduledCount = filteredGroups.filter((g) => dayTypeMatches(g, 'odd') || dayTypeMatches(g, 'even')).length;
+  // Ustunlar: barcha ma'lum xonalar (toq va juft kunlarda bir xil turadi) + xonasiz guruhlar uchun
+  const knownRooms = Array.from(new Set(groups.map((g) => (g.room || '').trim()).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
+  );
+  const needsNoRoom = knownRooms.length === 0 || dayGroups.some((g) => !(g.room || '').trim());
+  const roomColumns = needsNoRoom ? [...knownRooms, NO_ROOM] : knownRooms;
 
-  const openModalForSlot = (start: string, end: string, days: string) => {
+  const gridStartHour = Math.min(8, ...dayGroups.map((g) => Math.floor(toMinutes(g.startTime) / 60)));
+  const gridEndHour = Math.min(24, Math.max(20, ...dayGroups.map((g) => Math.ceil(toMinutes(g.endTime) / 60))));
+  const hours = Array.from({ length: gridEndHour - gridStartHour }, (_, i) => gridStartHour + i);
+  const gridHeight = hours.length * HOUR_H;
+
+  // Bir xonada vaqti ustma-ust tushgan guruhlar yonma-yon joylashadi
+  const layoutRoom = (list: Group[]) => {
+    const items = list
+      .map((g) => {
+        const sMin = toMinutes(g.startTime);
+        return { g, s: sMin, e: Math.max(toMinutes(g.endTime), sMin + 30), lane: 0, lanes: 1 };
+      })
+      .sort((a, b) => a.s - b.s || a.e - b.e);
+    let cluster: typeof items = [];
+    let clusterEnd = -1;
+    const laneEnds: number[] = [];
+    const flush = () => {
+      const n = Math.max(...cluster.map((c) => c.lane)) + 1;
+      cluster.forEach((c) => (c.lanes = n));
+      cluster = [];
+    };
+    items.forEach((it) => {
+      if (cluster.length && it.s >= clusterEnd) {
+        flush();
+        laneEnds.length = 0;
+        clusterEnd = -1;
+      }
+      let lane = laneEnds.findIndex((end) => end <= it.s);
+      if (lane === -1) {
+        lane = laneEnds.length;
+        laneEnds.push(it.e);
+      } else {
+        laneEnds[lane] = it.e;
+      }
+      it.lane = lane;
+      cluster.push(it);
+      clusterEnd = Math.max(clusterEnd, it.e);
+    });
+    if (cluster.length) flush();
+    return items;
+  };
+
+  const openModalForSlot = (start: string, end: string, days: string, room = '') => {
     setEditingGroupId(null);
     setFormData(() => ({
       ...emptyForm(),
       startTime: start,
       endTime: end,
       days,
+      room,
     }));
     setIsModalOpen(true);
   };
@@ -351,84 +400,103 @@ export default function GroupsPage() {
           <div className="px-5 sm:px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200">
             <div>
               <h2 className="text-lg font-bold text-slate-900">Haftalik dars jadvali</h2>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Bo‘sh katakni bosib, shu vaqtga yangi guruh qo‘shing</p>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                Xonalar bo‘yicha. Bo‘sh joyni bosib, shu vaqtga yangi guruh qo‘shing
+                <span className="text-slate-400"> · {scheduledCount} ta guruh</span>
+              </p>
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-600">
-              <span className="inline-flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Toq kunlar
-              </span>
-              <span className="inline-flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Juft kunlar
-              </span>
-              <span className="text-slate-400">{scheduledCount} ta guruh jadvalda</span>
+            <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
+              {DAY_OPTIONS.map((o) => (
+                <button
+                  key={o.type}
+                  type="button"
+                  onClick={() => setDayType(o.type)}
+                  className={`h-9 px-3.5 rounded-lg text-sm font-semibold transition ${
+                    dayType === o.type ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-white'
+                  }`}
+                  title={o.days}
+                >
+                  {o.title}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="overflow-x-auto">
-            <div className="min-w-[720px]">
-              {/* Ustun sarlavhalari */}
-              <div className="grid grid-cols-[150px_1fr_1fr] bg-slate-50 border-b border-slate-200">
-                <div className="px-5 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
-                {DAY_COLUMNS.map((col) => (
-                  <div key={col.type} className="px-5 py-3 border-l border-slate-200">
-                    <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                      <span className={`w-2 h-2 rounded-full ${col.dot}`} /> {col.title}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-0.5 ml-4">{col.days}</p>
+            <div style={{ minWidth: 70 + roomColumns.length * 190 }}>
+              {/* Xonalar */}
+              <div className="flex border-b border-slate-200 bg-slate-50">
+                <div className="w-[70px] shrink-0 px-3 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
+                {roomColumns.map((room) => (
+                  <div key={room} className="flex-1 min-w-[190px] px-4 py-3 border-l border-slate-200 text-sm font-semibold text-slate-900 truncate">
+                    {room}
                   </div>
                 ))}
               </div>
 
-              {/* Qatorlar */}
-              {TIME_SLOTS.map((slot, i) => (
-                <div
-                  key={slot.start}
-                  className={`grid grid-cols-[150px_1fr_1fr] ${i > 0 ? 'border-t border-slate-200' : ''}`}
-                >
-                  <div className="px-5 py-4">
-                    <p className="text-base font-bold text-slate-900 tabular-nums">{slot.start}</p>
-                    <p className="text-xs text-slate-500 tabular-nums">{slot.end} gacha</p>
-                    <span className="inline-block mt-2 px-2 py-0.5 rounded-md bg-slate-100 text-[11px] font-medium text-slate-600">
-                      {slot.label}
-                    </span>
-                  </div>
-
-                  {DAY_COLUMNS.map((col) => {
-                    const list = getGroupsForSlot(i, col.type);
-                    return (
-                      <div key={col.type} className="p-3 border-l border-slate-200 flex flex-col gap-2">
-                        {list.map((g) => (
-                          <Link
-                            key={g.id}
-                            href={`/groups/${g.id}`}
-                            className={`block px-3.5 py-3 rounded-xl border border-slate-200 border-l-4 ${col.accent} bg-white hover:bg-slate-50 transition`}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <span className="text-sm font-semibold text-slate-900 leading-snug">{g.name}</span>
-                              <span className="shrink-0 text-xs font-medium text-slate-500 tabular-nums">
-                                {g.startTime}–{g.endTime}
-                              </span>
-                            </div>
-                            <div className="mt-1 flex items-center justify-between gap-2 text-xs text-slate-500">
-                              <span className="truncate">{g.teacher?.fullName || 'O‘qituvchi biriktirilmagan'}</span>
-                              <span className="shrink-0">{g._count?.students || 0} o‘quvchi</span>
-                            </div>
-                          </Link>
-                        ))}
-                        <button
-                          type="button"
-                          onClick={() => openModalForSlot(slot.start, slot.end, col.formDays)}
-                          className={`w-full rounded-xl border border-dashed border-slate-200 text-xs font-medium text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition flex items-center justify-center gap-1.5 ${
-                            list.length ? 'h-9' : 'flex-1 min-h-[64px]'
-                          }`}
-                        >
-                          <Plus size={14} /> Guruh qo‘shish
-                        </button>
-                      </div>
-                    );
-                  })}
+              {/* Jadval */}
+              <div className="flex">
+                {/* Soatlar */}
+                <div className="w-[70px] shrink-0 relative" style={{ height: gridHeight }}>
+                  {hours.map((h, i) => (
+                    <div
+                      key={h}
+                      className="absolute left-0 right-0 px-3 text-xs font-medium text-slate-500 tabular-nums"
+                      style={{ top: i * HOUR_H + 6 }}
+                    >
+                      {fmtHour(h)}
+                    </div>
+                  ))}
                 </div>
-              ))}
+
+                {roomColumns.map((room) => {
+                  const inRoom = dayGroups.filter((g) => ((g.room || '').trim() || NO_ROOM) === room);
+                  const items = layoutRoom(inRoom);
+                  const roomValue = room === NO_ROOM ? '' : room;
+                  const formDays = DAY_OPTIONS.find((o) => o.type === dayType)!.formDays;
+                  return (
+                    <div key={room} className="flex-1 min-w-[190px] relative border-l border-slate-200" style={{ height: gridHeight }}>
+                      {/* Soat chiziqlari va bo'sh joylar (bosilsa guruh qo'shiladi) */}
+                      {hours.map((h, i) => (
+                        <button
+                          key={h}
+                          type="button"
+                          onClick={() => openModalForSlot(fmtHour(h), fmtHour(Math.min(h + 2, 23)), formDays, roomValue)}
+                          title={`${fmtHour(h)} ga guruh qo‘shish`}
+                          className="group absolute left-0 right-0 border-t border-slate-100 hover:bg-indigo-50 transition flex items-start justify-end"
+                          style={{ top: i * HOUR_H, height: HOUR_H }}
+                        >
+                          <Plus size={14} className="m-1.5 text-indigo-400 opacity-0 group-hover:opacity-100 transition" />
+                        </button>
+                      ))}
+
+                      {/* Dars bloklari */}
+                      {items.map(({ g, s: sMin, e: eMin, lane, lanes }) => (
+                        <Link
+                          key={g.id}
+                          href={`/groups/${g.id}`}
+                          className={`absolute rounded-lg px-2.5 py-1.5 text-white overflow-hidden shadow-sm hover:brightness-110 transition ${colorOf(g)}`}
+                          style={{
+                            top: ((sMin - gridStartHour * 60) / 60) * HOUR_H + 2,
+                            height: Math.max(((eMin - sMin) / 60) * HOUR_H - 4, 34),
+                            left: `calc(${(lane / lanes) * 100}% + 4px)`,
+                            width: `calc(${100 / lanes}% - 8px)`,
+                          }}
+                          title={`${g.name} · ${g.teacher?.fullName || ''}`}
+                        >
+                          <p className="text-[13px] font-bold leading-tight truncate">{g.name}</p>
+                          <p className="text-[11px] opacity-90 leading-tight truncate">
+                            {g.teacher?.fullName || 'O‘qituvchi biriktirilmagan'}
+                          </p>
+                          <p className="text-[11px] opacity-90 leading-tight tabular-nums">
+                            {g.startTime}–{g.endTime} · {g._count?.students || 0} o‘quvchi
+                          </p>
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -516,6 +584,14 @@ export default function GroupsPage() {
                       Ustoz: <strong className="text-slate-700 font-bold">{group.teacher?.fullName || 'Biriktirilmagan'}</strong>
                     </span>
                   </div>
+                  {group.room && (
+                    <div className="flex items-center gap-2">
+                      <Users size={14} className="text-emerald-600 shrink-0" />
+                      <span className="text-slate-500 truncate">
+                        Xona: <strong className="text-slate-700 font-bold">{group.room}</strong>
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Pasti: Amallar */}
@@ -585,6 +661,25 @@ export default function GroupsPage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 transition"
                 />
+              </div>
+
+              {/* Xona */}
+              <div>
+                <label className="block text-xs font-bold text-slate-600 mb-1.5">Xona (ixtiyoriy)</label>
+                <input
+                  type="text"
+                  list="room-options"
+                  maxLength={60}
+                  placeholder="Masalan: Cambridge xonasi"
+                  value={formData.room}
+                  onChange={(e) => setFormData({ ...formData, room: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 transition"
+                />
+                <datalist id="room-options">
+                  {knownRooms.map((r) => (
+                    <option key={r} value={r} />
+                  ))}
+                </datalist>
               </div>
 
               {/* Fan / Kurs tanlash */}

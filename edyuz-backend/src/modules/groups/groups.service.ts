@@ -57,6 +57,7 @@ export class GroupsService {
         courseId,
         teacherId,
         name: dto.name,
+        room: dto.room?.trim() || null,
         days: formattedDays || ['Dushanba', 'Chorshanba', 'Juma'],
         startTime: dto.startTime,
         endTime: dto.endTime,
@@ -134,6 +135,7 @@ export class GroupsService {
     // Kunlar formadan "Dush-Chor-Jum" ko'rinishida keladi: yaratishdagi kabi ro'yxatga aylantiriladi
     const { archived, ...rest } = dto;
     const data: any = { ...rest };
+    if (dto.room !== undefined) data.room = dto.room?.trim() || null;
     if (archived !== undefined) {
       data.archivedAt = archived ? new Date() : null;
     }

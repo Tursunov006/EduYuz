@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
+import { MaxLength, IsBoolean, IsOptional, IsString, Matches } from 'class-validator';
 
 export class UpdateGroupDto {
   @IsOptional()
@@ -12,6 +12,11 @@ export class UpdateGroupDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  room?: string;
 
   // true: guruhni arxivga olish, false: arxivdan qaytarish
   @IsOptional()
