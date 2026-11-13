@@ -50,6 +50,40 @@ const getCourseBadge = (title: string = '') => {
   return { icon: '', color: 'from-indigo-500/20 to-blue-500/20 text-indigo-700 border-indigo-500/30' };
 };
 
+// Hafta kunlari. Guruh kunlari turli ko'rinishda saqlangan: ["Dush","Chor"], "Dush-Chor-Jum",
+// ["Dushanba"], "toq kunlar", "har kuni". Hammasi shu qisqa nomlarga keltiriladi.
+const WEEK = [
+  { key: 'Dush', full: 'Dushanba' },
+  { key: 'Sesh', full: 'Seshanba' },
+  { key: 'Chor', full: 'Chorshanba' },
+  { key: 'Pay', full: 'Payshanba' },
+  { key: 'Jum', full: 'Juma' },
+  { key: 'Shan', full: 'Shanba' },
+  { key: 'Yak', full: 'Yakshanba' },
+];
+const WEEK_KEYS = WEEK.map((w) => w.key);
+
+function parseDays(raw: any): string[] {
+  const text = (Array.isArray(raw) ? raw.join(' ') : String(raw || '')).toLowerCase();
+  const set = new Set<string>();
+  if (text.includes('har kuni')) ['Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'].forEach((k) => set.add(k));
+  // So'zlar boshidan solishtiriladi: "Dushanba" ichidagi "shan" Shanba deb adashmasligi uchun
+  text.split(/[^a-z]+/).filter(Boolean).forEach((t) => {
+    if (t.startsWith('dush')) set.add('Dush');
+    else if (t.startsWith('sesh')) set.add('Sesh');
+    else if (t.startsWith('chor')) set.add('Chor');
+    else if (t.startsWith('pay')) set.add('Pay');
+    else if (t.startsWith('jum')) set.add('Jum');
+    else if (t.startsWith('shan')) set.add('Shan');
+    else if (t.startsWith('yak')) set.add('Yak');
+    else if (t === 'toq') ['Dush', 'Chor', 'Jum'].forEach((k) => set.add(k));
+    else if (t === 'juft') ['Sesh', 'Pay', 'Shan'].forEach((k) => set.add(k));
+    else if (t === 'dam') ['Shan', 'Yak'].forEach((k) => set.add(k));
+  });
+  return WEEK_KEYS.filter((k) => set.has(k));
+}
+const TODAY_KEY = () => ['Yak', 'Dush', 'Sesh', 'Chor', 'Pay', 'Jum', 'Shan'][new Date().getDay()];
+
 export default function GroupsPage() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [courses, setCourses] = useState<CourseItem[]>([]);
@@ -61,8 +95,8 @@ export default function GroupsPage() {
   const [activeTab, setActiveTab] = useState<'cards' | 'timetable'>('cards');
   // Tahrirlanayotgan guruh (null bo'lsa, yangi guruh ochiladi)
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
-  // Dars jadvali: toq yoki juft kunlar
-  const [dayType, setDayType] = useState<'odd' | 'even'>('odd');
+  // Dars jadvali: tanlangan hafta kuni
+  const [dayKey, setDayKey] = useState<string>(() => TODAY_KEY());
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
@@ -149,7 +183,7 @@ export default function GroupsPage() {
       teacherId: g.teacher?.id || teachers[0]?.id || '',
       startTime: g.startTime || '14:00',
       endTime: g.endTime || '16:00',
-      days: Array.isArray(g.days) ? g.days.join('-') : String(g.days || 'Dush-Chor-Jum'),
+      days: parseDays(g.days).join('-') || 'Dush-Chor-Jum',
     });
     setIsModalOpen(true);
   };
@@ -173,6 +207,10 @@ export default function GroupsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (parseDays(formData.days).length === 0) {
+      alert('Kamida bitta dars kunini tanlang');
+      return;
+    }
     try {
       if (editingGroupId) {
         await axios.patch(`http://localhost:3000/api/v1/groups/${editingGroupId}`, formData, {
@@ -226,10 +264,6 @@ export default function GroupsPage() {
   // --- Dars jadvali: xonalar ustun, soatlar qator, dars bloklari vaqtga qarab joylashadi ---
   const HOUR_H = 64; // bir soat balandligi (px)
   const NO_ROOM = 'Xona belgilanmagan';
-  const DAY_OPTIONS = [
-    { type: 'odd' as const, title: 'Toq kunlar', days: 'Dush · Chor · Jum', formDays: 'Dush-Chor-Jum' },
-    { type: 'even' as const, title: 'Juft kunlar', days: 'Sesh · Pay · Shan', formDays: 'Sesh-Pay-Shan' },
-  ];
   const BLOCK_COLORS = [
     'bg-rose-500', 'bg-emerald-500', 'bg-indigo-500', 'bg-amber-500',
     'bg-sky-500', 'bg-violet-500', 'bg-teal-500', 'bg-pink-500',
@@ -249,14 +283,7 @@ export default function GroupsPage() {
     return BLOCK_COLORS[h % BLOCK_COLORS.length];
   };
 
-  const dayTypeMatches = (g: Group, type: 'odd' | 'even') => {
-    const d = (Array.isArray(g.days) ? g.days.join(' ') : String(g.days || '')).toLowerCase();
-    if (d.includes('har kuni')) return true;
-    if (type === 'odd') return d.includes('dush') || d.includes('chor') || d.includes('jum') || d.includes('toq');
-    return d.includes('sesh') || d.includes('pay') || d.includes('shan') || d.includes('juft') || d.includes('dam');
-  };
-
-  const dayGroups = filteredGroups.filter((g) => dayTypeMatches(g, dayType));
+  const dayGroups = filteredGroups.filter((g) => parseDays(g.days).includes(dayKey));
   const scheduledCount = dayGroups.length;
 
   // Ustunlar: barcha ma'lum xonalar (toq va juft kunlarda bir xil turadi) + xonasiz guruhlar uchun
@@ -405,18 +432,18 @@ export default function GroupsPage() {
                 <span className="text-slate-400"> · {scheduledCount} ta guruh</span>
               </p>
             </div>
-            <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
-              {DAY_OPTIONS.map((o) => (
+            <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
+              {WEEK.map((w) => (
                 <button
-                  key={o.type}
+                  key={w.key}
                   type="button"
-                  onClick={() => setDayType(o.type)}
-                  className={`h-9 px-3.5 rounded-lg text-sm font-semibold transition ${
-                    dayType === o.type ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-white'
+                  onClick={() => setDayKey(w.key)}
+                  className={`h-9 px-3 rounded-lg text-sm font-semibold transition ${
+                    dayKey === w.key ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-white'
                   }`}
-                  title={o.days}
+                  title={w.full}
                 >
-                  {o.title}
+                  {w.key}
                 </button>
               ))}
             </div>
@@ -453,7 +480,7 @@ export default function GroupsPage() {
                   const inRoom = dayGroups.filter((g) => ((g.room || '').trim() || NO_ROOM) === room);
                   const items = layoutRoom(inRoom);
                   const roomValue = room === NO_ROOM ? '' : room;
-                  const formDays = DAY_OPTIONS.find((o) => o.type === dayType)!.formDays;
+                  const formDays = dayKey;
                   return (
                     <div key={room} className="flex-1 min-w-[190px] relative border-l border-slate-200" style={{ height: gridHeight }}>
                       {/* Soat chiziqlari va bo'sh joylar (bosilsa guruh qo'shiladi) */}
@@ -757,19 +784,40 @@ export default function GroupsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-600 mb-1.5">Dars kunlari</label>
-                <select
-                  value={formData.days}
-                  onChange={(e) => setFormData({ ...formData, days: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="Dush-Chor-Jum">Dushanba / Chorshanba / Juma (Toq kunlar)</option>
-                  <option value="Sesh-Pay-Shan">Seshanba / Payshanba / Shanba (Juft kunlar)</option>
-                  <option value="Har kuni">Har kuni (Dush - Shan)</option>
-                  <option value="Dam olish kunlari">Dam olish kunlari (Shanba / Yakshanba)</option>
-                  {!['Dush-Chor-Jum', 'Sesh-Pay-Shan', 'Har kuni', 'Dam olish kunlari'].includes(formData.days) && formData.days && (
-                    <option value={formData.days}>{formData.days}</option>
-                  )}
-                </select>
+                <div className="flex flex-wrap gap-2">
+                  {WEEK.map((w) => {
+                    const on = parseDays(formData.days).includes(w.key);
+                    return (
+                      <button
+                        key={w.key}
+                        type="button"
+                        title={w.full}
+                        aria-pressed={on}
+                        onClick={() => {
+                          const cur = new Set(parseDays(formData.days));
+                          if (on) cur.delete(w.key);
+                          else cur.add(w.key);
+                          setFormData({ ...formData, days: WEEK_KEYS.filter((k) => cur.has(k)).join('-') });
+                        }}
+                        className={`h-10 min-w-[52px] px-3 rounded-xl border text-sm font-bold transition ${
+                          on ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {w.key}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-[11px] font-semibold text-indigo-600">
+                  <button type="button" onClick={() => setFormData({ ...formData, days: 'Dush-Chor-Jum' })} className="hover:underline">Toq kunlar</button>
+                  <button type="button" onClick={() => setFormData({ ...formData, days: 'Sesh-Pay-Shan' })} className="hover:underline">Juft kunlar</button>
+                  <button type="button" onClick={() => setFormData({ ...formData, days: 'Dush-Sesh-Chor-Pay-Jum-Shan' })} className="hover:underline">Har kuni</button>
+                </div>
+                <p className="text-[11px] text-slate-500 mt-1.5">
+                  {parseDays(formData.days).length
+                    ? parseDays(formData.days).map((k) => WEEK.find((w) => w.key === k)!.full).join(', ')
+                    : 'Kamida bitta kunni tanlang'}
+                </p>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
