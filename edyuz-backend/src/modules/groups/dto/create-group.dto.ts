@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Matches, MaxLength } from 'class-validator';
 
 export class CreateGroupDto {
   @IsOptional()
@@ -16,6 +16,11 @@ export class CreateGroupDto {
   @IsNotEmpty({ message: 'Guruh nomi kiritilishi shart' })
   @IsString()
   name: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  room?: string;
 
   @IsOptional()
   days?: any;
