@@ -6,8 +6,7 @@ import axios from 'axios';
 import Script from 'next/script';
 import Image from 'next/image';
 import { 
-  Coins, Sparkles, Gamepad2, Trophy, Flame, 
-  Search, ArrowRight, BookOpen, Loader2
+  Sparkles, Search, ArrowRight, BookOpen, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -130,16 +129,6 @@ function MiniWebAppContent() {
           <div className="flex items-center gap-2">
             {/* Tilni almashtirish */}
             <LanguageSwitcher compact />
-
-            {/* Top Coins & Ranking Pill */}
-            <Link
-              href="/leaderboard"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-700 font-bold text-xs active:scale-95 transition"
-            >
-              <Coins className="w-3.5 h-3.5 text-amber-600 fill-amber-600" />
-              <span>{student?.coins || 0}</span>
-              <span className="text-[9px] text-amber-600/80 font-normal">Coin</span>
-            </Link>
           </div>
         </header>
 
@@ -180,62 +169,6 @@ function MiniWebAppContent() {
                 />
               )}
 
-              {/* Tab 3: O'yinlar Arenasi (Games) */}
-              {activeTab === 'games' && (
-                <div className="space-y-4 pb-6">
-                  <div className="p-5 rounded-2xl border border-rose-200 space-y-3 shadow-sm bg-rose-50">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30 flex items-center gap-1">
-                        <Flame className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
-                        <span>Mavzuli Viktorina Arenasi</span>
-                      </span>
-                      <span className="text-xs font-bold text-amber-700">+25 EduCoin</span>
-                    </div>
-
-                    <h2 className="text-base font-bold text-slate-900">
-                      Darslarni o‘yin orqali mustahkamlang!
-                    </h2>
-                    <p className="text-xs text-slate-600 leading-relaxed">
-                      15 soniyalik harakatlanuvchi savollar, Combo ballar va ovoz effektlari bilan bilimingizni sinang.
-                    </p>
-                  </div>
-
-                  <div className="space-y-2.5">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1">
-                      Guruh Darslari Bo‘yicha O‘yinlar
-                    </h3>
-
-                    {lessons.length === 0 ? (
-                      <div className="p-6 rounded-2xl bg-white border border-slate-200 text-center text-xs text-slate-500">
-                        Hozircha darslar yuklanmagan
-                      </div>
-                    ) : (
-                      lessons.map((ls, idx) => (
-                        <div
-                          key={ls.id || idx}
-                          className="p-4 rounded-2xl bg-white border border-slate-200 flex items-center justify-between gap-3 shadow-sm"
-                        >
-                          <div className="space-y-1 min-w-0 flex-1">
-                            <h4 className="text-xs font-bold text-slate-900 truncate">{ls.title}</h4>
-                            <span className="text-[10px] text-amber-600 font-semibold block">
-                              +25 gacha EduCoin mukofoti
-                            </span>
-                          </div>
-
-                          <Link
-                            href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                            className="px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition shrink-0 bg-rose-600 hover:bg-rose-500"
-                          >
-                            <Gamepad2 className="w-3.5 h-3.5" />
-                            <span>O‘ynash</span>
-                          </Link>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-
               {/* Tab 4: AI Repetitor Chat (AI) */}
               {activeTab === 'ai' && (
                 <div className="pb-6">
@@ -264,7 +197,6 @@ function MiniWebAppContent() {
         <MobileBottomNav
           activeTab={activeTab}
           onChangeTab={setActiveTab}
-          coins={student?.coins}
         />
       </div>
     </div>

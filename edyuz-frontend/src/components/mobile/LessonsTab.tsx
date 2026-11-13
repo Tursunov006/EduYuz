@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { BookOpen, Video, FileText, ChevronDown, ChevronUp, Gamepad2, CheckCircle2, Clock } from 'lucide-react';
-import Link from 'next/link';
+import { BookOpen, Video, FileText, ChevronDown, ChevronUp, CheckCircle2, Clock } from 'lucide-react';
 
 interface LessonsTabProps {
   lessons?: any[];
@@ -104,15 +103,6 @@ export default function LessonsTab({ lessons = [], studentId }: LessonsTabProps)
                         {ls.content}
                       </div>
                     )}
-
-                    {/* Interactive Game Button */}
-                    <Link
-                      href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${studentId}`}
-                      className="w-full py-2.5 px-4 rounded-2xl text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-98 bg-rose-600 hover:bg-rose-500"
-                    >
-                      <Gamepad2 className="w-4 h-4" />
-                      <span>Ushbu Dars O‘yini (+25 Coin)</span>
-                    </Link>
 
                     {/* Homework tasks */}
                     {ls.homeworks?.map((hw: any) => {

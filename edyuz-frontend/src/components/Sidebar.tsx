@@ -7,7 +7,7 @@ import { Archive, LogOut, X } from 'lucide-react';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
 // Figma: "EduYuz Dashboard v2" — yon menyu
-const ACADEMIC_PATHS = ['/lms', '/certificates', '/leaderboard', '/games', '/announcements'];
+const ACADEMIC_PATHS = ['/lms', '/certificates', '/announcements'];
 
 const items = [
   { name: 'Boshqaruv paneli', href: '/' },
@@ -58,7 +58,6 @@ export default function Sidebar() {
     pathname === '/login' ||
     pathname === '/portal' ||
     pathname.startsWith('/app') ||
-    pathname.startsWith('/games/play') ||
     pathname.startsWith('/verify') ||
     pathname.startsWith('/anketa')
   ) {

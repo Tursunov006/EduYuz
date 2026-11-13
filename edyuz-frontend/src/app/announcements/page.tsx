@@ -50,7 +50,7 @@ const initialAnnouncements: Announcement[] = [
   {
     id: 'ann-2',
     title: 'Yangi "Full-Stack Dasturlash" guruhi uchun qabul ochildi',
-    content: 'Markazimizda yangi amaliy Full-Stack (Next.js & NestJS) o‘quv kursi start olmoqda. Darslar haftasiga 3 kun bo‘lib o‘tadi. O‘z tanishlaringizni taklif qiling va 100 EduCoin bonusga ega bo‘ling!',
+    content: 'Markazimizda yangi amaliy Full-Stack (Next.js & NestJS) o‘quv kursi start olmoqda. Darslar haftasiga 3 kun bo‘lib o‘tadi.',
     target: 'students',
     priority: 'medium',
     isPinned: false,

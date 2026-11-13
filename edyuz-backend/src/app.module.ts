@@ -15,13 +15,11 @@ import { AttendanceModule } from './modules/attendance/attendance.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { TelegramModule } from './modules/telegram/telegram.module';
 import { LmsModule } from './modules/lms/lms.module';
-import { GamificationModule } from './modules/gamification/gamification.module';
 import { CertificatesModule } from './modules/certificates/certificates.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
 import { ExpensesModule } from './modules/expenses/expenses.module';
 import { SmsModule } from './modules/sms/sms.module';
 import { AiModule } from './modules/ai/ai.module';
-import { GamesModule } from './modules/games/games.module';
 import { InstagramModule } from './modules/instagram/instagram.module';
 import { HealthModule } from './modules/health/health.module';
 
@@ -37,12 +35,10 @@ import { HealthModule } from './modules/health/health.module';
     SmsModule,
     TelegramModule,
     LmsModule,
-    GamificationModule,
     CertificatesModule,
     TeachersModule,
     ExpensesModule,
     AiModule,
-    GamesModule,
     InstagramModule,
     AuthModule,
     CentersModule,

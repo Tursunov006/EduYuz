@@ -8,11 +8,8 @@ export default function HelpWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
 
-  // Yordam tugmasi ba'zi sahifalarda xalaqit bermasligi uchun yashirilishi mumkin (masalan login yoki o'yinlar)
-  if (
-    pathname === '/login' || 
-    pathname.startsWith('/games/play')
-  ) {
+  // Yordam tugmasi ba'zi sahifalarda xalaqit bermasligi uchun yashirilishi mumkin (masalan login sahifasi)
+  if (pathname === '/login') {
     return null;
   }
 

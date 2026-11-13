@@ -174,42 +174,15 @@ export class LmsService {
       throw new BadRequestException(`Baho ${maxScore} balldan oshmasligi kerak`);
     }
 
-    // Qayta baholanganda tanga to'liq qaytadan emas, faqat FARQ miqdorida o'zgaradi.
-    // (Avval har "Saqlash" bosilganda o'quvchiga yana to'liq ball qo'shilardi.)
-    const delta = dto.score - (submission.score ?? 0);
-
-    const [updated] = await this.prisma.$transaction([
-      this.prisma.homeworkSubmission.update({
-        where: { id: submissionId },
-        data: {
-          score: dto.score,
-          feedback: dto.feedback,
-          status: 'reviewed',
-          reviewedAt: new Date(),
-        },
-      }),
-      ...(delta !== 0
-        ? [
-            this.prisma.student.update({
-              where: { id: submission.studentId },
-              data: {
-                coins: { increment: delta },
-                points: { increment: delta },
-              },
-            }),
-            this.prisma.coinTransaction.create({
-              data: {
-                studentId: submission.studentId,
-                amount: delta,
-                reason:
-                  submission.score == null
-                    ? `Uyga vazifani ${dto.score} ballga bajargani uchun`
-                    : `Uyga vazifa bahosi ${submission.score} dan ${dto.score} ga o'zgartirildi`,
-              },
-            }),
-          ]
-        : []),
-    ]);
+    const updated = await this.prisma.homeworkSubmission.update({
+      where: { id: submissionId },
+      data: {
+        score: dto.score,
+        feedback: dto.feedback,
+        status: 'reviewed',
+        reviewedAt: new Date(),
+      },
+    });
 
     return updated;
   }
@@ -231,7 +204,7 @@ export class LmsService {
     });
   }
 
-  // --- QUIZ & GAMIFICATION LOGIC ---
+  // --- QUIZ LOGIC ---
   async createQuiz(lessonId: string, title: string, questions: any[]) {
     for (const q of questions) {
       if (q.correctIndex >= q.options.length) {
@@ -289,49 +262,19 @@ export class LmsService {
       where: { quizId_studentId: { quizId, studentId } },
     });
 
-    // Mukofot faqat BIRINCHI marta o'tganda beriladi. Avval testni qayta-qayta
-    // topshirib, har safar +20 tanga va ball yig'ish mumkin edi.
-    const firstPass = passed && !existing?.passed;
-    // Reyting ballari faqat natija yaxshilangan qismiga oshadi
-    const pointsDelta = Math.max(0, score - (existing?.score ?? 0));
-
-    const [result] = await this.prisma.$transaction([
-      existing
-        ? this.prisma.quizResult.update({
-            where: { id: existing.id },
-            // Qayta topshirishda eng yaxshi natija saqlanadi
-            data: {
-              score: Math.max(score, existing.score),
-              maxScore,
-              passed: passed || existing.passed,
-            },
-          })
-        : this.prisma.quizResult.create({
-            data: { quizId, studentId, score, maxScore, passed },
-          }),
-      ...(firstPass || pointsDelta > 0
-        ? [
-            this.prisma.student.update({
-              where: { id: studentId },
-              data: {
-                coins: { increment: firstPass ? 20 : 0 },
-                points: { increment: pointsDelta },
-              },
-            }),
-          ]
-        : []),
-      ...(firstPass
-        ? [
-            this.prisma.coinTransaction.create({
-              data: {
-                studentId,
-                amount: 20,
-                reason: `Testni muvaffaqiyatli topshirdi: ${quiz.title}`,
-              },
-            }),
-          ]
-        : []),
-    ]);
+    // Qayta topshirishda eng yaxshi natija saqlanadi
+    const result = existing
+      ? await this.prisma.quizResult.update({
+          where: { id: existing.id },
+          data: {
+            score: Math.max(score, existing.score),
+            maxScore,
+            passed: passed || existing.passed,
+          },
+        })
+      : await this.prisma.quizResult.create({
+          data: { quizId, studentId, score, maxScore, passed },
+        });
 
     return { ...result, lastScore: score, lastPassed: passed };
   }

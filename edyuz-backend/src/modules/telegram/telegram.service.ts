@@ -109,7 +109,7 @@ export class TelegramService implements OnModuleInit {
             { command: 'davomat', description: '📊 Farzandim davomati va statistika' },
             { command: 'jadval', description: '🗓 Dars jadvali va uyga vazifalar' },
             { command: 'tolov', description: '💰 To‘lovlar tarixi va balans' },
-            { command: 'reyting', description: '🏆 EduCoin ballar va QR-Sertifikatlar' },
+            { command: 'sertifikat', description: '🎓 QR-Sertifikatlar' },
             { command: 'kurslar', description: '🎁 Bepul sinov darsi (+100,000 so‘m vaucher)' },
             { command: 'app', description: '📱 EduYuz Mobil Mini Ilovasi' },
           ],
@@ -230,7 +230,6 @@ export class TelegramService implements OnModuleInit {
       statusText = '⏳ <b>Darsga kechikib keldi</b>';
     } else if (normalized === 'present') {
       statusText = '✅ <b>Darsga o‘z vaqtida yetib keldi!</b>';
-      bonusLine = '\n🪙 <b>Bonus:</b> Farzandingizga <b>+10 EduCoin</b> rag‘bat balli qo‘shildi!';
     } else {
       return;
     }
@@ -381,7 +380,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
           { text: '📊 Farzandim Davomati' },
         ],
         [{ text: '🗓 Dars Jadvali & Vazifa' }, { text: '💰 To‘lov & Qarz' }],
-        [{ text: '🏆 Reyting & Sertifikat' }, { text: '👨‍🏫 Ustozi Haqida' }],
+        [{ text: '🎓 Sertifikatlar' }, { text: '👨‍🏫 Ustozi Haqida' }],
         [{ text: '🎁 Bepul Darsga Yozilish' }, { text: '📩 Direktorga Murojaat' }],
         [{ text: '🏫 Markaz Kurslari' }, { text: '📱 Mini Ilova (/app)' }],
       ],
@@ -428,7 +427,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
         const namesList = students
           .map(
             (s) =>
-              `• <b>${s.fullName}</b> (${s.groups?.[0]?.group?.name || 'Guruhga biriktirilgan'} | Balans: ${Number(s.balance).toLocaleString()} so‘m | 🪙 ${s.coins} Coin)`,
+              `• <b>${s.fullName}</b> (${s.groups?.[0]?.group?.name || 'Guruhga biriktirilgan'} | Balans: ${Number(s.balance).toLocaleString()} so‘m)`,
           )
           .join('\n');
 
@@ -526,12 +525,12 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
     if (text === '/start') {
       const linked = await this.findLinkedStudent(chatId);
       const linkedBanner = linked
-        ? `\n\n👨‍🎓 <b>Bog‘langan farzandingiz:</b> ${linked.fullName} (🪙 ${linked.coins} EduCoin)`
+        ? `\n\n👨‍🎓 <b>Bog‘langan farzandingiz:</b> ${linked.fullName}`
         : `\n\n👉 <b>Farzandingizni ulash uchun</b> pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bosing!`;
 
       await this.sendMessage(
         chatId,
-        `👋 <b>Assalomu alaykum, hurmatli ota-ona va o‘quvchilar!</b>\n\nBu <b>EduYuz CRM</b> rasmiy ta’lim va nazorat botidir.${linkedBanner}\n\nMen orqali:\n• 📊 <b>Kunlik Davomat</b> (keldi/kelmadi hisoboti)\n• 🗓 <b>Dars Jadvali va Uyga Vazifalar (LMS)</b>\n• 💰 <b>Oylik To‘lovlar, Balans va Kvitansiyalar</b>\n• 🏆 <b>Reyting, EduCoin tangalar va QR-Sertifikatlar</b>\n• 🎁 <b>Bepul Sinov Darsiga Yozilish (+100,000 so‘m vaucher)</b>\nxizmatlaridan foydalanishingiz mumkin!`,
+        `👋 <b>Assalomu alaykum, hurmatli ota-ona va o‘quvchilar!</b>\n\nBu <b>EduYuz CRM</b> rasmiy ta’lim va nazorat botidir.${linkedBanner}\n\nMen orqali:\n• 📊 <b>Kunlik Davomat</b> (keldi/kelmadi hisoboti)\n• 🗓 <b>Dars Jadvali va Uyga Vazifalar (LMS)</b>\n• 💰 <b>Oylik To‘lovlar, Balans va Kvitansiyalar</b>\n• 🎓 <b>QR-Sertifikatlar</b>\n• 🎁 <b>Bepul Sinov Darsiga Yozilish (+100,000 so‘m vaucher)</b>\nxizmatlaridan foydalanishingiz mumkin!`,
         quickReplyKeyboard,
       );
       return;
@@ -632,8 +631,9 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
       text === '/davomat' ||
       text.includes('To‘lov & Qarz') ||
       text === '/tolov' ||
+      text.includes('Sertifikatlar') ||
       text.includes('Reyting & Sertifikat') ||
-      text.includes('Yutuq va Ballar') ||
+      text === '/sertifikat' ||
       text === '/reyting';
 
     if (!student && isPersonalCommand) {
@@ -763,20 +763,17 @@ Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bo
       return;
     }
 
-    // 11. REYTING, EDUCOIN VA QR-SERTIFIKATLAR
-    if (text.includes('Reyting & Sertifikat') || text.includes('Yutuq va Ballar') || text === '/reyting') {
+    // 11. QR-SERTIFIKATLAR (eski "Reyting & Sertifikat" tugmasi va /reyting ham shu yerga keladi)
+    if (
+      text.includes('Sertifikatlar') ||
+      text.includes('Reyting & Sertifikat') ||
+      text === '/sertifikat' ||
+      text === '/reyting'
+    ) {
       if (!student) {
         await this.sendMessage(chatId, `O‘quvchi ma’lumotlari topilmadi.`, quickReplyKeyboard);
         return;
       }
-
-      const allStudents = await this.prisma.student.findMany({
-        where: { centerId: student.centerId, status: 'active' },
-        orderBy: { coins: 'desc' },
-        select: { id: true, fullName: true, coins: true },
-      });
-      const rankIndex = allStudents.findIndex((s) => s.id === student!.id);
-      const rank = rankIndex >= 0 ? rankIndex + 1 : 1;
 
       const certs = student.certificates || [];
       const certLines =
@@ -791,7 +788,7 @@ Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bo
 
       await this.sendMessage(
         chatId,
-        `🏆 <b>${student.fullName} — Reyting va Yutuqlar</b>\n\n🪙 <b>To‘plangan EduCoinlar:</b> ${student.coins || 0} ta tanga\n🥇 <b>Markaz bo‘yicha o‘rni:</b> ${rank}-o‘rin (jami ${allStudents.length} o‘quvchi ichida)\n\n📜 <b>Rasmiy QR-Sertifikatlar:</b>\n${certLines}${demoNotice}`,
+        `🎓 <b>${student.fullName} — Sertifikatlar</b>\n\n📜 <b>Rasmiy QR-Sertifikatlar:</b>\n${certLines}${demoNotice}`,
         quickReplyKeyboard,
       );
       return;

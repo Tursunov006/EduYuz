@@ -1,14 +1,13 @@
 'use client';
 
-import { Home, BookOpen, Gamepad2, Bot, User } from 'lucide-react';
+import { Home, BookOpen, Bot, User } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 
-export type MobileTab = 'home' | 'lessons' | 'games' | 'ai' | 'profile';
+export type MobileTab = 'home' | 'lessons' | 'ai' | 'profile';
 
 interface MobileBottomNavProps {
   activeTab: MobileTab;
   onChangeTab: (tab: MobileTab) => void;
-  coins?: number;
 }
 
 export default function MobileBottomNav({
@@ -20,7 +19,6 @@ export default function MobileBottomNav({
   const tabs = [
     { id: 'home' as MobileTab, label: t('app.home', 'Asosiy'), icon: Home },
     { id: 'lessons' as MobileTab, label: t('app.lessons', 'Darslar'), icon: BookOpen },
-    { id: 'games' as MobileTab, label: t('app.games', 'O‘yinlar'), icon: Gamepad2, highlight: true },
     { id: 'ai' as MobileTab, label: t('app.aiTutor', 'AI Tutor'), icon: Bot },
     { id: 'profile' as MobileTab, label: t('app.profile', 'Profil'), icon: User },
   ];
@@ -50,9 +48,7 @@ export default function MobileBottomNav({
               <div
                 className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
                   isActive
-                    ? tab.highlight
-                      ? 'text-white shadow-sm scale-105 bg-rose-600'
-                      : 'text-white shadow-sm scale-105 bg-indigo-600'
+                    ? 'text-white shadow-sm scale-105 bg-indigo-600'
                     : 'bg-transparent'
                 }`}
               >

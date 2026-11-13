@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { AiService } from './ai.service';
 import { GenerateLessonDto, GenerateQuizDto, AiChatDto, GenerateMarketingDto } from './dto/ai.dto';
@@ -20,12 +20,6 @@ export class AiController {
   @Post('generate-quiz')
   async generateQuiz(@Body() dto: GenerateQuizDto) {
     return this.aiService.generateQuiz(dto.topic, dto.count || 5);
-  }
-
-  @Throttle({ default: { ttl: 60_000, limit: 20 } })
-  @Get('match-cards')
-  async getMatchCards(@Query('topic') topic: string) {
-    return this.aiService.generateMatchCards(String(topic || 'Dasturlash asoslari').slice(0, 100));
   }
 
   @Public()

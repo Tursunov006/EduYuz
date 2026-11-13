@@ -758,8 +758,8 @@ export default function InstagramBioPage() {
               },
               {
                 icon: Bot,
-                title: 'Ota-onalar Portali va Gamifikatsiya',
-                desc: "O'quvchilar darsda EduCoins tangalar yig'adi, testlar yechadi va sertifikat oladi.",
+                title: 'Ota-onalar Portali',
+                desc: "O'quvchilar darslarni kuzatadi, testlar yechadi va sertifikat oladi.",
                 badge: 'Next-Gen EdTech',
                 color: 'text-purple-600 bg-purple-500/10 border-purple-500/20',
               },
