@@ -220,7 +220,7 @@ export default function StudentsPage() {
       <div>
         <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{t('students.title', 'O‘quvchilar')}</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Faol o‘quvchilar
+          Faol o‘quvchilar: <span className="font-semibold text-slate-700">{visibleStudents.length} ta</span>
           {archivedCount > 0 && (
             <>
               {' · '}
@@ -321,12 +321,13 @@ export default function StudentsPage() {
                   </td>
                 </tr>
               ) : (
-                visibleStudents.map((s) => {
+                visibleStudents.map((s, idx) => {
                   const bal = Number(s.balance || 0);
                   return (
                     <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
+                          <span className="w-6 shrink-0 text-right text-xs font-semibold text-slate-400 tabular-nums">{idx + 1}</span>
                           <span className="w-9 h-9 rounded-full bg-indigo-500/10 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
                             {(s.fullName || '?')[0]}
                           </span>
