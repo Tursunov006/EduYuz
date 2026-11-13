@@ -65,7 +65,6 @@ const PLANS = [
       '24/7 Ota-onalar va Avto-Lid Telegram Boti',
       'Instagram Voronka (/insta) + AI Sotuv Konsultanti',
       'LMS Video Darslar va Uyga Vazifalar tizimi',
-      'EduCoin Gamifikatsiya, Reyting va Interaktiv O‘yinlar',
       'Avtomatik QR-kodli Rasmiy Sertifikatlar generatori',
       'Ustozlar 50% KPI Maosh kalkulyatori va 6 oylik tahlil',
     ],

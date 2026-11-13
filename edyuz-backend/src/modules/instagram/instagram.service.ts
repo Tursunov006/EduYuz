@@ -183,7 +183,7 @@ EduYuz CRM afzalliklari:
 1. 📅 Kunlik Davomat va Ota-onalarga avtomatik Telegram/SMS xabar yuborish.
 2. 💰 Moliya, Kassa, Oylik avto-yechim va Qarzdorlar nazorati.
 3. 🎯 Lidlar voronkasi (Kanban) va Instagram integratsiya.
-4. 🎮 Gamifikatsiya (EduCoins), Sertifikatlar va Ota-onalar portali.
+4. 🎓 QR-Sertifikatlar va Ota-onalar portali.
 5. 🎁 14 kunlik BEPUL sinov (Trial) mavjud! Narxi: oyiga atigi 299,000 so'mdan boshlanadi.
 
 Mijoz xabari: "${text}"

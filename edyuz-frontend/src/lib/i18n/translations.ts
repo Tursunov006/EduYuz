@@ -15,7 +15,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.expenses': 'Moliya & Chiqim',
     'nav.lms': 'Ta’lim va sertifikatlar',
     'nav.games': 'Mavzuli O‘yinlar',
-    'nav.leaderboard': 'Reyting & Coins',
     'nav.certificates': 'Sertifikatlar',
     'nav.portal': 'O‘quvchi portali',
     'nav.logout': 'Chiqish',
@@ -39,19 +38,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'students.name': 'F.I.O',
     'students.phone': 'Telefon',
     'students.balance': 'Balans',
-    'students.coins': 'EduCoins',
     'students.status': 'Holati',
     'students.actions': 'Amallar',
 
-    // O'yinlar
-    'games.title': 'Mavzuli Interaktiv O‘yinlar Arenasi',
-    'games.subtitle': 'Darslarni o‘yin orqali o‘rganing va EduCoin yutib oling!',
-    'games.play': 'O‘yinni Boshlash',
-    'games.timer': 'Vaqt',
-    'games.score': 'Ball',
-    'games.combo': 'On Fire!',
-    'games.victory': 'O‘yin Yakunlandi! ',
-    'games.earnedCoins': 'EduCoin Yutib Oldingiz!',
 
     // Mini App
     'app.home': 'Asosiy',
@@ -85,7 +74,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.expenses': 'Финансы и Расходы',
     'nav.lms': 'Обучение и Сертификаты',
     'nav.games': 'Тематические Игры',
-    'nav.leaderboard': 'Рейтинг и Монеты',
     'nav.certificates': 'Сертификаты',
     'nav.portal': 'Портал Студента',
     'nav.logout': 'Выйти',
@@ -109,19 +97,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'students.name': 'Ф.И.О',
     'students.phone': 'Телефон',
     'students.balance': 'Баланс',
-    'students.coins': 'EduCoins',
     'students.status': 'Статус',
     'students.actions': 'Действия',
 
-    // O'yinlar
-    'games.title': 'Арена Тематических Игр',
-    'games.subtitle': 'Изучайте уроки через игры и выигрывайте EduCoins!',
-    'games.play': 'Начать игру',
-    'games.timer': 'Время',
-    'games.score': 'Баллы',
-    'games.combo': 'В огне!',
-    'games.victory': 'Игра завершена! ',
-    'games.earnedCoins': 'Вы выиграли EduCoins!',
 
     // Mini App
     'app.home': 'Главная',
@@ -155,7 +133,6 @@ export const translations: Record<Language, Record<string, string>> = {
     'nav.expenses': 'Finance & Expenses',
     'nav.lms': 'Academy & Certificates',
     'nav.games': 'Interactive Games',
-    'nav.leaderboard': 'Leaderboard & Coins',
     'nav.certificates': 'Certificates',
     'nav.portal': 'Student Portal',
     'nav.logout': 'Logout',
@@ -179,19 +156,9 @@ export const translations: Record<Language, Record<string, string>> = {
     'students.name': 'Full Name',
     'students.phone': 'Phone',
     'students.balance': 'Balance',
-    'students.coins': 'EduCoins',
     'students.status': 'Status',
     'students.actions': 'Actions',
 
-    // O'yinlar
-    'games.title': 'Interactive Lesson Games Arena',
-    'games.subtitle': 'Master lessons with gamified quizzes and win EduCoins!',
-    'games.play': 'Start Game',
-    'games.timer': 'Time',
-    'games.score': 'Score',
-    'games.combo': 'On Fire!',
-    'games.victory': 'Game Complete! ',
-    'games.earnedCoins': 'EduCoins Earned!',
 
     // Mini App
     'app.home': 'Home',

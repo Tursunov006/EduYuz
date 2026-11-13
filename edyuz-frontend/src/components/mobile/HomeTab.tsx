@@ -1,17 +1,16 @@
 'use client';
 
 import { 
-  Award, Coins, Flame, ChevronRight, BookOpen, Clock, 
-  Gamepad2, Bot, CalendarCheck, CreditCard, Sparkles, CheckCircle
+  Award, ChevronRight, BookOpen, Clock, 
+  Bot, CalendarCheck, CreditCard, Sparkles, CheckCircle
 } from 'lucide-react';
-import Link from 'next/link';
 
 interface HomeTabProps {
   student: any;
   groupInfo?: any;
   lessons?: any[];
   attendances?: any[];
-  onNavigateTab: (tab: 'home' | 'lessons' | 'games' | 'ai' | 'profile') => void;
+  onNavigateTab: (tab: 'home' | 'lessons' | 'ai' | 'profile') => void;
 }
 
 export default function HomeTab({
@@ -23,8 +22,6 @@ export default function HomeTab({
 }: HomeTabProps) {
   const isDebt = Number(student?.balance || 0) < 0;
   const formattedDebt = Math.abs(Number(student?.balance || 0)).toLocaleString('uz-UZ') + " so'm";
-  const coins = student?.coins || 0;
-  const points = student?.points || 0;
 
   // Eng so'nggi dars
   const latestLesson = lessons[lessons.length - 1] || lessons[0];
@@ -55,27 +52,10 @@ export default function HomeTab({
               </p>
             </div>
           </div>
-
-          {/* Quick Coins pill */}
-          <button
-            onClick={() => onNavigateTab('games')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl border border-amber-500/40 text-amber-700 font-bold text-xs shadow-inner active:scale-95 transition bg-amber-50"
-          >
-            <Coins className="w-4 h-4 text-amber-600 fill-amber-600" />
-            <span>{coins}</span>
-          </button>
         </div>
 
-        {/* Level and Points Stats */}
-        <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-200/80">
-          <div className="p-2.5 rounded-2xl bg-white border border-slate-200/60 text-center">
-            <span className="text-[10px] text-slate-500 font-medium block">EduCoin</span>
-            <span className="text-sm font-bold text-amber-600">{coins} </span>
-          </div>
-          <div className="p-2.5 rounded-2xl bg-white border border-slate-200/60 text-center">
-            <span className="text-[10px] text-slate-500 font-medium block">Umumiy Ball</span>
-            <span className="text-sm font-bold text-blue-600">{points}</span>
-          </div>
+        {/* Davomat */}
+        <div className="grid grid-cols-1 gap-2 mt-4 pt-3 border-t border-slate-200/80">
           <div className="p-2.5 rounded-2xl bg-white border border-slate-200/60 text-center">
             <span className="text-[10px] text-slate-500 font-medium block">Davomat</span>
             <span className="text-sm font-bold text-emerald-600">{attPercent}%</span>
@@ -117,34 +97,6 @@ export default function HomeTab({
         >
           <ChevronRight className="w-4 h-4" />
         </button>
-      </div>
-
-      {/* 3. Daily Game & Challenge Card */}
-      <div className="relative overflow-hidden rounded-2xl border border-rose-200 p-5 shadow-sm space-y-3 bg-rose-50">
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30 flex items-center gap-1">
-            <Flame className="w-3.5 h-3.5 text-rose-600 fill-rose-600" />
-            <span>Kunlik Viktorina</span>
-          </span>
-          <span className="text-xs font-bold text-amber-700">+25 gacha Coin</span>
-        </div>
-
-        <div>
-          <h3 className="text-base font-bold text-slate-900">
-            {latestLesson?.title || 'Dars bo‘yicha interaktiv o‘yin'}
-          </h3>
-          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-            15 soniyalik savollarga tezkor javob bering, Combo ballar to‘plang va yetakchilar safida bo‘ling!
-          </p>
-        </div>
-
-        <Link
-          href={`/games/play?topic=${encodeURIComponent(latestLesson?.title || 'Dasturlash asoslari')}&studentId=${student?.id || ''}`}
-          className="w-full py-3 rounded-2xl text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm active:scale-98 transition bg-rose-600 hover:bg-rose-500"
-        >
-          <Gamepad2 className="w-4 h-4" />
-          <span>O‘yinni Boshlash (Play)</span>
-        </Link>
       </div>
 
       {/* 4. AI Repetitor Teaser Card */}

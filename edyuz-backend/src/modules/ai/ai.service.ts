@@ -11,12 +11,6 @@ export interface QuizQuestion {
   points: number;
 }
 
-export interface MatchPair {
-  id: string;
-  term: string;
-  definition: string;
-}
-
 export interface ParentBotContext {
   student?: any;
   groupInfo?: any;
@@ -66,11 +60,6 @@ export class AiService {
     return this.generateSmartQuizFallback(topic, count);
   }
 
-  // 3. Flashcard / Match O'yini kartalarini generatsiya qilish
-  async generateMatchCards(topic: string): Promise<MatchPair[]> {
-    return this.generateSmartMatchFallback(topic);
-  }
-
   // 4. Talaba uchun AI Repetitor Chat
   async chatTutor(message: string, studentName?: string, topic?: string): Promise<string> {
     const greeting = studentName ? `Salom, ${studentName}! 😊` : 'Assalomu alaykum! 😊';
@@ -78,17 +67,6 @@ export class AiService {
 
     if (cleanMsg.includes('salom') || cleanMsg.includes('assalom')) {
       return `${greeting} Men sizning EduYuz AI Repetitoringizman. Bugungi mavzu yoki darslaringiz bo'yicha qanday savolingiz bor? Savolingizni bemalol yozing! 🚀`;
-    }
-
-    if (cleanMsg.includes('tanga') || cleanMsg.includes('coin') || cleanMsg.includes('ball')) {
-      return `🪙 **EduCoins haqida:**
-Siz darslarga qatnashish (+10 coin), uy vazifalarini a'lo topshirish va dars bo'yicha interaktiv o'yinlarda g'olib bo'lish orqali tangalar to'plashingiz mumkin! 
-
-Tangalaringiz reyting shohsupasida o'rningizni ko'taradi va maxsus sertifikatlarga eshik ochadi. Hozir qaysi darsni o'rganamiz?`;
-    }
-
-    if (cleanMsg.includes('o\'yin') || cleanMsg.includes('oyin') || cleanMsg.includes('game') || cleanMsg.includes('viktorina')) {
-      return `🎮 Darslarni o'yin orqali mustahkamlash ajoyib usul! Dars sahifasidagi **"🎮 Dars bo'yicha O'yin"** tugmasini bosing — taymerli viktorinada to'g'ri javoblarni topib, tangalar yutib oling!`;
     }
 
     return `${greeting}
@@ -183,26 +161,6 @@ Farzandingiz bo‘yicha to‘lovlar to‘liq amalga oshirilgan! Qarzdorlik mavju
       }
     }
 
-    // 3. EduCoins, Tangalar va Ballar haqida
-    if (
-      text.includes('tanga') ||
-      text.includes('coin') ||
-      text.includes('ball') ||
-      text.includes('reyting') ||
-      text.includes('yutuq')
-    ) {
-      const coins = student?.coins || 0;
-      const points = student?.points || 0;
-
-      return `🪙 <b>${studentName} — Gamifikatsiya & Yutuqlar:</b>
-
-⭐ <b>To‘plagan EduCoinlar:</b> <b>${coins} EduCoin</b>
-🏆 <b>Umumiy Tajriba Ballari:</b> <b>${points} ball</b>
-
-💡 <i>EduCoins haqida:</i>
-Farzandingiz har bir darsga kelganida (+10 coin), dars konspektlari va interaktiv viktorina o‘yinlarida to‘g‘ri javob berganida tangalar yutib oladi. Bu tangalar o‘quvchilarning umumiy reytingdagi mavqeini ko‘taradi va sertifikat olishga yordam beradi! 🚀`;
-    }
-
     // 4. Ustoz va O'qituvchi haqida
     if (
       text.includes('ustoz') ||
@@ -271,7 +229,6 @@ Men sizga farzandingiz <b>${studentName}</b> bo‘yicha quyidagi ma'lumotlarni b
 
 • 📊 <b>Davomati:</b> Darslarga qatnashuvi va yo‘qlamasi;
 • 💳 <b>To‘lovlar:</b> Oylik to‘lov, qarzdorlik va kvitansiyalar;
-• 🪙 <b>EduCoins:</b> Yig‘ilgan tangalar va reyting shohsupasi;
 • 👨‍🏫 <b>Ustoz:</b> Guruh ustozi bilan bog‘lanish va xabar qoldirish;
 • 🏫 <b>Kurslar:</b> Markazimizdagi barcha yangi yo‘nalishlar.
 
@@ -313,14 +270,14 @@ Savolingizni bemalol yozishingiz yoki quyidagi menyudan foydalanishingiz mumkin!
           title: `3. Xulosa va eslab qolish kerak bo'lgan "Oltin Qoidalar"`,
           content: `✅ 1-qoida: Mavzuning negizini yodlamang, balki mantiqan tushunib oling.
 ✅ 2-qoida: Mavzu bo'yicha kamida 3 ta mustaqil misol ishlang.
-✅ 3-qoida: Dars yakunida interaktiv viktorinada qatnashib, o'z bilimingizni tekshiring!`,
+✅ 3-qoida: Dars yakunida testni topshirib, o'z bilimingizni tekshiring!`,
         },
       ],
       homework: {
         title: `Uyga vazifa: "${topic}" mavzusi bo'yicha mustaqil loyiha`,
         description: `1. Darsda o'tilgan asosiy 3 ta qoidani o'z konspekt daftaringizga yozing.
 2. Mavzuga oid kamida bitta to'liq amaliy misol ishlab, LMS portaliga yuklang.
-3. Portal orqali viktorina o'yinini o'ynab, kamida 80% natija qayd eting.`,
+3. Portal orqali dars testini topshirib, kamida 80% natija qayd eting.`,
         maxScore: 100,
       },
       interactiveQuestionsCount: 5,
@@ -402,16 +359,6 @@ Savolingizni bemalol yozishingiz yoki quyidagi menyudan foydalanishingiz mumkin!
     ];
 
     return questions.slice(0, count);
-  }
-
-  private generateSmartMatchFallback(topic: string): MatchPair[] {
-    return [
-      { id: 'm1', term: `${topic}: Asos`, definition: 'Mavzuning poydevor tushunchasi' },
-      { id: 'm2', term: 'Amaliyot', definition: 'Nazariyani jonli misolda sinab ko\'rish' },
-      { id: 'm3', term: 'Tahlil', definition: 'Muammoni qismlarga bo\'lib o\'rganish' },
-      { id: 'm4', term: 'Optimallashtirish', definition: 'Eng yaxshi va tez natijaga erishish' },
-      { id: 'm5', term: 'EduCoin', definition: 'O\'quvchining mehnati uchun beriladigan rag\'bat' },
-    ];
   }
 
   // 6. Sotuv va Marketing (Marketing AI)

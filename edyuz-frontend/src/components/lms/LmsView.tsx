@@ -16,10 +16,8 @@ import {
   Award,
   Send,
   MessageSquare,
-  Sparkles,
-  Gamepad2
+  Sparkles
 } from 'lucide-react';
-import Link from 'next/link';
 import AiTeacherAssistantModal from '@/components/ai/AiTeacherAssistantModal';
 
 interface LmsViewProps {
@@ -352,15 +350,6 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <Link
-                      href={`/games/play?topic=${encodeURIComponent(lesson.title)}`}
-                      onClick={(e) => e.stopPropagation()}
-                      className="px-3 py-1.5 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition bg-rose-600 hover:bg-rose-500"
-                      title="Ushbu dars bo'yicha interaktiv o'yin o'ynash"
-                    >
-                      <Gamepad2 size={14} />
-                      <span className="hidden sm:inline">Dars O‘yini</span>
-                    </Link>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();

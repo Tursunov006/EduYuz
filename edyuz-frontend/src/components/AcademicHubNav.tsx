@@ -2,13 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { GraduationCap, Award, Trophy, Gamepad2, Megaphone } from 'lucide-react';
+import { GraduationCap, Award, Megaphone } from 'lucide-react';
 
 const TABS = [
   { href: '/lms', label: 'LMS Darslar', icon: GraduationCap },
   { href: '/certificates', label: 'QR-Sertifikatlar', icon: Award },
-  { href: '/leaderboard', label: 'Reyting & Coins', icon: Trophy },
-  { href: '/games', label: "Mavzuli O'yinlar", icon: Gamepad2 },
   { href: '/announcements', label: "E'lonlar", icon: Megaphone },
 ];
 
@@ -17,7 +15,7 @@ export default function AcademicHubNav() {
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl p-1.5 mb-6 shadow-sm backdrop-blur-md">
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href || pathname.startsWith(tab.href + '/');

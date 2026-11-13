@@ -85,23 +85,12 @@ export class AttendanceService {
       throw new BadRequestException("Ro'yxatda bu guruhga tegishli bo'lmagan o'quvchi bor");
     }
 
-    // Shu kun uchun avval kim "keldi" deb belgilanganini bilib olamiz —
-    // davomat qayta saqlanganda EduCoin ikkinchi marta berilmasligi uchun.
+    // Shu kun uchun avval qaysi holat belgilangani: ota-onaga xabar faqat holat o'zgarganda yuboriladi.
     const previous = await this.prisma.attendance.findMany({
       where: { groupId: dto.groupId, date: attendanceDate, studentId: { in: studentIds } },
       select: { studentId: true, status: true },
     });
     const previousStatus = new Map(previous.map((p) => [p.studentId, p.status]));
-
-    const newlyPresent = records.filter(
-      (r) => r.status === 'present' && previousStatus.get(r.studentId) !== 'present',
-    );
-    // Avval "keldi" bo'lib, endi tuzatilganlardan berilgan tanga qaytarib olinadi
-    const noLongerPresent = records.filter(
-      (r) => r.status !== 'present' && previousStatus.get(r.studentId) === 'present',
-    );
-
-    const ATTENDANCE_COINS = 10;
 
     await this.prisma.$transaction([
       ...records.map((record) =>
@@ -126,38 +115,6 @@ export class AttendanceService {
           },
         }),
       ),
-      ...newlyPresent.flatMap((rec) => [
-        this.prisma.student.update({
-          where: { id: rec.studentId },
-          data: {
-            coins: { increment: ATTENDANCE_COINS },
-            points: { increment: ATTENDANCE_COINS },
-          },
-        }),
-        this.prisma.coinTransaction.create({
-          data: {
-            studentId: rec.studentId,
-            amount: ATTENDANCE_COINS,
-            reason: `Darsga o'z vaqtida kelgani uchun (${group.name})`,
-          },
-        }),
-      ]),
-      ...noLongerPresent.flatMap((rec) => [
-        this.prisma.student.update({
-          where: { id: rec.studentId },
-          data: {
-            coins: { decrement: ATTENDANCE_COINS },
-            points: { decrement: ATTENDANCE_COINS },
-          },
-        }),
-        this.prisma.coinTransaction.create({
-          data: {
-            studentId: rec.studentId,
-            amount: -ATTENDANCE_COINS,
-            reason: `Davomat tuzatildi (${group.name})`,
-          },
-        }),
-      ]),
     ]);
 
     // Ota-onaga Telegram orqali xabar yuborish (Keldi, Kechikdi va Kelmadi holatlari uchun!)

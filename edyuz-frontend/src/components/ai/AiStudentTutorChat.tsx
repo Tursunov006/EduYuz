@@ -32,8 +32,6 @@ export default function AiStudentTutorChat({ studentName = 'O‘quvchi', topic }
   }, [messages, loading]);
 
   const quickPrompts = [
-    'Qanday qilib EduCoin yutib olsam bo‘ladi?',
-    'Mavzu bo‘yicha o‘yin qanday o‘ynaladi?',
     'Bugungi mavzuni eng sodda qilib tushuntirib bering',
   ];
 

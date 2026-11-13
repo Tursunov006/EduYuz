@@ -192,13 +192,6 @@ export default function StudentsPage() {
           format: (val) => `${Number(val || 0).toLocaleString('uz-UZ')} so'm`,
         },
         {
-          header: t('students.coins', 'EduCoins'),
-          key: 'coins',
-          width: 120,
-          align: 'center',
-          format: (val) => `${val || 0} `,
-        },
-        {
           header: t('students.status', 'Holati'),
           key: 'status',
           width: 130,

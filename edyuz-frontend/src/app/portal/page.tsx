@@ -9,7 +9,6 @@ import {
   CreditCard, 
   QrCode,
   Award, 
-  Coins, 
   CheckCircle2, 
   Clock, 
   XCircle, 
@@ -18,7 +17,6 @@ import {
   GraduationCap,
   Sparkles,
   User,
-  Gamepad2,
   Bot,
   Copy,
   Check,
@@ -82,7 +80,7 @@ function PortalContent() {
   const [allStudents, setAllStudents] = useState<any[]>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<string>(urlStudentId || '');
   const [studentData, setStudentData] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'attendance' | 'lms' | 'games' | 'ai' | 'payments' | 'certificates'>('attendance');
+  const [activeTab, setActiveTab] = useState<'attendance' | 'lms' | 'ai' | 'payments' | 'certificates'>('attendance');
   const [loading, setLoading] = useState(true);
   const [copiedCard, setCopiedCard] = useState(false);
 
@@ -311,20 +309,12 @@ function PortalContent() {
                 </div>
               </div>
 
-              {/* Balans va EduCoinlar Vidjeti */}
-              <div className="grid grid-cols-2 gap-2 pt-1">
+              {/* Balans vidjeti */}
+              <div className="grid grid-cols-1 gap-2 pt-1">
                 <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
                   <span className="text-[10px] text-slate-500 block">{isDebt ? 'Qarzdorlik' : 'Hisob Balansi'}</span>
                   <span className={`text-sm font-bold ${isDebt ? 'text-rose-600' : 'text-emerald-600'}`}>
                     {Math.abs(Number(studentData.balance || 0)).toLocaleString('uz-UZ')} so'm
-                  </span>
-                </div>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
-                  <span className="text-[10px] text-slate-500 block">Yig'ilgan Coinlar</span>
-                  <span className="text-sm font-bold text-amber-600 flex items-center gap-1">
-                    <Coins size={14} />
-                    {studentData.coins || 0} EduCoin
                   </span>
                 </div>
               </div>
@@ -351,15 +341,6 @@ function PortalContent() {
           >
             <BookOpen size={16} />
             Darslar
-          </button>
-          <button
-            onClick={() => setActiveTab('games')}
-            className={`py-2.5 flex flex-col items-center gap-1 transition ${
-              activeTab === 'games' ? 'text-rose-600 border-b-2 border-rose-500 bg-rose-500/5' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Gamepad2 size={16} />
-            O‘yinlar
           </button>
           <button
             onClick={() => setActiveTab('ai')}
@@ -430,7 +411,7 @@ function PortalContent() {
                               : 'bg-rose-500/10 text-rose-600 border border-rose-500/20'
                           }`}
                         >
-                          {isPresent ? 'Keldi (+10 Coin)' : isLate ? 'Kechikdi' : 'Kelmadi'}
+                          {isPresent ? 'Keldi' : isLate ? 'Kechikdi' : 'Kelmadi'}
                         </span>
                       </div>
                     );
@@ -516,61 +497,10 @@ function PortalContent() {
                           </div>
                         );
                       })}
-                      {/* Dars o'yini tugmasi */}
-                      <Link
-                        href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                        className="mt-2.5 py-2 px-3 rounded-xl text-white text-[11px] font-bold flex items-center justify-center gap-2 shadow-md transition bg-rose-600 hover:bg-rose-500"
-                      >
-                        <Gamepad2 size={14} />
-                        <span>Mavzuli O‘yinni Boshlash (+25 Coin)</span>
-                      </Link>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
-          ) : activeTab === 'games' ? (
-            /* O'YINLAR TABI */
-            <div className="space-y-4">
-              <div className="p-4 rounded-2xl border border-slate-200 space-y-2 bg-rose-50">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 border border-rose-500/30">
-                  EduYuz Gamifikatsiya
-                </span>
-                <h3 className="text-sm font-bold text-slate-900">Darslarni o‘ynab, EduCoin yutib oling!</h3>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Viktorinada to‘g‘ri javoblarni toping, ketma-ket Combo ballar to‘plang va umumiy reytingda 1-o‘ringa chiqing!
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  Guruh Darslari Bo‘yicha O‘yinlar
-                </h4>
-                {lessons.length === 0 ? (
-                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">
-                    Darslar mavjud emas
-                  </div>
-                ) : (
-                  lessons.map((ls) => (
-                    <div
-                      key={ls.id}
-                      className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between gap-3"
-                    >
-                      <div className="space-y-0.5 flex-1 min-w-0">
-                        <div className="text-xs font-bold text-slate-900 truncate">{ls.title}</div>
-                        <span className="text-[10px] text-amber-600 font-semibold">+25 gacha EduCoin</span>
-                      </div>
-                      <Link
-                        href={`/games/play?topic=${encodeURIComponent(ls.title)}&studentId=${selectedStudentId}`}
-                        className="px-3 py-1.5 rounded-xl text-white text-xs font-bold flex items-center gap-1.5 shadow-md shrink-0 transition bg-rose-600 hover:bg-rose-500"
-                      >
-                        <Gamepad2 size={13} />
-                        <span>O‘ynash</span>
-                      </Link>
-                    </div>
-                  ))
-                )}
-              </div>
             </div>
           ) : activeTab === 'ai' ? (
             /* AI REPETITOR TABI */
