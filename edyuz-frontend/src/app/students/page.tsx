@@ -8,6 +8,9 @@ import axios from 'axios';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
 import { exportToExcel } from '@/lib/excelExport';
 
+// Tur avtomatik: guruhi yo'q = o'quvchi, guruhga qo'shilgan = talaba
+const kindOf = (x: any) => ((x.groups?.length || 0) > 0 ? 'talaba' : 'oquvchi');
+
 export default function StudentsPage() {
   const { t } = useTranslation();
   const [students, setStudents] = useState<any[]>([]);
@@ -199,7 +202,7 @@ export default function StudentsPage() {
           format: (val) => (val === 'active' ? 'Faol' : val === 'graduated' ? 'Bitirgan' : 'Nofaol'),
         },
       ],
-      students,
+      students.map((x) => ({ ...x, kind: kindOf(x) })),
       {
         title: "EduYuz CRM — Markaz O'quvchilari Bazasi",
         summaryLabel: "JAMI RO'YXATDAGI O'QUVCHILAR:",
@@ -210,7 +213,6 @@ export default function StudentsPage() {
 
   // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
   const activeAll = students.filter((x) => x.status === 'active');
-  const kindOf = (x: any) => (x.kind === 'talaba' ? 'talaba' : 'oquvchi');
   const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || kindOf(x) === kindFilter);
   const archivedCount = students.length - activeAll.length;
 
@@ -310,7 +312,7 @@ export default function StudentsPage() {
                       {search
                         ? `«${search}» bo‘yicha o‘quvchi yo‘q. Boshqa ism yoki raqam bilan qidiring`
                         : kindFilter !== 'all'
-                          ? `Bu bo‘limda hali ${kindFilter === 'talaba' ? 'talaba' : 'o‘quvchi'} yo‘q. Turini o‘quvchi tahrirlash oynasida belgilang`
+                          ? `Bu bo‘limda hali ${kindFilter === 'talaba' ? 'talaba' : 'o‘quvchi'} yo‘q. Guruhga qo‘shilgan o‘quvchi avtomatik talabaga o‘tadi`
                           : '«O‘quvchi qo‘shish» tugmasi bilan birinchi o‘quvchini kiriting'}
                     </p>
                     {!search && kindFilter === 'all' && (
@@ -478,23 +480,9 @@ export default function StudentsPage() {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1">Turi</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {([['oquvchi', 'O‘quvchi'], ['talaba', 'Talaba']] as const).map(([val, label]) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setForm({ ...form, kind: val })}
-                      className={`h-10 rounded-xl border text-sm font-semibold transition ${
-                        form.kind === val ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              <p className="text-xs text-slate-500">
+                Turi avtomatik: guruhga qo‘shilguncha <b>o‘quvchi</b>, guruhga qo‘shilgach <b>talaba</b>.
+              </p>
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Otasining ismi</label>
                 <input
