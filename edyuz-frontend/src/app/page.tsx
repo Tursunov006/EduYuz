@@ -19,10 +19,13 @@ const fmt = (n: number) => Math.round(n).toLocaleString('uz-UZ').replace(/,/g, '
 function hasLessonOn(group: any, day: number) {
   const raw = (Array.isArray(group.days) ? group.days.join(' ') : String(group.days || '')).toLowerCase();
   if (!raw) return false;
-  if (raw.includes('har kuni')) return true;
+  if (raw.includes('har kuni')) return day >= 1 && day <= 6;
   if (raw.includes('toq')) return [1, 3, 5].includes(day);
   if (raw.includes('juft')) return [2, 4, 6].includes(day);
-  return raw.includes(DAY_SHORT[day].toLowerCase());
+  if (/(^|[^a-z])dam([^a-z]|$)/.test(raw) && [0, 6].includes(day)) return true;
+  // So'zlar boshidan solishtiriladi: "Dushanba" ichidagi "shan" Shanba deb adashmasligi uchun
+  const key = DAY_SHORT[day].toLowerCase();
+  return raw.split(/[^a-z]+/).some((t: string) => t.startsWith(key));
 }
 const minutes = (t: string) => {
   const [h, m] = String(t || '0:0').split(':').map(Number);
