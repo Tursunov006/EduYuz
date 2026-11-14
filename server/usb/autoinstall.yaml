@@ -1,0 +1,56 @@
+#cloud-config
+# EduYuz uy serveri — Ubuntu Server 24.04 ni klaviaturasiz, avtomatik o'rnatish.
+# Bu fayl fleshkaning ILDIZIGA (eng yuqori papkasiga) "autoinstall.yaml" nomi bilan qo'yiladi.
+# DIQQAT: kompyuterning ichki diskidagi HAMMA ma'lumot o'chiriladi!
+autoinstall:
+  version: 1
+  locale: en_US.UTF-8
+  keyboard: { layout: us }
+  timezone: Asia/Tashkent
+  # Internet kabeli orqali (DHCP) — routerga sim bilan ulang
+  network:
+    version: 2
+    ethernets:
+      any-eth:
+        match: { name: "e*" }
+        dhcp4: true
+  # Disk: fleshka/USB disklarga tegmaslik uchun o'rnatish oldidan ichki (USB bo'lmagan) eng katta disk tanlanadi
+  early-commands:
+    - |
+      BEST=""; BESTSIZE=0
+      for d in /sys/block/sd* /sys/block/nvme*n1 /sys/block/vd* /sys/block/hd*; do
+        [ -e "$d" ] || continue
+        [ "$(cat $d/removable)" = "0" ] || continue
+        readlink -f "$d/device" | grep -q usb && continue
+        SIZE=$(cat $d/size)
+        if [ "$SIZE" -gt "$BESTSIZE" ]; then BEST=$(basename $d); BESTSIZE=$SIZE; fi
+      done
+      if [ -z "$BEST" ]; then echo "Ichki disk topilmadi — o'rnatish to'xtatildi"; exit 1; fi
+      echo "O'rnatish diski: /dev/$BEST"
+      sed -i "s#__TARGET_DISK__#/dev/$BEST#" /autoinstall.yaml
+  storage:
+    layout:
+      name: direct
+      match: { path: "__TARGET_DISK__" }
+  identity:
+    hostname: eduyuz
+    username: eduyuz
+    realname: EduYuz Server
+    # Parol alohida beriladi; o'rnatilgandan keyin "passwd" bilan almashtiring
+    password: "$6$i2Z0QAQYR5RvoSmy$ys4Z4HKqNUFe5CbcKTbiDpcjEtSunWAxDKe2/Ossa2HbSW61Z2/WY0Qg/C6DWlxVUOCDpeECocYMyTYWBAK0K1"
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages:
+    - git
+    - curl
+    - avahi-daemon        # tarmoqda "eduyuz.local" nomi bilan topish uchun
+  updates: security
+  late-commands:
+    # Docker o'rnatish va EduYuz kodini yuklab olish (birinchi yonishda tayyor turadi)
+    - curtin in-target -- sh -c 'curl -fsSL https://get.docker.com | sh'
+    - curtin in-target -- usermod -aG docker eduyuz
+    - curtin in-target -- sudo -u eduyuz git clone https://github.com/Tursunov006/EduYuz.git /home/eduyuz/EduYuz
+    # Kompyuter uxlab qolmasin (server doim ishlashi kerak)
+    - curtin in-target -- systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+  shutdown: reboot
