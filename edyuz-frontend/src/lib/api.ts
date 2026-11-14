@@ -36,6 +36,33 @@ function normalizeErrorMessage(data: any): string | undefined {
   return undefined;
 }
 
+// Backend frontenddan orqada qolsa (Render'da deploy qilinmagan), yangi maydonlar uchun
+// "property X should not exist" xatosi chiqadi. Bunda noma'lum maydonlarsiz bir marta qayta urinamiz,
+// shunda saqlash butunlay to'xtab qolmaydi; foydalanuvchiga esa nima saqlanmagani aytiladi.
+function unknownProps(message?: string): string[] {
+  if (!message) return [];
+  return [...message.matchAll(/property (\w+) should not exist/g)].map((m) => m[1]);
+}
+
+function stripProps(body: any, names: string[]): string | undefined {
+  try {
+    const obj = typeof body === 'string' ? JSON.parse(body) : body;
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return undefined;
+    for (const n of names) delete obj[n];
+    return JSON.stringify(obj);
+  } catch {
+    return undefined;
+  }
+}
+
+function warnStaleBackend(names: string[]) {
+  if (typeof window === 'undefined') return;
+  alert(
+    `Saqlandi, lekin server hali yangilanmagan: «${names.join(', ')}» maydoni saqlanmadi. ` +
+      `Render'da Manual Deploy qilingach, uni qayta kiriting.`,
+  );
+}
+
 declare global {
   interface Window {
     __eduyuzAxiosReady?: boolean;
@@ -62,7 +89,7 @@ if (typeof window !== 'undefined' && !window.__eduyuzAxiosReady) {
 
   axios.interceptors.response.use(
     (response) => response,
-    (error) => {
+    async (error) => {
       const data = error?.response?.data;
       if (data && typeof data === 'object') {
         const message = normalizeErrorMessage(data);
@@ -71,12 +98,22 @@ if (typeof window !== 'undefined' && !window.__eduyuzAxiosReady) {
       if (error?.response?.status === 401) {
         handleUnauthorized();
       }
+      const cfg = error?.config;
+      const names = error?.response?.status === 400 ? unknownProps(data?.message) : [];
+      if (cfg && names.length && cfg.data && !cfg._staleRetried) {
+        const body = stripProps(cfg.data, names);
+        if (body) {
+          const res = await axios.request({ ...cfg, data: body, _staleRetried: true });
+          warnStaleBackend(names);
+          return res;
+        }
+      }
       return Promise.reject(error);
     },
   );
 }
 
-export async function apiFetch(endpoint: string, options: RequestInit = {}) {
+export async function apiFetch(endpoint: string, options: RequestInit = {}, retried = false): Promise<any> {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
   const headers = {
@@ -95,7 +132,17 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     if (res.status === 401) {
       handleUnauthorized();
     }
-    throw new Error(normalizeErrorMessage(error) || 'Xatolik yuz berdi');
+    const message = normalizeErrorMessage(error);
+    const names = res.status === 400 && !retried ? unknownProps(message) : [];
+    if (names.length && typeof options.body === 'string') {
+      const body = stripProps(options.body, names);
+      if (body) {
+        const data: any = await apiFetch(endpoint, { ...options, body }, true);
+        warnStaleBackend(names);
+        return data;
+      }
+    }
+    throw new Error(message || 'Xatolik yuz berdi');
   }
 
   return res.json();
