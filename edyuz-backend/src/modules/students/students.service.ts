@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { resolveJwtSecret } from '../../common/jwt-secret';
 import { AnketaDto } from './dto/anketa.dto';
@@ -10,6 +10,25 @@ import { UpdateStudentDto } from './dto/update-student.dto';
 export class StudentsService {
   constructor(private prisma: PrismaService) {}
 
+  // Bir markazda bir xil ism-familiyali o'quvchi ikkinchi marta qo'shilmasligi uchun tekshiruv
+  // (katta-kichik harf va ortiqcha bo'shliqlar e'tiborsiz; arxivdagilar ham hisobga olinadi).
+  private async assertNameFree(centerId: string, fullName: string, exceptId?: string) {
+    const name = fullName.trim().replace(/\s+/g, ' ');
+    const dup = await this.prisma.student.findFirst({
+      where: {
+        centerId,
+        fullName: { equals: name, mode: 'insensitive' },
+        ...(exceptId && { id: { not: exceptId } }),
+      },
+      select: { status: true },
+    });
+    if (dup) {
+      throw new ConflictException(
+        `«${name}» ismli o‘quvchi allaqachon qo‘shilgan${dup.status === 'inactive' ? ' (arxivda)' : ''}. Qayta qo‘shib bo‘lmaydi`,
+      );
+    }
+  }
+
   async create(dto: CreateStudentDto) {
     const center = await this.prisma.center.findUnique({
       where: { id: dto.centerId },
@@ -17,6 +36,7 @@ export class StudentsService {
     if (!center) {
       throw new NotFoundException('Markaz topilmadi');
     }
+    await this.assertNameFree(dto.centerId, dto.fullName);
 
     const student = await this.prisma.student.create({
       data: {
@@ -275,7 +295,12 @@ export class StudentsService {
   }
 
   async update(id: string, dto: UpdateStudentDto) {
-    await this.findOne(id);
+    const current: any = await this.findOne(id);
+    // Faqat ism o'zgartirilganda tekshiriladi (eski takrorlangan yozuvlarni tahrirlash to'sib qolmasin)
+    const norm = (v: string) => v.trim().replace(/\s+/g, ' ').toLowerCase();
+    if (dto.fullName && current?.centerId && norm(dto.fullName) !== norm(current.fullName || '')) {
+      await this.assertNameFree(current.centerId, dto.fullName, id);
+    }
 
     const dataToUpdate: any = {
       fullName: dto.fullName,
