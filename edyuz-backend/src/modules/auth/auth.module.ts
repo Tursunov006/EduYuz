@@ -17,7 +17,7 @@ import { resolveJwtSecret } from '../../common/jwt-secret';
         secret: resolveJwtSecret(),
         signOptions: {
           expiresIn:
-            config.get<string>('JWT_EXPIRES_IN') || config.get<string>('JWT_EXPIRATION') || '7d',
+            (config.get<string>('JWT_EXPIRES_IN') || config.get<string>('JWT_EXPIRATION') || '7d') as any,
         },
       }),
     }),
