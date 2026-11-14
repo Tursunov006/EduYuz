@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   BookOpen, 
   Video, 
@@ -108,7 +109,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
   async function fetchLessons() {
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:3000/api/v1/lms/groups/${groupId}/lessons`, {
+      const res = await axios.get(`/lms/groups/${groupId}/lessons`, {
         headers: getHeaders(),
       });
       setLessons(res.data || []);
@@ -131,7 +132,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
     e.preventDefault();
     try {
       await axios.post(
-        'http://localhost:3000/api/v1/lms/lessons',
+        '/lms/lessons',
         { ...lessonForm, groupId, orderIndex: Number(lessonForm.orderIndex) },
         { headers: getHeaders() }
       );
@@ -147,7 +148,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
   async function handleDeleteLesson(id: string, title: string) {
     if (!confirm(`"${title}" darsini va unga tegishli vazifalarni o'chirmoqchimisiz?`)) return;
     try {
-      await axios.delete(`http://localhost:3000/api/v1/lms/lessons/${id}`, {
+      await axios.delete(`/lms/lessons/${id}`, {
         headers: getHeaders(),
       });
       fetchLessons();
@@ -161,7 +162,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
     e.preventDefault();
     try {
       await axios.post(
-        'http://localhost:3000/api/v1/lms/homeworks',
+        '/lms/homeworks',
         {
           lessonId: selectedLessonForHw,
           title: hwForm.title,
@@ -185,7 +186,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
     if (!submitForm.studentId) return alert('O\'quvchini tanlang!');
     try {
       await axios.post(
-        'http://localhost:3000/api/v1/lms/homeworks/submit',
+        '/lms/homeworks/submit',
         {
           homeworkId: selectedHomeworkForSubmit.id,
           studentId: submitForm.studentId,
@@ -209,7 +210,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
     setIsReviewModalOpen(true);
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/v1/lms/homeworks/${hw.id}/submissions`,
+        `/lms/homeworks/${hw.id}/submissions`,
         { headers: getHeaders() }
       );
       setSubmissions(res.data || []);
@@ -232,7 +233,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
     if (!data) return;
     try {
       await axios.post(
-        `http://localhost:3000/api/v1/lms/homeworks/grade/${submissionId}`,
+        `/lms/homeworks/grade/${submissionId}`,
         {
           score: Number(data.score),
           feedback: data.feedback,

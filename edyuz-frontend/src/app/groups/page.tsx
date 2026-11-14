@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
   Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive
@@ -124,9 +125,9 @@ export default function GroupsPage() {
     try {
       setLoading(true);
       const [groupsRes, coursesRes, teachersRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/v1/groups', { headers: getHeaders() }).catch(() => ({ data: [] })),
-        axios.get('http://localhost:3000/api/v1/courses', { headers: getHeaders() }).catch(() => ({ data: [] })),
-        axios.get('http://localhost:3000/api/v1/teachers', { headers: getHeaders() }).catch(() => ({ data: [] })),
+        axios.get('/groups', { headers: getHeaders() }).catch(() => ({ data: [] })),
+        axios.get('/courses', { headers: getHeaders() }).catch(() => ({ data: [] })),
+        axios.get('/teachers', { headers: getHeaders() }).catch(() => ({ data: [] })),
       ]);
 
       // Arxivdagi guruhlar alohida bo'limda
@@ -197,7 +198,7 @@ export default function GroupsPage() {
     );
     if (!ok) return;
     try {
-      await axios.patch(`http://localhost:3000/api/v1/groups/${g.id}`, { archived: true }, { headers: getHeaders() });
+      await axios.patch(`/groups/${g.id}`, { archived: true }, { headers: getHeaders() });
       setGroups((prev) => prev.filter((x) => x.id !== g.id));
     } catch (err: any) {
       const msg = err.response?.data?.message || 'Guruhni arxivga olib bo‘lmadi';
@@ -213,11 +214,11 @@ export default function GroupsPage() {
     }
     try {
       if (editingGroupId) {
-        await axios.patch(`http://localhost:3000/api/v1/groups/${editingGroupId}`, formData, {
+        await axios.patch(`/groups/${editingGroupId}`, formData, {
           headers: getHeaders(),
         });
       } else {
-        await axios.post('http://localhost:3000/api/v1/groups', formData, {
+        await axios.post('/groups', formData, {
           headers: getHeaders(),
         });
       }
@@ -232,11 +233,11 @@ export default function GroupsPage() {
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const centersRes = await axios.get('http://localhost:3000/api/v1/centers', { headers: getHeaders() }).catch(() => ({ data: [] }));
+      const centersRes = await axios.get('/centers', { headers: getHeaders() }).catch(() => ({ data: [] }));
       const centerId = centersRes.data?.[0]?.id;
 
       const res = await axios.post(
-        'http://localhost:3000/api/v1/courses',
+        '/courses',
         {
           title: courseForm.title,
           price: Number(courseForm.price),

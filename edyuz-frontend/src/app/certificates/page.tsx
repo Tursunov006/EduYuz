@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   Award, 
   Plus, 
@@ -40,8 +41,8 @@ export default function CertificatesPage() {
     try {
       setLoading(true);
       const [certRes, stdRes] = await Promise.all([
-        axios.get('http://localhost:3000/api/v1/certificates'),
-        axios.get('http://localhost:3000/api/v1/students', { headers: getHeaders() }),
+        axios.get('/certificates'),
+        axios.get('/students', { headers: getHeaders() }),
       ]);
       setCertificates(certRes.data || []);
       setStudents(stdRes.data || []);
@@ -64,7 +65,7 @@ export default function CertificatesPage() {
     if (!issueForm.studentId) return alert('O\'quvchini tanlang!');
     try {
       const res = await axios.post(
-        'http://localhost:3000/api/v1/certificates/issue',
+        '/certificates/issue',
         issueForm
       );
       alert(`Sertifikat berildi! Raqami: ${res.data.certificateNumber}`);
