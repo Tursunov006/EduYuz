@@ -1,0 +1,28 @@
+# EduYuz uy serveri: backend + Cloudflare Tunnel (+ ixtiyoriy mahalliy baza).
+# Ishga tushirish:   docker compose up -d --build
+# Holatni ko'rish:   docker compose ps   |   loglar: docker compose logs -f backend
+services:
+  backend:
+    build: ../edyuz-backend
+    image: eduyuz-backend
+    restart: unless-stopped          # svet kelib kompyuter yonganda o'zi ishga tushadi
+    env_file: .env
+    environment:
+      PORT: "3000"
+      NODE_ENV: production
+    ports:
+      - "127.0.0.1:3000:3000"         # faqat shu kompyuterdan; internetga Tunnel orqali chiqadi
+    mem_limit: 1g
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "5" }
+
+  # Cloudflare Tunnel: routerda port ochmasdan, statik IP'siz serverni internetga xavfsiz chiqaradi.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on: [backend]
+    mem_limit: 256m
