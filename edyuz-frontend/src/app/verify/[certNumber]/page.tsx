@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   CheckCircle2, 
   XCircle, 
@@ -25,7 +26,7 @@ export default function VerifyCertificatePage({ params }: { params: Promise<{ ce
     async function verifyCert() {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:3000/api/v1/certificates/verify/${certNumber}`);
+        const res = await axios.get(`/certificates/verify/${certNumber}`);
         setCert(res.data);
       } catch (err) {
         console.error(err);

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   CalendarCheck, 
   BookOpen, 
@@ -39,7 +40,7 @@ function HomeworkSubmitForm({ homeworkId, studentId, onSuccess }: { homeworkId: 
     if (!content.trim()) return alert('Javobni kiriting');
     setLoading(true);
     try {
-      await axios.post('http://localhost:3000/api/v1/lms/homeworks/submit', {
+      await axios.post('/lms/homeworks/submit', {
         homeworkId,
         studentId,
         content
@@ -182,7 +183,7 @@ function PortalContent() {
         return;
       }
       try {
-        const res = await axios.get('http://localhost:3000/api/v1/students');
+        const res = await axios.get('/students');
         const list = res.data || [];
         setAllStudents(list);
         if (!selectedStudentId && list.length > 0) {
@@ -205,10 +206,10 @@ function PortalContent() {
       try {
         setLoading(true);
         const [stRes, attRes, payRes, certRes] = await Promise.all([
-          axios.get(`http://localhost:3000/api/v1/students/${selectedStudentId}`),
-          axios.get(`http://localhost:3000/api/v1/attendance/student/${selectedStudentId}`).catch(() => ({ data: [] })),
-          axios.get(`http://localhost:3000/api/v1/payments?studentId=${selectedStudentId}`).catch(() => ({ data: [] })),
-          axios.get(`http://localhost:3000/api/v1/certificates/student/${selectedStudentId}`).catch(() => ({ data: [] })),
+          axios.get(`/students/${selectedStudentId}`),
+          axios.get(`/attendance/student/${selectedStudentId}`).catch(() => ({ data: [] })),
+          axios.get(`/payments?studentId=${selectedStudentId}`).catch(() => ({ data: [] })),
+          axios.get(`/certificates/student/${selectedStudentId}`).catch(() => ({ data: [] })),
         ]);
 
         const st = stRes.data;
@@ -220,7 +221,7 @@ function PortalContent() {
         // Talaba guruhining darslari
         const grpId = st.groups?.[0]?.groupId;
         if (grpId) {
-          const lmsRes = await axios.get(`http://localhost:3000/api/v1/lms/groups/${grpId}/lessons`).catch(() => ({ data: [] }));
+          const lmsRes = await axios.get(`/lms/groups/${grpId}/lessons`).catch(() => ({ data: [] }));
           setLessons(lmsRes.data || []);
         }
       } catch (err) {

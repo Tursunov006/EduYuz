@@ -1,0 +1,47 @@
+# Har bir PR va main'ga push'da avtomatik tekshiruv:
+# backend — tur tekshiruvi, unit testlar va build; frontend — build.
+# Biror narsa buzilsa PR'da qizil belgi chiqadi va merge'dan oldin ko'rinadi.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: edyuz-backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: edyuz-backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run typecheck
+      - run: npm test -- --ci
+      - run: npm run build
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: edyuz-frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: edyuz-frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build

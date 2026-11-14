@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   ArrowLeft, 
   UserPlus, 
@@ -40,8 +41,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     try {
       setLoading(true);
       const [grpRes, stdsRes] = await Promise.all([
-        axios.get(`http://localhost:3000/api/v1/groups/${groupId}`, { headers: getHeaders() }),
-        axios.get('http://localhost:3000/api/v1/students', { headers: getHeaders() }),
+        axios.get(`/groups/${groupId}`, { headers: getHeaders() }),
+        axios.get('/students', { headers: getHeaders() }),
       ]);
       setGroup(grpRes.data);
       setAllStudents(stdsRes.data || []);
@@ -63,7 +64,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     e.preventDefault();
     try {
       await axios.post(
-        `http://localhost:3000/api/v1/groups/${groupId}/students`,
+        `/groups/${groupId}/students`,
         { studentId: selectedStudentId },
         { headers: getHeaders() }
       );
@@ -79,7 +80,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     if (!confirm(`Haqiqatan ham "${studentName}"ni ushbu guruhdan chiqarmoqchimisiz?`)) return;
     try {
       await axios.delete(
-        `http://localhost:3000/api/v1/groups/${groupId}/students/${studentId}`,
+        `/groups/${groupId}/students/${studentId}`,
         { headers: getHeaders() }
       );
       loadGroupData();
@@ -101,7 +102,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     try {
       setBillingLoading(true);
       const res = await axios.post(
-        'http://localhost:3000/api/v1/payments/charge-monthly',
+        '/payments/charge-monthly',
         { groupId },
         { headers: getHeaders() }
       );

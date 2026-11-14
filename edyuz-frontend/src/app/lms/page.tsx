@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { BookOpen, Users, Layers } from 'lucide-react';
 import LmsView from '@/components/lms/LmsView';
 import AcademicHubNav from '@/components/AcademicHubNav';
@@ -20,7 +21,7 @@ export default function LmsPage() {
     async function fetchGroups() {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:3000/api/v1/groups', { headers: getHeaders() });
+        const res = await axios.get('/groups', { headers: getHeaders() });
         const list = res.data || [];
         setGroups(list);
         if (list.length > 0) {

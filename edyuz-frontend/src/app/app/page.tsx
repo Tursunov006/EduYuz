@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import Script from 'next/script';
 import Image from 'next/image';
 import { 
@@ -55,7 +56,7 @@ function MiniWebAppContent() {
         // Agar stId bo'lmasa, dastlabki o'quvchini olish
         // Ro'yxat faqat tizimga kirgan xodimga beriladi (ko'rib chiqish rejimi)
         if (!stId && localStorage.getItem('token')) {
-          const allRes = await axios.get('http://localhost:3000/api/v1/students');
+          const allRes = await axios.get('/students');
           const list = allRes.data || [];
           if (list.length > 0) {
             stId = list[0].id;
@@ -65,10 +66,10 @@ function MiniWebAppContent() {
 
         if (stId) {
           const [stRes, attRes, payRes, certRes] = await Promise.all([
-            axios.get(`http://localhost:3000/api/v1/students/${stId}`),
-            axios.get(`http://localhost:3000/api/v1/attendance/student/${stId}`).catch(() => ({ data: [] })),
-            axios.get(`http://localhost:3000/api/v1/payments?studentId=${stId}`).catch(() => ({ data: [] })),
-            axios.get(`http://localhost:3000/api/v1/certificates/student/${stId}`).catch(() => ({ data: [] })),
+            axios.get(`/students/${stId}`),
+            axios.get(`/attendance/student/${stId}`).catch(() => ({ data: [] })),
+            axios.get(`/payments?studentId=${stId}`).catch(() => ({ data: [] })),
+            axios.get(`/certificates/student/${stId}`).catch(() => ({ data: [] })),
           ]);
 
           const studentObj = stRes.data;
@@ -79,7 +80,7 @@ function MiniWebAppContent() {
 
           const grpId = studentObj.groups?.[0]?.groupId;
           if (grpId) {
-            const lmsRes = await axios.get(`http://localhost:3000/api/v1/lms/groups/${grpId}/lessons`).catch(() => ({ data: [] }));
+            const lmsRes = await axios.get(`/lms/groups/${grpId}/lessons`).catch(() => ({ data: [] }));
             setLessons(lmsRes.data || []);
           }
         }

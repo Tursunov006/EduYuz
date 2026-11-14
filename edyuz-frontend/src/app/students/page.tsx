@@ -402,7 +402,7 @@ export default function StudentsPage() {
                               );
                               if (!msg) return;
                               try {
-                                await axios.post('http://localhost:3000/api/v1/sms/send', { phone: s.parentPhone, message: msg });
+                                await axios.post('/sms/send', { phone: s.parentPhone, message: msg });
                                 alert('SMS yuborildi');
                               } catch (err: any) {
                                 alert(err?.response?.data?.message || 'SMS yuborishda xatolik');

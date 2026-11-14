@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   Users, 
   BookOpen, 
@@ -85,7 +86,7 @@ export default function TeachersPage() {
   async function loadTeachers() {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:3000/api/v1/teachers');
+      const res = await axios.get('/teachers');
       setTeachers(res.data || []);
     } catch (err) {
       console.error(err);
@@ -130,11 +131,11 @@ export default function TeachersPage() {
       if (editingTeacher) {
         const payload: any = { ...form };
         if (!payload.password) delete payload.password;
-        await axios.patch(`http://localhost:3000/api/v1/teachers/${editingTeacher.id}`, payload);
+        await axios.patch(`/teachers/${editingTeacher.id}`, payload);
       } else {
         const payload: any = { ...form };
         if (!payload.password) delete payload.password;
-        const res = await axios.post('http://localhost:3000/api/v1/teachers', payload);
+        const res = await axios.post('/teachers', payload);
         // Parol kiritilmagan bo'lsa server tasodifiy vaqtinchalik parol yaratadi
         if (res.data?.temporaryPassword) {
           alert(
@@ -152,7 +153,7 @@ export default function TeachersPage() {
   async function handleDeleteTeacher(id: string, name: string) {
     if (!confirm(`${name} o'qituvchisini o'chirishni tasdiqlaysizmi?`)) return;
     try {
-      await axios.delete(`http://localhost:3000/api/v1/teachers/${id}`);
+      await axios.delete(`/teachers/${id}`);
       loadTeachers();
     } catch (err: any) {
       alert(err.response?.data?.message || 'O\'chirishda xatolik');
@@ -173,7 +174,7 @@ export default function TeachersPage() {
     e.preventDefault();
     if (!payingTeacher) return;
     try {
-      await axios.post(`http://localhost:3000/api/v1/teachers/${payingTeacher.id}/pay-salary`, payForm);
+      await axios.post(`/teachers/${payingTeacher.id}/pay-salary`, payForm);
       alert(`${payingTeacher.fullName} ustozga ${formatMoney(payForm.amount)} maosh muvaffaqiyatli to'landi!`);
       setPayingTeacher(null);
       loadTeachers();
@@ -186,7 +187,7 @@ export default function TeachersPage() {
     setHistoryTeacher(t);
     try {
       setLoadingHistory(true);
-      const res = await axios.get(`http://localhost:3000/api/v1/teachers/${t.id}/salary-history`);
+      const res = await axios.get(`/teachers/${t.id}/salary-history`);
       setSalaryHistory(res.data || []);
     } catch (err) {
       console.error(err);
