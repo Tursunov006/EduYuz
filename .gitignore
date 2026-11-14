@@ -26,3 +26,15 @@ pnpm-debug.log*
 # OS Metadata
 .DS_Store
 Thumbs.db
+
+# Maxfiy fayllar va ma'lumotlar nusxalari — hech qachon GitHub'ga yuklanmasin
+*.pem
+*.key
+*.p12
+*.sql.gz
+*.dump
+*.bak
+*.xlsx
+*.csv
+.env*
+!.env.example

@@ -133,9 +133,9 @@ model Student {
   points       Int           @default(0)
   status       StudentStatus @default(active)
   // Shaxsiy ma'lumotlar (ixtiyoriy)
-  passport     String?       @db.VarChar(20) // seriya va raqam, masalan AA1234567
+  passport     String?       @db.Text // seriya va raqam (shifrlangan saqlanadi)
   birthDate    DateTime?     @map("birth_date") @db.Date
-  address      String?       @db.VarChar(255)
+  address      String?       @db.Text // shifrlangan saqlanadi
   notes        String?       @db.Text // Izoh (ichki, faqat xodimlar uchun)
   // Turi: 'oquvchi' (maktab yoshidagi) yoki 'talaba'
   kind         String        @default("oquvchi") @db.VarChar(20)
