@@ -483,7 +483,7 @@ export default function SuperAdminPage() {
                           </span>
                         ) : (
                           <span className="px-3 py-1 bg-amber-500/10 text-amber-700 rounded-full text-xs font-bold border border-amber-500/20 inline-flex items-center gap-1.5">
-                            <Clock size={13} /> 14-kunlik Trial
+                            <Clock size={13} /> Bepul
                           </span>
                         )}
                       </td>
@@ -644,7 +644,7 @@ export default function SuperAdminPage() {
                   </div>
                   <div className="flex justify-between items-center py-1">
                     <span className="text-slate-500">Litsenziya:</span>
-                    <span className="text-amber-700 font-bold">14-kunlik Bepul Sinov (Free Trial)</span>
+                    <span className="text-amber-700 font-bold">Bepul (muddatsiz)</span>
                   </div>
                 </div>
 
@@ -717,11 +717,11 @@ export default function SuperAdminPage() {
         </div>
       )}
 
-      {/* 6. 14 kundan keyin chiqadigan Tariflar Ro'yxati oynasini ko'rish */}
+      {/* 6. Tariflar ro'yxati oynasini ko'rish */}
       <SubscriptionModal
         isOpen={isPreviewPricingOpen}
         isExpired={false}
-        daysLeft={14}
+        daysLeft={0}
         centerName="EduYuz SaaS Demo"
         onClose={() => setIsPreviewPricingOpen(false)}
       />
