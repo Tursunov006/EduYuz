@@ -121,6 +121,7 @@ export class AuthService {
         id: user.id,
         centerId: user.centerId,
         centerName: user.center?.name,
+        centerLogo: user.center?.logoUrl || null,
         fullName: user.fullName,
         phone: user.phone,
         role: user.role,

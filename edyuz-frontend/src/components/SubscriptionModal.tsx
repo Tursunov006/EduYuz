@@ -159,12 +159,12 @@ export default function SubscriptionModal({
           {isExpired ? (
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-700 text-xs font-bold">
               <AlertTriangle size={15} className="text-rose-600" />
-              <span>14 kunlik bepul sinov muddatingiz yakunlandi!</span>
+              <span>Markazingiz obunasi to‘xtatilgan</span>
             </div>
           ) : (
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-700 text-xs font-bold">
               <Clock size={15} className="text-amber-600" />
-              <span>14 kunlik bepul sinov davri faol • Yana {daysLeft} kun qoldi</span>
+              <span>EduYuz tariflari</span>
             </div>
           )}
 

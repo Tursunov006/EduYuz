@@ -84,7 +84,7 @@ export default function InstagramBioPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'bot',
-      text: "Assalomu alaykum! Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Moliya, Lidlar voronkasi yoki 14 kunlik BEPUL DEMO bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
+      text: "Assalomu alaykum! Men @eduyuzcrmuz rasmiy AI konsultantiman.\n\nO'quv markazingizni avtomatlashtirish, Moliya, Lidlar voronkasi yoki BEPUL DEMO (taqdimot) bo'yicha savolingizni yozing yoki telefon raqamingizni qoldiring!",
       time: 'Hozir',
     },
   ]);
@@ -489,12 +489,12 @@ export default function InstagramBioPage() {
               onClick={handleClaimFromCalculator}
               className="w-full py-3.5 rounded-2xl text-white font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500"
             >
-              Yo&apos;qotishni To&apos;xtatish — 14 Kun Bepul Sinab Ko&apos;rish <ArrowRight size={16} />
+              Yo&apos;qotishni To&apos;xtatish — Bepul Demo So&apos;rash <ArrowRight size={16} />
             </button>
           </div>
         )}
 
-        {/* 3. TAB 2: BEPUL 14-KUNLIK DEMO ARIZA FORMASI */}
+        {/* 3. TAB 2: BEPUL DEMO ARIZA FORMASI */}
         {activeTab === 'form' && (
           <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm backdrop-blur-xl">
             {submitted ? (
@@ -506,7 +506,7 @@ export default function InstagramBioPage() {
                   Arizangiz Qabul Qilindi! 
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
-                  Ma&apos;lumotlaringiz <strong>EduYuz CRM</strong> tizimiga tushdi. Mutaxassisimiz tez orada siz bilan bog&apos;lanib, <strong>14 kunlik BEPUL VIP-DEMO</strong> kabinetingizni ochib beradi!
+                  Ma&apos;lumotlaringiz <strong>EduYuz CRM</strong> tizimiga tushdi. Mutaxassisimiz tez orada siz bilan bog&apos;lanib, platformani <strong>BEPUL</strong> ko&apos;rsatib beradi va kabinetingizni ochadi!
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row gap-2.5 justify-center">
                   <button
@@ -531,7 +531,7 @@ export default function InstagramBioPage() {
                       @eduyuzcrmuz obunachilari uchun
                     </span>
                     <h2 className="text-lg font-bold text-slate-900 mt-2">
-                      14 Kunlik Bepul Demo Olish
+                      Bepul Demo So&apos;rash
                     </h2>
                     <p className="text-xs text-slate-500 mt-0.5">
                       Raqamingizni qoldiring — 10 daqiqada markazingiz uchun tizimni yoqib beramiz.
@@ -629,7 +629,7 @@ export default function InstagramBioPage() {
                   disabled={submitting}
                   className="w-full py-3.5 rounded-2xl text-white font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2 disabled:opacity-60 bg-indigo-600 hover:bg-indigo-500"
                 >
-                  {submitting ? 'Yuborilmoqda...' : <>14 Kunlik Bepul Demo Olish</>}
+                  {submitting ? 'Yuborilmoqda...' : <>Bepul Demo So&apos;rash</>}
                 </button>
               </form>
             )}
