@@ -31,14 +31,10 @@ export default function LoginPage() {
       // Login kiritilganda (masalan, admin yoki superadmin), tizimdagi mos hisobga yo'naltirish
       let accountLogin = login.trim();
       const lowerLogin = accountLogin.toLowerCase();
-      const isSuperAdminLogin = lowerLogin === 'superadmin' || lowerLogin === 'dasturchi';
+      const isSuperAdminLogin =
+        lowerLogin === 'tursunov1976' || lowerLogin === 'superadmin' || lowerLogin === 'dasturchi';
 
-      if (
-        lowerLogin === 'admin' || 
-        lowerLogin === 'superadmin' || 
-        lowerLogin === 'dasturchi' ||
-        lowerLogin === 'admin123'
-      ) {
+      if (isSuperAdminLogin || lowerLogin === 'admin') {
         accountLogin = '+998901234567';
       }
 
