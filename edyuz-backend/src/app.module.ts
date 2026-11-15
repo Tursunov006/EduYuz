@@ -22,6 +22,7 @@ import { SmsModule } from './modules/sms/sms.module';
 import { AiModule } from './modules/ai/ai.module';
 import { InstagramModule } from './modules/instagram/instagram.module';
 import { HealthModule } from './modules/health/health.module';
+import { NewsModule } from './modules/news/news.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { HealthModule } from './modules/health/health.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     PrismaModule,
     HealthModule,
+    NewsModule,
     SmsModule,
     TelegramModule,
     LmsModule,
