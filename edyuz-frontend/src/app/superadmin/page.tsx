@@ -25,6 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import PlatformNewsAdmin from '@/components/PlatformNewsAdmin';
 import EditCenterModal from '@/components/EditCenterModal';
 import SubscriptionModal from '@/components/SubscriptionModal';
 
@@ -605,6 +606,8 @@ export default function SuperAdminPage() {
         </div>
       </div>
 
+      {/* Platforma yangiliklari (barcha markazlarga e'lon) */}
+      <PlatformNewsAdmin />
       {editing && (
         <EditCenterModal
           center={editing}

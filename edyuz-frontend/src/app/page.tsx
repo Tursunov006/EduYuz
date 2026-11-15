@@ -6,6 +6,7 @@ import { MessageSquare } from 'lucide-react';
 import { api, apiFetch } from '@/lib/api';
 import ThemeToggle from '@/components/ThemeToggle';
 import AnketaLinkButton from '@/components/AnketaLinkButton';
+import PlatformNewsFeed from '@/components/PlatformNewsFeed';
 
 // Figma: "EduYuz Dashboard v2"
 const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
@@ -158,6 +159,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
+      <PlatformNewsFeed />
       {/* Sarlavha */}
       <div className="flex items-center justify-between gap-4">
         <div>
