@@ -67,6 +67,27 @@ export default function SuperAdminPage() {
     loadCenters();
   }, []);
 
+  // Server va bazaning haqiqiy holati (/health) — oldingi "100% himoyalangan" kabi doimiy yozuv o'rniga
+  const [health, setHealth] = useState<{ ok: boolean; db: string; ms: number; at: string } | null>(null);
+  async function checkHealth() {
+    setHealth(null);
+    const t0 = performance.now();
+    try {
+      const d = await apiFetch('/health');
+      setHealth({
+        ok: d?.status === 'ok' && d?.db === 'up',
+        db: d?.db || 'down',
+        ms: Math.round(performance.now() - t0),
+        at: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+      });
+    } catch {
+      setHealth({ ok: false, db: 'down', ms: Math.round(performance.now() - t0), at: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) });
+    }
+  }
+  useEffect(() => {
+    checkHealth();
+  }, []);
+
   async function loadCenters() {
     setLoading(true);
     try {
@@ -239,7 +260,9 @@ export default function SuperAdminPage() {
     0,
   );
   const totalGroupsAcrossSaaS = centers.reduce((acc, c) => acc + (c._count?.groups || 0), 0);
-  const monthlySaasRevenue = activeCentersCount * 500000;
+  // Faqat PRO (to'lovli) markazlar hisoblanadi; bepul/bloklanganlar tushumga qo'shilmaydi
+  const proCentersCount = centers.filter((c) => c.subscriptionStatus === 'active').length;
+  const monthlySaasRevenue = proCentersCount * 500000;
 
   return (
     <div className="p-4 sm:p-8 space-y-8 bg-slate-50 min-h-screen text-slate-800 max-w-7xl mx-auto">
@@ -332,31 +355,47 @@ export default function SuperAdminPage() {
             {totalStudentsAcrossSaaS} nafar
           </h2>
           <p className="text-[11px] text-slate-500 mt-1">
-            Jami {totalGroupsAcrossSaaS} ta faol guruhda
+            Jami {totalGroupsAcrossSaaS} ta guruhda
           </p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Oylik SaaS Obuna Tushumi</span>
+            <span>Kutilayotgan oylik tushum</span>
             <Wallet className="text-emerald-600" size={18} />
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">
             {monthlySaasRevenue.toLocaleString('uz-UZ')} <span className="text-xs font-normal">so‘m</span>
           </h2>
-          <p className="text-[11px] text-slate-500 mt-1">Har bir markaz obunasi: 500,000 so‘m</p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            {proCentersCount} ta PRO markaz × 500 000 so‘m (bepul markazlar kirmaydi)
+          </p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Server & Bot Himoyasi</span>
-            <CheckCircle className="text-indigo-600" size={18} />
+            <span>Server holati</span>
+            <button type="button" onClick={checkHealth} title="Qayta tekshirish" className="cursor-pointer">
+              <CheckCircle className="text-indigo-600" size={18} />
+            </button>
           </div>
-          <h2 className="text-xl font-bold text-indigo-600 mt-2 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            100% Himoyalangan
+          <h2
+            className={`text-xl font-bold mt-2 flex items-center gap-2 ${
+              health === null ? 'text-slate-500' : health.ok ? 'text-emerald-600' : 'text-rose-600'
+            }`}
+          >
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                health === null ? 'bg-slate-300' : health.ok ? 'bg-emerald-400' : 'bg-rose-500'
+              }`}
+            ></span>
+            {health === null ? 'Tekshirilmoqda…' : health.ok ? 'Ishlayapti' : 'Muammo bor'}
           </h2>
-          <p className="text-[11px] text-slate-500 mt-1">Anti-Webhook & PostgreSQL Cloud</p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            {health === null
+              ? 'Server va bazaga so‘rov yuborilmoqda'
+              : `Baza: ${health.db === 'up' ? 'ulangan' : 'ulanmagan'} • javob ${health.ms} ms • ${health.at}`}
+          </p>
         </div>
       </div>
 
