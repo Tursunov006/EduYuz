@@ -49,6 +49,7 @@ model Center {
   createdAt          DateTime @default(now()) @map("created_at")
   trialEndsAt        DateTime? @map("trial_ends_at")
   subscriptionStatus String   @default("trial") @map("subscription_status") @db.VarChar(20) // 'trial', 'active', 'expired'
+  logoUrl            String?  @map("logo_url") @db.Text // markaz profil rasmi (kichraytirilgan data:image/...)
 
   users    User[]
   courses  Course[]

@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Search,
   KeyRound,
+  Pencil,
   Trash2,
   Bot,
   Ban,
@@ -24,6 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import EditCenterModal from '@/components/EditCenterModal';
 import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function SuperAdminPage() {
@@ -87,6 +89,8 @@ export default function SuperAdminPage() {
   useEffect(() => {
     checkHealth();
   }, []);
+
+  const [editing, setEditing] = useState<any>(null);
 
   async function loadCenters() {
     setLoading(true);
@@ -260,9 +264,9 @@ export default function SuperAdminPage() {
     0,
   );
   const totalGroupsAcrossSaaS = centers.reduce((acc, c) => acc + (c._count?.groups || 0), 0);
-  // Faqat PRO (to'lovli) markazlar hisoblanadi; bepul/bloklanganlar tushumga qo'shilmaydi
+  // Obuna to'lovlari hali tizimda qayd etilmaydi — taxminiy summa ko'rsatilmaydi, faqat haqiqiy qiymat (0)
   const proCentersCount = centers.filter((c) => c.subscriptionStatus === 'active').length;
-  const monthlySaasRevenue = proCentersCount * 500000;
+  const monthlySaasRevenue = 0;
 
   return (
     <div className="p-4 sm:p-8 space-y-8 bg-slate-50 min-h-screen text-slate-800 max-w-7xl mx-auto">
@@ -361,14 +365,14 @@ export default function SuperAdminPage() {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Kutilayotgan oylik tushum</span>
+            <span>Obuna tushumi (bu oy)</span>
             <Wallet className="text-emerald-600" size={18} />
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">
             {monthlySaasRevenue.toLocaleString('uz-UZ')} <span className="text-xs font-normal">so‘m</span>
           </h2>
           <p className="text-[11px] text-slate-500 mt-1">
-            {proCentersCount} ta PRO markaz × 500 000 so‘m (bepul markazlar kirmaydi)
+            Obuna to‘lovlari hali tizimda qayd etilmaydi • PRO markazlar: {proCentersCount} ta
           </p>
         </div>
 
@@ -467,15 +471,23 @@ export default function SuperAdminPage() {
                     <tr key={center.id} className="hover:bg-slate-50 transition">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-2xl text-slate-900 flex items-center justify-center font-bold text-sm shadow-md ${
-                              isBlocked
-                                ? 'bg-slate-100 text-slate-500'
-                                : 'bg-indigo-600'
-                            }`}
-                          >
-                            {center.name.charAt(0).toUpperCase()}
-                          </div>
+                          {center.logoUrl ? (
+                            <img
+                              src={center.logoUrl}
+                              alt={center.name}
+                              className={`w-10 h-10 rounded-2xl object-cover border border-slate-200 ${isBlocked ? 'grayscale opacity-60' : ''}`}
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-2xl text-slate-900 flex items-center justify-center font-bold text-sm shadow-md ${
+                                isBlocked
+                                  ? 'bg-slate-100 text-slate-500'
+                                  : 'bg-indigo-600'
+                              }`}
+                            >
+                              {center.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <div className="font-bold text-slate-900">{center.name}</div>
                             <div className="text-[11px] text-slate-500 font-mono">
@@ -548,6 +560,14 @@ export default function SuperAdminPage() {
                           )}
 
                           <button
+                            onClick={() => setEditing(center)}
+                            className="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 text-indigo-700 transition cursor-pointer"
+                            title="Nomi va rasmini tahrirlash"
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
                             onClick={() => handleResetPassword(center)}
                             className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-700 transition cursor-pointer"
                             title="Direktor parolini yangilash"
@@ -584,6 +604,17 @@ export default function SuperAdminPage() {
           </table>
         </div>
       </div>
+
+      {editing && (
+        <EditCenterModal
+          center={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            loadCenters();
+          }}
+        />
+      )}
 
       {/* 4. Yangi Markaz Qo'shish Modali */}
       {isModalOpen && (
