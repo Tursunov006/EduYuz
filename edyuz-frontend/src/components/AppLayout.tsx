@@ -53,9 +53,8 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 14 kunlik sinov muddati va obuna holatini hisoblash
-  let subStatus = 'trial';
-  let daysLeft = 14;
+  // Obuna holati: bepul sinov muddati yo'q. Markaz faqat superadmin uni qo'lda "expired" qilsa bloklanadi.
+  let subStatus = 'active';
   let centerName = 'O‘quv Markazi';
   let centerId = '';
   let userPhone = '';
@@ -64,20 +63,14 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
     const userRaw = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     if (userRaw) {
       const user = JSON.parse(userRaw);
-      subStatus = user.subscriptionStatus || 'trial';
+      subStatus = user.subscriptionStatus || 'active';
       centerName = user.centerName || user.fullName || 'O‘quv Markazi';
       centerId = user.centerId || '';
       userPhone = user.phone || '';
-
-      if (user.trialEndsAt) {
-        daysLeft = Math.ceil(
-          (new Date(user.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 3600 * 24)
-        );
-      }
     }
   } catch (e) {}
 
-  const isTrialExpired = subStatus === 'expired' || (subStatus === 'trial' && daysLeft <= 0);
+  const isBlocked = subStatus === 'expired';
 
   return (
     <>
@@ -89,27 +82,11 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
           <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
             <Navbar />
             
-            {/* 14-kunlik Bepul Sinov (Trial) Banneri */}
-            {subStatus === 'trial' && daysLeft > 0 && (
-              <div className="mx-4 sm:mx-6 md:mx-8 mt-4 md:mt-6 px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-700 text-xs sm:text-sm flex flex-wrap items-center justify-between gap-2">
-                <span>
-                  Bepul sinov muddati: <b>{daysLeft} kun</b> qoldi
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsPricingOpen(true)}
-                  className="font-semibold text-indigo-600 hover:underline"
-                >
-                  Tariflarni ko‘rish
-                </button>
-              </div>
-            )}
-
-            {/* 14 kun tugaganda avtomatik chiqadigan (yoki tugma bosilganda ochiladigan) Tariflar Ro'yxati Modali */}
+            {/* Tariflar oynasi: tugma bosilganda yoki obuna to'xtatilgan (expired) bo'lsa ochiladi */}
             <SubscriptionModal
-              isOpen={isTrialExpired || isPricingOpen}
-              isExpired={isTrialExpired}
-              daysLeft={Math.max(daysLeft, 0)}
+              isOpen={isBlocked || isPricingOpen}
+              isExpired={isBlocked}
+              daysLeft={0}
               centerName={centerName}
               centerId={centerId}
               userPhone={userPhone}
