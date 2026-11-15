@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { SuperadminBootstrapService } from './superadmin-bootstrap.service';
 import { resolveJwtSecret } from '../../common/jwt-secret';
 
 @Module({
@@ -23,7 +24,7 @@ import { resolveJwtSecret } from '../../common/jwt-secret';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, SuperadminBootstrapService],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
