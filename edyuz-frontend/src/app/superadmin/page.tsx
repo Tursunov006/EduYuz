@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Search,
   KeyRound,
+  Pencil,
   Trash2,
   Bot,
   Ban,
@@ -24,6 +25,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import EditCenterModal from '@/components/EditCenterModal';
 import SubscriptionModal from '@/components/SubscriptionModal';
 
 export default function SuperAdminPage() {
@@ -66,6 +68,29 @@ export default function SuperAdminPage() {
     }
     loadCenters();
   }, []);
+
+  // Server va bazaning haqiqiy holati (/health) — oldingi "100% himoyalangan" kabi doimiy yozuv o'rniga
+  const [health, setHealth] = useState<{ ok: boolean; db: string; ms: number; at: string } | null>(null);
+  async function checkHealth() {
+    setHealth(null);
+    const t0 = performance.now();
+    try {
+      const d = await apiFetch('/health');
+      setHealth({
+        ok: d?.status === 'ok' && d?.db === 'up',
+        db: d?.db || 'down',
+        ms: Math.round(performance.now() - t0),
+        at: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+      });
+    } catch {
+      setHealth({ ok: false, db: 'down', ms: Math.round(performance.now() - t0), at: new Date().toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }) });
+    }
+  }
+  useEffect(() => {
+    checkHealth();
+  }, []);
+
+  const [editing, setEditing] = useState<any>(null);
 
   async function loadCenters() {
     setLoading(true);
@@ -239,7 +264,9 @@ export default function SuperAdminPage() {
     0,
   );
   const totalGroupsAcrossSaaS = centers.reduce((acc, c) => acc + (c._count?.groups || 0), 0);
-  const monthlySaasRevenue = activeCentersCount * 500000;
+  // Obuna to'lovlari hali tizimda qayd etilmaydi — taxminiy summa ko'rsatilmaydi, faqat haqiqiy qiymat (0)
+  const proCentersCount = centers.filter((c) => c.subscriptionStatus === 'active').length;
+  const monthlySaasRevenue = 0;
 
   return (
     <div className="p-4 sm:p-8 space-y-8 bg-slate-50 min-h-screen text-slate-800 max-w-7xl mx-auto">
@@ -332,31 +359,47 @@ export default function SuperAdminPage() {
             {totalStudentsAcrossSaaS} nafar
           </h2>
           <p className="text-[11px] text-slate-500 mt-1">
-            Jami {totalGroupsAcrossSaaS} ta faol guruhda
+            Jami {totalGroupsAcrossSaaS} ta guruhda
           </p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Oylik SaaS Obuna Tushumi</span>
+            <span>Obuna tushumi (bu oy)</span>
             <Wallet className="text-emerald-600" size={18} />
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">
             {monthlySaasRevenue.toLocaleString('uz-UZ')} <span className="text-xs font-normal">so‘m</span>
           </h2>
-          <p className="text-[11px] text-slate-500 mt-1">Har bir markaz obunasi: 500,000 so‘m</p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            Obuna to‘lovlari hali tizimda qayd etilmaydi • PRO markazlar: {proCentersCount} ta
+          </p>
         </div>
 
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Server & Bot Himoyasi</span>
-            <CheckCircle className="text-indigo-600" size={18} />
+            <span>Server holati</span>
+            <button type="button" onClick={checkHealth} title="Qayta tekshirish" className="cursor-pointer">
+              <CheckCircle className="text-indigo-600" size={18} />
+            </button>
           </div>
-          <h2 className="text-xl font-bold text-indigo-600 mt-2 flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-            100% Himoyalangan
+          <h2
+            className={`text-xl font-bold mt-2 flex items-center gap-2 ${
+              health === null ? 'text-slate-500' : health.ok ? 'text-emerald-600' : 'text-rose-600'
+            }`}
+          >
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                health === null ? 'bg-slate-300' : health.ok ? 'bg-emerald-400' : 'bg-rose-500'
+              }`}
+            ></span>
+            {health === null ? 'Tekshirilmoqda…' : health.ok ? 'Ishlayapti' : 'Muammo bor'}
           </h2>
-          <p className="text-[11px] text-slate-500 mt-1">Anti-Webhook & PostgreSQL Cloud</p>
+          <p className="text-[11px] text-slate-500 mt-1">
+            {health === null
+              ? 'Server va bazaga so‘rov yuborilmoqda'
+              : `Baza: ${health.db === 'up' ? 'ulangan' : 'ulanmagan'} • javob ${health.ms} ms • ${health.at}`}
+          </p>
         </div>
       </div>
 
@@ -428,15 +471,23 @@ export default function SuperAdminPage() {
                     <tr key={center.id} className="hover:bg-slate-50 transition">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-10 h-10 rounded-2xl text-slate-900 flex items-center justify-center font-bold text-sm shadow-md ${
-                              isBlocked
-                                ? 'bg-slate-100 text-slate-500'
-                                : 'bg-indigo-600'
-                            }`}
-                          >
-                            {center.name.charAt(0).toUpperCase()}
-                          </div>
+                          {center.logoUrl ? (
+                            <img
+                              src={center.logoUrl}
+                              alt={center.name}
+                              className={`w-10 h-10 rounded-2xl object-cover border border-slate-200 ${isBlocked ? 'grayscale opacity-60' : ''}`}
+                            />
+                          ) : (
+                            <div
+                              className={`w-10 h-10 rounded-2xl text-slate-900 flex items-center justify-center font-bold text-sm shadow-md ${
+                                isBlocked
+                                  ? 'bg-slate-100 text-slate-500'
+                                  : 'bg-indigo-600'
+                              }`}
+                            >
+                              {center.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                           <div>
                             <div className="font-bold text-slate-900">{center.name}</div>
                             <div className="text-[11px] text-slate-500 font-mono">
@@ -509,6 +560,14 @@ export default function SuperAdminPage() {
                           )}
 
                           <button
+                            onClick={() => setEditing(center)}
+                            className="p-2 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 text-indigo-700 transition cursor-pointer"
+                            title="Nomi va rasmini tahrirlash"
+                          >
+                            <Pencil size={15} />
+                          </button>
+
+                          <button
                             onClick={() => handleResetPassword(center)}
                             className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/25 text-amber-700 transition cursor-pointer"
                             title="Direktor parolini yangilash"
@@ -545,6 +604,17 @@ export default function SuperAdminPage() {
           </table>
         </div>
       </div>
+
+      {editing && (
+        <EditCenterModal
+          center={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            setEditing(null);
+            loadCenters();
+          }}
+        />
+      )}
 
       {/* 4. Yangi Markaz Qo'shish Modali */}
       {isModalOpen && (
