@@ -29,11 +29,12 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  // Joriy foydalanuvchining yangi ma'lumotlari (markaz nomi/rasmi o'zgarsa, qayta login qilmasdan yangilanadi)
   @Get('me')
-  getProfile(@CurrentUser() user: AuthUser) {
+  async getProfile(@CurrentUser() user: AuthUser) {
     return {
       success: true,
-      user,
+      user: await this.authService.profile(user.id),
     };
   }
 }
