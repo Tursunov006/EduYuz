@@ -230,8 +230,12 @@ export default function GroupsPage() {
     }
   };
 
+  const [courseSaving, setCourseSaving] = useState(false);
+
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (courseSaving) return; // ikki marta bosilib, bir xil fan ikki marta qo'shilmasin
+    setCourseSaving(true);
     try {
       const centersRes = await axios.get('/centers', { headers: getHeaders() }).catch(() => ({ data: [] }));
       const centerId = centersRes.data?.[0]?.id;
@@ -249,10 +253,15 @@ export default function GroupsPage() {
       setCourseForm({ title: '', price: 500000 });
       await fetchData();
       if (res.data?.id) {
+        // Fan qo'shilgach orqaga qaytmaymiz: shu fan tanlangan holda yangi guruh oynasi ochiladi
         setFormData((prev) => ({ ...prev, courseId: res.data.id }));
+        setIsModalOpen(true);
       }
     } catch (err: any) {
-      alert('Kurs yaratishda xatolik yuz berdi');
+      const msg = err.response?.data?.message || err.response?.data?.error || 'Kurs yaratishda xatolik yuz berdi';
+      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    } finally {
+      setCourseSaving(false);
     }
   };
 
@@ -892,9 +901,10 @@ export default function GroupsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm"
+                  disabled={courseSaving}
+                  className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm disabled:opacity-60"
                 >
-                  Qo'shish
+                  {courseSaving ? 'Saqlanmoqda…' : "Qo'shish"}
                 </button>
               </div>
             </form>
