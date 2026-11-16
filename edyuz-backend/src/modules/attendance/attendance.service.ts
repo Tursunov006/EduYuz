@@ -77,12 +77,17 @@ export class AttendanceService {
     // Faqat shu guruhga biriktirilgan o'quvchilarga davomat qo'yish mumkin
     const members = await this.prisma.groupStudent.findMany({
       where: { groupId: dto.groupId, studentId: { in: studentIds } },
-      select: { studentId: true },
+      select: { studentId: true, student: { select: { status: true } } },
     });
     const memberIds = new Set(members.map((m) => m.studentId));
     const outsiders = studentIds.filter((id) => !memberIds.has(id));
     if (outsiders.length > 0) {
       throw new BadRequestException("Ro'yxatda bu guruhga tegishli bo'lmagan o'quvchi bor");
+    }
+    // Arxivdagi (faol bo'lmagan) o'quvchiga davomat qo'yilmaydi
+    const inactive = members.filter((m) => m.student?.status !== 'active').map((m) => m.studentId);
+    if (inactive.length > 0) {
+      throw new BadRequestException("Arxivdagi o'quvchiga davomat qo'yib bo'lmaydi");
     }
 
     // Shu kun uchun avval qaysi holat belgilangani: ota-onaga xabar faqat holat o'zgarganda yuboriladi.
@@ -215,7 +220,7 @@ export class AttendanceService {
         id: true,
         name: true,
         days: true,
-        students: { select: { student: { select: { id: true, fullName: true } } } },
+        students: { select: { student: { select: { id: true, fullName: true, status: true } } } },
       },
     });
     if (!group) throw new NotFoundException('Guruh topilmadi');
@@ -226,16 +231,17 @@ export class AttendanceService {
       orderBy: { date: 'asc' },
     });
 
-    // Hozirgi a'zolar + shu oyda davomati bor (keyin guruhdan chiqqan) o'quvchilar
+    // Faqat guruhning hozirgi faol a'zolari (guruhdan chiqarilgan yoki arxivdagi o'quvchilar ko'rsatilmaydi)
     const students = new Map<string, { id: string; fullName: string }>();
-    group.students.forEach((gs) => gs.student && students.set(gs.student.id, gs.student));
-    records.forEach((r) => r.student && !students.has(r.student.id) && students.set(r.student.id, r.student));
+    group.students.forEach(
+      (gs) => gs.student && gs.student.status === 'active' && students.set(gs.student.id, { id: gs.student.id, fullName: gs.student.fullName }),
+    );
 
     return {
       month: m,
       group: { id: group.id, name: group.name, days: group.days },
       students: Array.from(students.values()).sort((a, b) => a.fullName.localeCompare(b.fullName)),
-      records: records.map((r) => ({
+      records: records.filter((r) => students.has(r.studentId)).map((r) => ({
         studentId: r.studentId,
         date: r.date.toISOString().slice(0, 10),
         status: r.status,

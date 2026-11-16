@@ -1,12 +1,16 @@
 import { AttendanceService } from './attendance.service';
 
 describe('AttendanceService.getMonthlyJournal', () => {
-  it("oy bo'yicha a'zolar va davomat yozuvlarini qaytaradi (guruhdan chiqqanlar ham)", async () => {
+  it("faqat hozirgi faol a'zolar va ularning davomatini qaytaradi", async () => {
     const prisma: any = {
       group: {
         findUnique: jest.fn().mockResolvedValue({
           id: 'g1', name: 'IT', days: ['Dush', 'Chor', 'Jum'],
-          students: [{ student: { id: 's2', fullName: 'Vali' } }, { student: { id: 's1', fullName: 'Ali' } }],
+          students: [
+            { student: { id: 's2', fullName: 'Vali', status: 'active' } },
+            { student: { id: 's1', fullName: 'Ali', status: 'active' } },
+            { student: { id: 's4', fullName: 'Arxivdagi', status: 'inactive' } },
+          ],
         }),
       },
       attendance: {
@@ -19,11 +23,9 @@ describe('AttendanceService.getMonthlyJournal', () => {
     const svc = new (AttendanceService as any)(prisma, {}, {}, {}, {});
     const res = await svc.getMonthlyJournal('g1', '2026-11');
     expect(res.month).toBe('2026-11');
-    expect(res.students.map((s: any) => s.fullName)).toEqual(['Ali', 'Sobiq', 'Vali']);
-    expect(res.records).toEqual([
-      { studentId: 's1', date: '2026-11-02', status: 'present' },
-      { studentId: 's3', date: '2026-11-04', status: 'absent' },
-    ]);
+    // s3 guruhdan chiqarilgan, s4 arxivda — ko'rsatilmaydi
+    expect(res.students.map((s: any) => s.fullName)).toEqual(['Ali', 'Vali']);
+    expect(res.records).toEqual([{ studentId: 's1', date: '2026-11-02', status: 'present' }]);
     const where = prisma.attendance.findMany.mock.calls[0][0].where;
     expect(where.date.gte.toISOString()).toBe('2026-11-01T00:00:00.000Z');
     expect(where.date.lt.toISOString()).toBe('2026-12-01T00:00:00.000Z');

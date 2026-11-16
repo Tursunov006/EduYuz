@@ -63,7 +63,10 @@ export default function AttendancePage() {
         ]);
         if (cancelled) return;
         // Faqat shu guruhga biriktirilgan o'quvchilar (boshqa o'quvchilarga davomat qo'yib bo'lmaydi)
-        const members: Student[] = (group?.students || []).map((gs: any) => gs.student).filter(Boolean);
+        // Arxivdagi (faol bo'lmagan) o'quvchilar davomatga chiqmaydi
+        const members: Student[] = (group?.students || [])
+          .map((gs: any) => gs.student)
+          .filter((st: any) => st && (st.status === undefined || st.status === 'active'));
         const savedMap: Record<string, Status> = {};
         (Array.isArray(prev) ? prev : []).forEach((r: any) => {
           savedMap[r.studentId] = String(r.status).toUpperCase() as Status;

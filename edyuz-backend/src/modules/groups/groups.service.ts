@@ -204,13 +204,16 @@ export class GroupsService {
       throw new NotFoundException('O\'quvchi ushbu guruhda mavjud emas');
     }
 
-    return this.prisma.groupStudent.delete({
-      where: {
-        groupId_studentId: {
-          groupId,
-          studentId,
-        },
-      },
-    });
+    // Guruhdan chiqarilganda shu guruhdagi bugungi va keyingi kunlar davomati ham o'chiriladi
+    // (o'tgan kunlar tarixi saqlanadi). Avval chiqarilgan o'quvchi bugun "keldi" bo'lib qolardi.
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const [, removed] = await this.prisma.$transaction([
+      this.prisma.attendance.deleteMany({ where: { groupId, studentId, date: { gte: today } } }),
+      this.prisma.groupStudent.delete({
+        where: { groupId_studentId: { groupId, studentId } },
+      }),
+    ]);
+    return removed;
   }
 }
