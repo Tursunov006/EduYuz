@@ -177,12 +177,14 @@ export default function GroupsPage() {
     if (!isModalOpen && !isCourseModalOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
+      e.preventDefault(); // umumiy Esc yopuvchisi (EscCloser) ikkinchi marta yopmasin
       if (courseListOpen) setCourseListOpen(false);
       else if (isCourseModalOpen) setIsCourseModalOpen(false);
       else closeGroupModal();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // document darajasida: window'dagi umumiy yopuvchidan oldin ishlaydi
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
   });
 
   const openCreateModal = () => {
