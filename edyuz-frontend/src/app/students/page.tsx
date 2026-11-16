@@ -224,7 +224,7 @@ export default function StudentsPage() {
           key: 'status',
           width: 130,
           align: 'center',
-          format: (val) => (val === 'active' ? 'Faol' : val === 'graduated' ? 'Bitirgan' : 'Nofaol'),
+          format: (val) => (val === 'active' ? 'Faol' : val === 'dropped' ? 'Kelmagan' : 'Kursni tugatgan'),
         },
       ],
       students.map((x) => ({ ...x, kind: kindOf(x) })),
@@ -395,6 +395,8 @@ export default function StudentsPage() {
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600">Qarzdor</span>
                         ) : s.status === 'active' ? (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">Faol</span>
+                        ) : s.status === 'dropped' ? (
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700">Kelmagan</span>
                         ) : (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Kursni tugatgan</span>
                         )}
@@ -633,7 +635,8 @@ export default function StudentsPage() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   >
                     <option value="active">Faol</option>
-                    <option value="inactive">Arxivda (kursni tugatgan)</option>
+                    <option value="inactive">Kursni tugatgan</option>
+                    <option value="dropped">Kelmagan</option>
                   </select>
                 </div>
               </div>
