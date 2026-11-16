@@ -53,6 +53,7 @@ export class StudentsService {
         notes: dto.notes?.trim() || null,
         middleName: dto.middleName?.trim() || null,
         kind: dto.kind || 'oquvchi',
+        discount: dto.discount ?? 0,
       },
     });
     // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
@@ -88,6 +89,7 @@ export class StudentsService {
         notes: st.notes,
         status: st.status,
         balance: Number(st.balance),
+        discount: st.discount,
         totalPaid: Number(paid._sum.amount || 0),
         groups: st.groups.map((g) => g.group?.name).filter(Boolean),
         certificates: st.certificates.map((c) => ({
@@ -144,6 +146,7 @@ export class StudentsService {
       notes: st.notes,
       status: st.status,
       balance: Number(st.balance),
+      discount: st.discount,
       totalPaid: paid.get(st.id) || 0,
       groups: st.groups.map((g) => g.group?.name).filter(Boolean),
       certificates: st.certificates.map((c) => ({
@@ -314,6 +317,7 @@ export class StudentsService {
     if (dto.notes !== undefined) dataToUpdate.notes = dto.notes?.trim() || null;
     if (dto.middleName !== undefined) dataToUpdate.middleName = dto.middleName?.trim() || null;
     if (dto.kind !== undefined) dataToUpdate.kind = dto.kind;
+    if (dto.discount !== undefined) dataToUpdate.discount = dto.discount;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;

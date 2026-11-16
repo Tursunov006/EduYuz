@@ -144,6 +144,12 @@ export class PaymentsService {
         const student = item.student;
         if (!student || student.status !== 'active') continue;
 
+        // O'quvchining shaxsiy chegirmasi (foiz) hisobga olinadi
+        const discount = Math.min(100, Math.max(0, Number(student.discount || 0)));
+        const amount = Math.round((price * (100 - discount)) / 100);
+        if (amount <= 0) continue; // 100% chegirma — to'lov yechilmaydi
+        const studentComment = discount > 0 ? `${comment} (chegirma ${discount}%)` : comment;
+
         // Tugma ikki marta bosilsa yoki so'rov qayta yuborilsa — ikkinchi marta yechilmaydi
         const already = await this.prisma.payment.findFirst({
           where: {
@@ -168,16 +174,16 @@ export class PaymentsService {
             where: { id: student.id },
             data: {
               balance: {
-                decrement: price,
+                decrement: amount,
               },
             },
           }),
           this.prisma.payment.create({
             data: {
               studentId: student.id,
-              amount: -price,
+              amount: -amount,
               paymentMethod: PaymentType.cash,
-              comment,
+              comment: studentComment,
             },
           }),
         ]);
@@ -205,7 +211,7 @@ export class PaymentsService {
         }
 
         count++;
-        totalCharged += price;
+        totalCharged += amount;
       }
     }
 
