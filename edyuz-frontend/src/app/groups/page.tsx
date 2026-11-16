@@ -170,6 +170,18 @@ export default function GroupsPage() {
     setFormData(emptyForm());
   };
 
+  // Esc tugmasi bilan ochiq oynani yopish (avval fan oynasi, keyin guruh oynasi)
+  useEffect(() => {
+    if (!isModalOpen && !isCourseModalOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (isCourseModalOpen) setIsCourseModalOpen(false);
+      else closeGroupModal();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
+
   const openCreateModal = () => {
     setEditingGroupId(null);
     setFormData(emptyForm());
