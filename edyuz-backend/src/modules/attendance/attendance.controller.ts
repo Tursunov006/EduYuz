@@ -34,6 +34,17 @@ export class AttendanceController {
     return this.attendanceService.markGroupAttendance(dto, user.id);
   }
 
+  // Davomat jurnali (oylik jadval): ?month=YYYY-MM
+  @Get('group/:groupId/journal')
+  async journal(
+    @Param('groupId') groupId: string,
+    @Query('month') month: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.group(user, groupId);
+    return this.attendanceService.getMonthlyJournal(groupId, month);
+  }
+
   @Get('group/:groupId')
   async findByGroupAndDate(
     @Param('groupId') groupId: string,

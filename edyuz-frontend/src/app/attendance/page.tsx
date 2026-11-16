@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { CheckCheck, Save } from 'lucide-react';
+import { BookOpen, CheckCheck, Save } from 'lucide-react';
 import { api, apiFetch } from '@/lib/api';
 
 type Status = 'PRESENT' | 'ABSENT' | 'LATE';
@@ -35,8 +35,12 @@ export default function AttendancePage() {
       .then((list) => {
         const arr = Array.isArray(list) ? list : [];
         setGroups(arr);
-        const fromUrl = new URLSearchParams(window.location.search).get('groupId');
+        const params = new URLSearchParams(window.location.search);
+        const fromUrl = params.get('groupId');
         if (fromUrl && arr.some((g: any) => g.id === fromUrl)) setGroupId(fromUrl);
+        // Jurnaldan kun bosilib kelinsa (?date=YYYY-MM-DD) — o'sha kun tanlanadi
+        const dateFromUrl = params.get('date');
+        if (dateFromUrl && /^\d{4}-\d{2}-\d{2}$/.test(dateFromUrl)) setDate(dateFromUrl);
       })
       .catch(() => setGroups([]));
   }, []);
@@ -122,9 +126,17 @@ export default function AttendancePage() {
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-10">
       {/* Sarlavha */}
-      <div>
-        <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Davomat</h1>
-        <p className="text-sm text-slate-500 mt-1">Guruh bo‘yicha davomat belgilash</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">Davomat</h1>
+          <p className="text-sm text-slate-500 mt-1">Guruh bo‘yicha davomat belgilash</p>
+        </div>
+        <Link
+          href={groupId ? `/attendance/journal?groupId=${groupId}` : '/attendance/journal'}
+          className="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          <BookOpen className="w-4 h-4 text-indigo-600" /> Davomat jurnali
+        </Link>
       </div>
 
       {/* Asboblar paneli */}
