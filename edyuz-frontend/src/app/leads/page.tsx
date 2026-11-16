@@ -56,39 +56,8 @@ interface Lead {
   igUsername?: string;
 }
 
-const INITIAL_LEADS: Lead[] = [
-  {
-    id: 'l-1',
-    fullName: 'Azizbek Normurodov',
-    phone: '+998901239988',
-    courseInterest: 'Frontend Dasturlash (React)',
-    source: 'Instagram',
-    stage: 'new',
-    createdAt: 'Bugun, 10:30',
-    note: 'Kechki guruh so‘radi (@eduyuzcrmuz)',
-    igUsername: 'azizbek_dev',
-  },
-  {
-    id: 'l-2',
-    fullName: 'Malika Raximova',
-    phone: '+998934447711',
-    courseInterest: 'Ingliz tili (IELTS)',
-    source: 'Telegram',
-    stage: 'contacted',
-    createdAt: 'Kecha, 16:45',
-    note: 'Narxlar haqida ma’lumot berildi',
-  },
-  {
-    id: 'l-3',
-    fullName: 'Javohir Tursunov',
-    phone: '+998998882233',
-    courseInterest: 'Python Backend',
-    source: 'Tavsiya',
-    stage: 'trial',
-    createdAt: '2 kun oldin',
-    note: 'Shanba kuni soat 14:00 da sinov darsiga keladi',
-  },
-];
+// Soxta (namuna) lidlar olib tashlandi: ro'yxat faqat haqiqiy ma'lumotlardan iborat
+const DEMO_LEAD_IDS = new Set(['l-1', 'l-2', 'l-3']);
 
 const STAGES: { key: LeadStage; title: string; badgeColor: string; borderColor: string }[] = [
   {
@@ -144,12 +113,14 @@ export default function LeadsPage() {
 
   async function fetchAndMergeLeads() {
     setSyncing(true);
-    let localList: Lead[] = INITIAL_LEADS;
+    // Brauzerda faqat hali serverga yetib bormagan ("lead-..." ) yozuvlar saqlanadi;
+    // avval saqlanib qolgan namuna lidlar tozalanadi
+    let localList: Lead[] = [];
     try {
       const saved = localStorage.getItem('eduyuz_leads_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) localList = parsed;
+        if (Array.isArray(parsed)) localList = parsed.filter((l: Lead) => l && !DEMO_LEAD_IDS.has(l.id));
       }
     } catch {
       // ignore
@@ -157,12 +128,12 @@ export default function LeadsPage() {
 
     try {
       const remote = await apiFetch('/instagram/leads');
-      if (Array.isArray(remote) && remote.length > 0) {
+      if (Array.isArray(remote)) {
         const mappedRemote: Lead[] = remote.map((r: any) => ({
           id: r.id,
           fullName: r.fullName,
           phone: r.phone,
-          courseInterest: r.course || 'EduYuz CRM Demo',
+          courseInterest: r.course || '',
           source: (r.source as Lead['source']) || 'Instagram',
           stage: r.stage === 'converted' ? 'enrolled' : (r.stage as LeadStage) || 'new',
           createdAt: r.createdAt || 'Bugun',
@@ -171,9 +142,10 @@ export default function LeadsPage() {
         }));
 
         const remoteIds = new Set(mappedRemote.map((m) => m.id));
+        // Server — asosiy manba; brauzerdan faqat hali yuborilmagan vaqtinchalik lidlar qo'shiladi
         const merged = [
           ...mappedRemote,
-          ...localList.filter((l) => !remoteIds.has(l.id)),
+          ...localList.filter((l) => l.id.startsWith('lead-') && !remoteIds.has(l.id)),
         ];
         setLeads(merged);
         localStorage.setItem('eduyuz_leads_v1', JSON.stringify(merged));

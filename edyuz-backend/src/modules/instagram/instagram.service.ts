@@ -92,9 +92,9 @@ export class InstagramService {
       // chunki JSON.stringify qo'shtirnoqlarni ekranlaydi.
       ...(dto.centerId ? { centerId: dto.centerId } : {}),
       fullName: String(dto.fullName || 'Instagram Mijoz').slice(0, 100),
-      course: String(dto.course || 'EduYuz CRM Demo').slice(0, 150),
+      course: String(dto.course || '').slice(0, 150),
       source: String(dto.source || 'Instagram').slice(0, 50),
-      note: String(dto.note || '@eduyuzcrmuz orqali murojaat').slice(0, 500),
+      note: String(dto.note || '').slice(0, 500),
       igUsername: String(dto.igUsername || '').slice(0, 60),
     });
 
