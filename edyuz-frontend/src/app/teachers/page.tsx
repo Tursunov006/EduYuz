@@ -23,7 +23,7 @@ import {
   Check,
   X,
 } from 'lucide-react';
-import { formatMoney } from '@/lib/format';
+import { formatMoney, numVal } from '@/lib/format';
 
 interface Teacher {
   id: string;
@@ -497,7 +497,7 @@ export default function TeachersPage() {
                     required
                     placeholder={form.salaryType === 'percentage' ? 'Masalan: 50' : 'Masalan: 3500000'}
                     value={form.salaryRate}
-                    onChange={(e) => setForm({ ...form, salaryRate: Number(e.target.value) })}
+                    onChange={(e) => setForm({ ...form, salaryRate: numVal(e) })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-slate-900 focus:outline-none focus:border-indigo-500 font-bold"
                   />
                 </div>
@@ -562,7 +562,7 @@ export default function TeachersPage() {
                   type="number"
                   required
                   value={payForm.amount}
-                  onChange={(e) => setPayForm({ ...payForm, amount: Number(e.target.value) })}
+                  onChange={(e) => setPayForm({ ...payForm, amount: numVal(e) })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-emerald-600 font-bold text-base focus:outline-none focus:border-indigo-500"
                 />
               </div>

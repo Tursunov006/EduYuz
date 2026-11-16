@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { numVal } from '@/lib/format';
 import Link from 'next/link';
 import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
@@ -886,7 +887,7 @@ export default function GroupsPage() {
                   type="number"
                   step="10000"
                   value={courseForm.price}
-                  onChange={(e) => setCourseForm({ ...courseForm, price: Number(e.target.value) })}
+                  onChange={(e) => setCourseForm({ ...courseForm, price: numVal(e) })}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
                 />
               </div>

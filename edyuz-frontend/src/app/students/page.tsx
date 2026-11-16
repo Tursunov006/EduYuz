@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { numVal } from '@/lib/format';
 import { Plus, Search, Phone, Edit2, Trash2, Download, Send, Smartphone, MessageSquare, FileSpreadsheet, Copy, CheckCircle2, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { apiFetch } from '@/lib/api';
@@ -566,7 +567,7 @@ export default function StudentsPage() {
                   <input
                     type="number"
                     value={form.balance}
-                    onChange={(e) => setForm({ ...form, balance: Number(e.target.value) })}
+                    onChange={(e) => setForm({ ...form, balance: numVal(e) })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   />
                 </div>
