@@ -237,7 +237,8 @@ export default function StudentsPage() {
   }
 
   // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
-  const activeAll = students.filter((x) => x.status === 'active');
+  // Ro'yxatda faol va "Kelmagan" o'quvchilar turadi; faqat "Kursni tugatgan"lar Arxivga o'tadi
+  const activeAll = students.filter((x) => x.status !== 'inactive');
   const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || directionOf(x) === kindFilter);
   const archivedCount = students.length - activeAll.length;
 
@@ -247,7 +248,7 @@ export default function StudentsPage() {
       <div>
         <h1 className="text-2xl sm:text-[26px] font-bold text-slate-900 leading-tight">{t('students.title', 'O‘quvchilar')}</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Faol o‘quvchilar: <span className="font-semibold text-slate-700">{visibleStudents.length} ta</span>
+          O‘quvchilar: <span className="font-semibold text-slate-700">{visibleStudents.length} ta</span>
           {archivedCount > 0 && (
             <>
               {' · '}
@@ -391,7 +392,9 @@ export default function StudentsPage() {
                         {bal < 0 ? '-' : ''}{Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
                       </td>
                       <td className="px-5 py-3.5">
-                        {bal < 0 ? (
+                        {s.status === 'dropped' ? (
+                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700">Kelmagan</span>
+                        ) : bal < 0 ? (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600">Qarzdor</span>
                         ) : s.status === 'active' ? (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-600">Faol</span>
