@@ -37,7 +37,8 @@ export default function ArchivePage() {
         apiFetch('/students/registry').catch(() => []),
       ]);
       setRegistry(Array.isArray(reg) ? reg : []);
-      setStudents((Array.isArray(st) ? st : []).filter((s: any) => s.status !== 'active'));
+      // Arxivda faqat kursni tugatganlar ("Kelmagan"lar asosiy ro'yxatda qoladi)
+      setStudents((Array.isArray(st) ? st : []).filter((s: any) => s.status === 'inactive'));
       setGroups((Array.isArray(gr) ? gr : []).filter((g: any) => g.archivedAt));
     } finally {
       setLoading(false);
