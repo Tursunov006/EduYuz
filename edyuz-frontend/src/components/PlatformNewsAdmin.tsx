@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Megaphone, Trash2 } from 'lucide-react';
+import { Megaphone, Plus, Trash2, X } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
-// Superadmin: platforma yangiligini yozish va o'chirish. Yangilik barcha markazlarning bosh sahifasida chiqadi.
+// Superadmin: platforma yangiligini yozish va o'chirish (ixcham ko'rinish).
+// Yangilik barcha markazlarning bosh sahifasida chiqadi.
 export default function PlatformNewsAdmin() {
   const [items, setItems] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [link, setLink] = useState('');
@@ -34,9 +36,15 @@ export default function PlatformNewsAdmin() {
       setTitle('');
       setBody('');
       setLink('');
+      setOpen(false);
       await load();
     } catch (err: any) {
-      setError(err?.message || 'Yangilikni saqlab bo‘lmadi');
+      const msg = String(err?.message || '');
+      setError(
+        /forbidden/i.test(msg)
+          ? 'Ruxsat yo‘q: tizimdan chiqib, superadmin login bilan qayta kiring'
+          : msg || 'Yangilikni saqlab bo‘lmadi',
+      );
     } finally {
       setBusy(false);
     }
@@ -52,68 +60,53 @@ export default function PlatformNewsAdmin() {
     }
   }
 
+  const input = 'h-9 px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-900';
+
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 sm:p-6 space-y-5">
-      <div>
-        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-          <Megaphone size={18} className="text-indigo-600" /> Platforma yangiliklari
+    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+          <Megaphone size={16} className="text-indigo-600" /> Platforma yangiliklari
+          <span className="text-xs font-normal text-slate-500">({items.length})</span>
         </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Bu yerda yozilgan yangilik barcha o‘quv markazlarining bosh sahifasida ko‘rinadi.
-        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen((v) => !v);
+            setError('');
+          }}
+          className="inline-flex items-center gap-1 h-8 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+        >
+          {open ? <X size={14} /> : <Plus size={14} />} {open ? 'Yopish' : 'Yangilik'}
+        </button>
       </div>
 
-      <form onSubmit={publish} className="grid gap-3">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Sarlavha, masalan: Yangi funksiya — davomat Telegram xabari"
-          maxLength={150}
-          required
-          className="h-11 px-3.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
-        />
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Yangilik matni"
-          rows={3}
-          maxLength={5000}
-          required
-          className="px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
-        />
-        <input
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="Havola (ixtiyoriy), masalan https://t.me/..."
-          className="h-11 px-3.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
-        />
-        {error && <p className="text-sm text-rose-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={busy}
-          className="justify-self-start h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold disabled:opacity-60"
-        >
-          {busy ? 'Saqlanmoqda…' : 'E’lon qilish'}
-        </button>
-      </form>
+      {open && (
+        <form onSubmit={publish} className="grid gap-2 sm:grid-cols-[1fr_2fr_1fr_auto] items-start">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Sarlavha" maxLength={150} required className={input} />
+          <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Matn" maxLength={5000} required className={input} />
+          <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="Havola (ixtiyoriy)" className={input} />
+          <button type="submit" disabled={busy} className="h-9 px-4 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold disabled:opacity-60">
+            {busy ? '…' : 'E’lon qilish'}
+          </button>
+          {error && <p className="sm:col-span-4 text-xs text-rose-600">{error}</p>}
+        </form>
+      )}
 
       {items.length > 0 && (
-        <ul className="divide-y divide-slate-100 border border-slate-200 rounded-xl">
+        <ul className="divide-y divide-slate-100">
           {items.map((n) => (
-            <li key={n.id} className="flex items-start justify-between gap-3 px-4 py-3">
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-slate-900">{n.title}</p>
-                <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{n.body}</p>
-                <p className="text-[11px] text-slate-400 mt-1">{new Date(n.createdAt).toLocaleString('uz-UZ')}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => remove(n.id)}
-                title="O‘chirish"
-                className="p-2 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 shrink-0"
-              >
-                <Trash2 size={16} />
-              </button>
+            <li key={n.id} className="flex items-center justify-between gap-3 py-2">
+              <p className="min-w-0 text-sm text-slate-800 truncate">
+                <span className="font-semibold">{n.title}</span>
+                <span className="text-slate-500"> — {n.body}</span>
+              </p>
+              <span className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] text-slate-400">{new Date(n.createdAt).toLocaleDateString('uz-UZ')}</span>
+                <button type="button" onClick={() => remove(n.id)} title="O‘chirish" className="p-1.5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50">
+                  <Trash2 size={14} />
+                </button>
+              </span>
             </li>
           ))}
         </ul>
