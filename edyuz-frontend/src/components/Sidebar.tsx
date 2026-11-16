@@ -16,7 +16,8 @@ const items = [
   { name: 'O‘quvchilar', href: '/students' },
   { name: 'Guruhlar va jadval', href: '/groups' },
   { name: 'O‘qituvchilar', href: '/teachers' },
-  { name: 'Davomat', href: '/attendance' },
+  { name: 'Davomat', href: '/attendance', exact: true },
+  { name: 'Davomat jurnali', href: '/attendance/journal' },
   { name: 'Moliya va kassa', href: '/payments' },
   { name: 'Sertifikatlar', href: '/certificates', academic: true },
   { name: 'O‘quvchi portali', href: '/portal' },
@@ -78,7 +79,11 @@ export default function Sidebar() {
   }
 
   const isActive = (item: (typeof items)[number]) =>
-    item.academic ? ACADEMIC_PATHS.includes(pathname) : item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+    item.academic
+      ? ACADEMIC_PATHS.includes(pathname)
+      : item.href === '/' || ('exact' in item && item.exact)
+        ? pathname === item.href
+        : pathname.startsWith(item.href);
 
   function logout() {
     localStorage.removeItem('token');
