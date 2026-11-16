@@ -129,9 +129,13 @@ export default function Sidebar() {
 
       {/* Foydalanuvchi va chiqish */}
       <div className="px-5 py-4 border-t border-slate-100 flex items-center gap-3">
-        <span className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
-          {name.trim()[0]?.toUpperCase() || 'A'}
-        </span>
+        {user.centerLogo && user.role !== 'superadmin' ? (
+          <img src={user.centerLogo} alt="" className="w-9 h-9 rounded-full object-cover border border-slate-200 shrink-0" />
+        ) : (
+          <span className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
+            {name.trim()[0]?.toUpperCase() || 'A'}
+          </span>
+        )}
         <div className="min-w-0 flex-1 leading-tight">
           <p className="text-sm font-semibold text-slate-900 truncate">{name}</p>
           <p className="text-xs text-slate-500">{ROLE_LABELS[user.role || ''] || 'Boshqaruvchi'}</p>
@@ -155,18 +159,6 @@ export default function Sidebar() {
         <div className="px-5 pt-7 pb-3">
           <Brand />
         </div>
-        {user.centerName && user.role !== 'superadmin' && (
-          <div className="mx-5 mb-2 flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2">
-            {user.centerLogo ? (
-              <img src={user.centerLogo} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-            ) : (
-              <span className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
-                {user.centerName.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <span className="text-xs font-semibold text-slate-700 truncate">{user.centerName}</span>
-          </div>
-        )}
         {content()}
       </aside>
 
