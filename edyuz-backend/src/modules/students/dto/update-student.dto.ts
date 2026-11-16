@@ -62,4 +62,10 @@ export class UpdateStudentDto {
   @Min(0, { message: 'Chegirma 0% dan kam bo\'lmaydi' })
   @Max(100, { message: 'Chegirma 100% dan oshmaydi' })
   discount?: number;
+
+  // Yo'nalish (fan)
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  direction?: string;
 }

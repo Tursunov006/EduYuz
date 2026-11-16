@@ -12,13 +12,27 @@ import { exportToExcel } from '@/lib/excelExport';
 // Tur avtomatik: guruhi yo'q = o'quvchi, guruhga qo'shilgan = talaba
 const kindOf = (x: any) => ((x.groups?.length || 0) > 0 ? 'talaba' : 'oquvchi');
 
+// Yo'nalishlar (fanlar) bo'yicha bo'limlar
+const DIRECTIONS = ['IT', 'Ingliz tili (Beginner)', 'Ingliz tili (CEFR)', 'Robototexnika', 'Boshqa'] as const;
+
+// O'quvchining yo'nalishi: qo'lda tanlangan bo'lsa — o'sha; aks holda guruh nomi va izohdan aniqlanadi
+function directionOf(x: any): string {
+  if (x.direction && (DIRECTIONS as readonly string[]).includes(x.direction)) return x.direction;
+  const text = `${(x.groups || []).join(' ')} ${x.notes || ''}`.toLowerCase();
+  if (text.includes('cefr')) return 'Ingliz tili (CEFR)';
+  if (/ingliz|english|ielts|beginner/.test(text)) return 'Ingliz tili (Beginner)';
+  if (text.includes('robot')) return 'Robototexnika';
+  if (/(^|[^a-z])it([^a-z]|$)|dastur|python|frontend|backend|kompyuter|web/.test(text)) return 'IT';
+  return 'Boshqa';
+}
+
 export default function StudentsPage() {
   const { t } = useTranslation();
   const [students, setStudents] = useState<any[]>([]);
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
-  // Ro'yxat filtri: hammasi / o'quvchilar / talabalar
-  const [kindFilter, setKindFilter] = useState<'all' | 'oquvchi' | 'talaba'>('all');
+  // Ro'yxat filtri: hammasi yoki yo'nalish (fan) bo'yicha
+  const [kindFilter, setKindFilter] = useState<string>('all');
   // Faol / kursni tugatgan (nofaol) / barchasi
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -37,6 +51,7 @@ export default function StudentsPage() {
     parentPhone: '',
     balance: 0,
     discount: 0,
+    direction: '',
     status: 'active',
     passport: '',
     birthDate: '',
@@ -87,6 +102,7 @@ export default function StudentsPage() {
       parentPhone: '',
       balance: 0,
       discount: 0,
+      direction: '',
       status: 'active',
       passport: '',
       birthDate: '',
@@ -107,6 +123,7 @@ export default function StudentsPage() {
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
       discount: Number(student.discount) || 0,
+      direction: student.direction || '',
       status: student.status || 'active',
       passport: student.passport || '',
       birthDate: student.birthDate ? String(student.birthDate).slice(0, 10) : '',
@@ -157,6 +174,7 @@ export default function StudentsPage() {
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
             discount: Number(form.discount) || 0,
+            direction: form.direction,
             status: form.status,
             passport: form.passport,
             birthDate: form.birthDate || undefined,
@@ -171,6 +189,7 @@ export default function StudentsPage() {
             ...form,
             balance: Number(form.balance),
             discount: Number(form.discount) || 0,
+            direction: form.direction,
             birthDate: form.birthDate || undefined,
           }),
         });
@@ -219,7 +238,7 @@ export default function StudentsPage() {
 
   // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
   const activeAll = students.filter((x) => x.status === 'active');
-  const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || kindOf(x) === kindFilter);
+  const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || directionOf(x) === kindFilter);
   const archivedCount = students.length - activeAll.length;
 
   return (
@@ -268,13 +287,12 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      {/* O'quvchi / talaba */}
+      {/* Barchasi + yo'nalishlar (fanlar) */}
       <div className="flex flex-wrap items-center gap-2">
-        {([
+        {[
           { key: 'all', label: 'Barchasi', count: activeAll.length },
-          { key: 'oquvchi', label: 'O‘quvchilar', count: activeAll.filter((x) => kindOf(x) === 'oquvchi').length },
-          { key: 'talaba', label: 'Talabalar', count: activeAll.filter((x) => kindOf(x) === 'talaba').length },
-        ] as const).map((f) => (
+          ...DIRECTIONS.map((d) => ({ key: d as string, label: d as string, count: activeAll.filter((x) => directionOf(x) === d).length })),
+        ].map((f) => (
           <button
             key={f.key}
             type="button"
@@ -318,7 +336,7 @@ export default function StudentsPage() {
                       {search
                         ? `«${search}» bo‘yicha o‘quvchi yo‘q. Boshqa ism yoki raqam bilan qidiring`
                         : kindFilter !== 'all'
-                          ? `Bu bo‘limda hali ${kindFilter === 'talaba' ? 'talaba' : 'o‘quvchi'} yo‘q. Guruhga qo‘shilgan o‘quvchi avtomatik talabaga o‘tadi`
+                          ? `«${kindFilter}» yo‘nalishida hali o‘quvchi yo‘q. O‘quvchini tahrirlab yo‘nalishini tanlang`
                           : '«O‘quvchi qo‘shish» tugmasi bilan birinchi o‘quvchini kiriting'}
                     </p>
                     {!search && kindFilter === 'all' && (
@@ -557,6 +575,21 @@ export default function StudentsPage() {
                   onChange={(e) => setForm({ ...form, address: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Yo‘nalish (fan)</label>
+                <select
+                  value={form.direction}
+                  onChange={(e) => setForm({ ...form, direction: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                >
+                  <option value="">Avtomatik (guruh va izohdan aniqlanadi)</option>
+                  {DIRECTIONS.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Izoh</label>
