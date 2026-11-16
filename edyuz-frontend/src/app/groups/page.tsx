@@ -253,7 +253,9 @@ export default function GroupsPage() {
       setCourseForm({ title: '', price: 500000 });
       await fetchData();
       if (res.data?.id) {
+        // Fan qo'shilgach orqaga qaytmaymiz: shu fan tanlangan holda yangi guruh oynasi ochiladi
         setFormData((prev) => ({ ...prev, courseId: res.data.id }));
+        setIsModalOpen(true);
       }
     } catch (err: any) {
       const msg = err.response?.data?.message || err.response?.data?.error || 'Kurs yaratishda xatolik yuz berdi';
