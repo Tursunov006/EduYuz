@@ -2,8 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -59,6 +61,29 @@ export class PaymentsController {
   async findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     await this.access.payment(user, id);
     return this.paymentsService.findOne(id);
+  }
+
+  // To'lov izohini tahrirlash — faqat admin. Summa o'zgartirilmaydi (xato bo'lsa bekor qilib, qayta kiritiladi).
+  @Roles(RoleType.admin)
+  @Patch(':id')
+  async updateComment(
+    @Param('id') id: string,
+    @Body('comment') comment: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    await this.access.payment(user, id);
+    if (typeof comment !== 'string' || comment.length > 500) {
+      throw new BadRequestException("Izoh matni noto'g'ri (500 belgigacha)");
+    }
+    return this.paymentsService.updateComment(id, comment);
+  }
+
+  // Xato kiritilgan to'lovni bekor qilish — faqat admin; o'quvchi balansi qaytariladi
+  @Roles(RoleType.admin)
+  @Delete(':id')
+  async cancel(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.payment(user, id);
+    return this.paymentsService.cancel(id);
   }
 
   // "reset-all-data" endpointi olib tashlandi: u login'siz chaqirilganda BARCHA

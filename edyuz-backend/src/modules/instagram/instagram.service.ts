@@ -122,6 +122,42 @@ export class InstagramService {
     return this.mapRowToLead(updated);
   }
 
+  // 3b. Lid ma'lumotlarini tahrirlash (ism, telefon, kurs, izoh va ixtiyoriy bosqich)
+  async updateLead(
+    id: string,
+    dto: { stage?: string; fullName?: string; phone?: string; course?: string; note?: string },
+    centerId?: string,
+  ): Promise<LeadRecord> {
+    const row = await this.findLeadRow(id, centerId);
+    if (!row) throw new NotFoundException('Lid topilmadi');
+
+    let parsed: any = {};
+    try {
+      parsed = JSON.parse(row.message);
+    } catch {
+      parsed = {};
+    }
+    // centerId birinchi qoladi va o'zgarmaydi (markaz bo'yicha qidiruv shu belgiga tayanadi)
+    const { centerId: keepCenter, ...rest } = parsed;
+    const next = {
+      ...(keepCenter ? { centerId: keepCenter } : {}),
+      ...rest,
+      ...(dto.fullName !== undefined ? { fullName: dto.fullName.trim().slice(0, 100) } : {}),
+      ...(dto.course !== undefined ? { course: dto.course.trim().slice(0, 150) } : {}),
+      ...(dto.note !== undefined ? { note: dto.note.trim().slice(0, 500) } : {}),
+    };
+
+    const updated = await this.prisma.smsLog.update({
+      where: { id },
+      data: {
+        message: JSON.stringify(next),
+        ...(dto.phone !== undefined ? { phone: dto.phone.trim().slice(0, 20) } : {}),
+        ...(dto.stage && STAGE_TO_STATUS[dto.stage] ? { status: STAGE_TO_STATUS[dto.stage] } : {}),
+      },
+    });
+    return this.mapRowToLead(updated);
+  }
+
   // 4. Lidni o'chirish. Avval bu yerda ID bo'yicha sms_logs dagi ISTALGAN yozuv
   //    (jumladan haqiqiy SMS jurnali) o'chirilishi mumkin edi.
   async deleteLead(id: string, centerId?: string): Promise<{ deleted: boolean }> {

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { RoleType } from '@prisma/client';
 import { CertificatesService } from './certificates.service';
-import { IssueCertificateDto } from './dto/issue-certificate.dto';
+import { IssueCertificateDto, UpdateCertificateDto } from './dto/issue-certificate.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -21,6 +21,24 @@ export class CertificatesController {
   async issue(@Body() dto: IssueCertificateDto, @CurrentUser() user: AuthUser) {
     await this.access.student(user, dto.studentId);
     return this.certificatesService.issue(dto);
+  }
+
+  // Sertifikatni tahrirlash (kurs nomi, baho) — faqat admin
+  @Roles(RoleType.admin)
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateCertificateDto, @CurrentUser() user: AuthUser) {
+    const cert = await this.certificatesService.findOne(id);
+    await this.access.student(user, cert.studentId);
+    return this.certificatesService.update(id, dto);
+  }
+
+  // Sertifikatni bekor qilish (o'chirish) — faqat admin; QR tekshiruvda endi "topilmadi" chiqadi
+  @Roles(RoleType.admin)
+  @Delete(':id')
+  async remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    const cert = await this.certificatesService.findOne(id);
+    await this.access.student(user, cert.studentId);
+    return this.certificatesService.remove(id);
   }
 
   @Get()

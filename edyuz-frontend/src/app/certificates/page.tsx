@@ -12,7 +12,9 @@ import {
   CheckCircle2, 
   GraduationCap,
   Calendar,
-  Sparkles
+  Sparkles,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import AcademicHubNav from '@/components/AcademicHubNav';
@@ -25,6 +27,8 @@ export default function CertificatesPage() {
   // Modallar
   const [isIssueModalOpen, setIsIssueModalOpen] = useState(false);
   const [viewingCert, setViewingCert] = useState<any>(null);
+  // Tahrirlanayotgan sertifikat (null — yangi sertifikat beriladi)
+  const [editingCert, setEditingCert] = useState<any>(null);
 
   const [issueForm, setIssueForm] = useState({
     studentId: '',
@@ -60,8 +64,47 @@ export default function CertificatesPage() {
     loadData();
   }, []);
 
+  function closeIssueModal() {
+    setIsIssueModalOpen(false);
+    if (editingCert) {
+      setEditingCert(null);
+      setIssueForm({ studentId: students[0]?.id || '', courseTitle: 'Frontend Dasturlash Bootcamp', grade: 'A+' });
+    }
+  }
+
+  function openEditCert(cert: any) {
+    setEditingCert(cert);
+    setIssueForm({ studentId: cert.studentId, courseTitle: cert.courseTitle, grade: cert.grade || 'A+' });
+    setIsIssueModalOpen(true);
+  }
+
+  async function handleDeleteCert(cert: any) {
+    if (!confirm(`${cert.student?.fullName || ''} — ${cert.certificateNumber} sertifikatini bekor qilasizmi?\n\nQR-kod orqali tekshirganda u endi topilmaydi.`)) return;
+    try {
+      await axios.delete(`/certificates/${cert.id}`, { headers: getHeaders() });
+      setCertificates((prev) => prev.filter((c) => c.id !== cert.id));
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Sertifikatni o'chirib bo'lmadi");
+    }
+  }
+
   async function handleIssueCertificate(e: React.FormEvent) {
     e.preventDefault();
+    if (editingCert) {
+      try {
+        await axios.patch(
+          `/certificates/${editingCert.id}`,
+          { courseTitle: issueForm.courseTitle, grade: issueForm.grade },
+          { headers: getHeaders() },
+        );
+        closeIssueModal();
+        loadData();
+      } catch (err: any) {
+        const msg = err.response?.data?.message || "Saqlab bo'lmadi";
+        alert(Array.isArray(msg) ? msg.join(', ') : msg);
+      }
+      return;
+    }
     if (!issueForm.studentId) return alert('O\'quvchini tanlang!');
     try {
       const res = await axios.post(
@@ -154,6 +197,20 @@ export default function CertificatesPage() {
                 >
                   <ExternalLink size={15} />
                 </Link>
+                <button
+                  onClick={() => openEditCert(cert)}
+                  title="Tahrirlash"
+                  className="p-2 bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 rounded-xl transition"
+                >
+                  <Pencil size={15} />
+                </button>
+                <button
+                  onClick={() => handleDeleteCert(cert)}
+                  title="Bekor qilish (o'chirish)"
+                  className="p-2 bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-xl transition"
+                >
+                  <Trash2 size={15} />
+                </button>
               </div>
             </div>
           ))}
@@ -166,13 +223,14 @@ export default function CertificatesPage() {
           <div className="bg-white border border-slate-200 rounded-2xl p-6 w-full max-w-md space-y-4 shadow-sm">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <Award className="text-amber-600" size={20} />
-              Yangi Sertifikat Berish
+              {editingCert ? 'Sertifikatni tahrirlash' : 'Yangi Sertifikat Berish'}
             </h3>
             <form onSubmit={handleIssueCertificate} className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-slate-500">O'quvchini Tanlang *</label>
                 <select
                   required
+                  disabled={!!editingCert}
                   value={issueForm.studentId}
                   onChange={(e) => setIssueForm({ ...issueForm, studentId: e.target.value })}
                   className="w-full mt-1.5 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
@@ -213,7 +271,7 @@ export default function CertificatesPage() {
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => setIsIssueModalOpen(false)}
+                  onClick={closeIssueModal}
                   className="px-4 py-2 text-sm text-slate-500 hover:text-slate-900"
                 >
                   Bekor qilish
@@ -222,7 +280,7 @@ export default function CertificatesPage() {
                   type="submit"
                   className="bg-amber-500 hover:bg-amber-600 text-slate-900 font-bold px-5 py-2 rounded-xl text-sm transition"
                 >
-                  Sertifikatni Rasmiylashtirish
+                  {editingCert ? 'Saqlash' : 'Sertifikatni Rasmiylashtirish'}
                 </button>
               </div>
             </form>

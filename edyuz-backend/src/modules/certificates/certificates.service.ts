@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { IssueCertificateDto } from './dto/issue-certificate.dto';
+import { IssueCertificateDto, UpdateCertificateDto } from './dto/issue-certificate.dto';
 
 @Injectable()
 export class CertificatesService {
@@ -106,5 +106,26 @@ export class CertificatesService {
       where: { studentId },
       orderBy: { issuedAt: 'desc' },
     });
+  }
+
+  async findOne(id: string) {
+    const cert = await this.prisma.certificate.findUnique({ where: { id } });
+    if (!cert) throw new NotFoundException('Sertifikat topilmadi');
+    return cert;
+  }
+
+  async update(id: string, dto: UpdateCertificateDto) {
+    return this.prisma.certificate.update({
+      where: { id },
+      data: {
+        ...(dto.courseTitle !== undefined ? { courseTitle: dto.courseTitle.trim() } : {}),
+        ...(dto.grade !== undefined ? { grade: dto.grade.trim() || 'A+' } : {}),
+      },
+    });
+  }
+
+  async remove(id: string) {
+    await this.prisma.certificate.delete({ where: { id } });
+    return { deleted: true };
   }
 }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -105,7 +106,11 @@ export class InstagramController {
     @Body() dto: UpdateLeadStageDto,
     @CurrentUser() user: AuthUser,
   ) {
-    return this.instagramService.updateLeadStage(id, dto.stage, this.access.scopeCenter(user));
+    const { stage, ...fields } = dto;
+    const hasFields = Object.values(fields).some((v) => v !== undefined);
+    if (hasFields) return this.instagramService.updateLead(id, dto, this.access.scopeCenter(user));
+    if (!stage) throw new BadRequestException("O'zgartirish uchun ma'lumot yuborilmadi");
+    return this.instagramService.updateLeadStage(id, stage, this.access.scopeCenter(user));
   }
 
   // 7. Lidni o'chirish

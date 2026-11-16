@@ -245,6 +245,29 @@ export class PaymentsService {
     });
   }
 
+  async updateComment(id: string, comment: string) {
+    await this.findOne(id);
+    return this.prisma.payment.update({ where: { id }, data: { comment: comment.trim() || null } });
+  }
+
+  // To'lovni bekor qilish: yozuv o'chiriladi va uning o'quvchi balansiga ta'siri qaytariladi.
+  // Click/Payme orqali kelgan onlayn to'lovlar bekor qilinmaydi (ular to'lov tizimi tomonida qaytariladi).
+  async cancel(id: string) {
+    const payment = await this.findOne(id);
+    if (payment.paymentMethod === PaymentType.click || payment.paymentMethod === PaymentType.payme) {
+      throw new BadRequestException("Onlayn (Click/Payme) to'lovni bu yerdan bekor qilib bo'lmaydi");
+    }
+    const amount = Number(payment.amount);
+    const [, student] = await this.prisma.$transaction([
+      this.prisma.payment.delete({ where: { id } }),
+      this.prisma.student.update({
+        where: { id: payment.studentId },
+        data: { balance: { decrement: amount } },
+      }),
+    ]);
+    return { cancelled: true, newBalance: Number(student.balance) };
+  }
+
   async findOne(id: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { id },

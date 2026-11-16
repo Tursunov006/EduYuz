@@ -36,9 +36,32 @@ export class CreateLeadDto {
   igUsername?: string;
 }
 
+// Lidni yangilash: bosqich va/yoki ma'lumotlar (ism, telefon, kurs, izoh)
 export class UpdateLeadStageDto {
+  @IsOptional()
   @IsIn(['new', 'contacted', 'trial', 'converted'], { message: "Bosqich noto'g'ri" })
-  stage: string;
+  stage?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty({ message: "Ism bo'sh bo'lmasin" })
+  @MaxLength(100)
+  fullName?: string;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^\+?[\d\s()-]{7,20}$/, { message: "Telefon raqam formati noto'g'ri" })
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(150)
+  course?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  note?: string;
 }
 
 export class InstagramAiChatDto {
