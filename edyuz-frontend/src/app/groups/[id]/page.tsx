@@ -65,7 +65,8 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     try {
       await axios.post(
         `/groups/${groupId}/students`,
-        { studentId: selectedStudentId },
+        // Tanlangan o'quvchi ro'yxatda bo'lmasa (masalan allaqachon guruhda), ro'yxatdagi birinchisi olinadi
+        { studentId: pickedStudentId },
         { headers: getHeaders() }
       );
       setIsAddModalOpen(false);
@@ -126,6 +127,10 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   // Guruhda hali mavjud bo'lmagan o'quvchilar
   const currentStudentIds = new Set((group.students || []).map((item: any) => item.studentId));
   const availableStudents = allStudents.filter((s) => !currentStudentIds.has(s.id));
+  // Select'da ko'rinib turgan o'quvchi bilan yuboriladigan o'quvchi doim bir xil bo'lishi uchun
+  const pickedStudentId = availableStudents.some((s) => s.id === selectedStudentId)
+    ? selectedStudentId
+    : availableStudents[0]?.id || '';
 
   return (
     <div className="space-y-6">
@@ -321,7 +326,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
                 ) : (
                   <select
                     required
-                    value={selectedStudentId}
+                    value={pickedStudentId}
                     onChange={(e) => setSelectedStudentId(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
                   >
