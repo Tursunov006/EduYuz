@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -16,9 +16,24 @@ export class CoursesService {
       throw new NotFoundException('Ko\'rsatilgan markaz topilmadi');
     }
 
+    const title = dto.title.trim().replace(/\s+/g, ' ');
+    await this.assertTitleFree(dto.centerId, title);
     return this.prisma.course.create({
-      data: { centerId: dto.centerId, title: dto.title, price: dto.price },
+      data: { centerId: dto.centerId, title, price: dto.price },
     });
+  }
+
+  // Bir markazda bir xil nomli fan ikkinchi marta qo'shilmasin (katta-kichik harf farqsiz)
+  private async assertTitleFree(centerId: string, title: string, exceptId?: string) {
+    const dup = await this.prisma.course.findFirst({
+      where: {
+        centerId,
+        title: { equals: title, mode: 'insensitive' },
+        ...(exceptId && { id: { not: exceptId } }),
+      },
+      select: { id: true },
+    });
+    if (dup) throw new ConflictException(`«${title}» nomli fan allaqachon bor`);
   }
 
   async findAll(centerId?: string) {
@@ -60,7 +75,11 @@ export class CoursesService {
   }
 
   async update(id: string, dto: UpdateCourseDto) {
-    await this.findOne(id);
+    const current = await this.findOne(id);
+    if (dto.title) {
+      dto.title = dto.title.trim().replace(/\s+/g, ' ');
+      await this.assertTitleFree(current.centerId, dto.title, id);
+    }
 
     return this.prisma.course.update({
       where: { id },
@@ -69,7 +88,12 @@ export class CoursesService {
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    const course = await this.findOne(id);
+    if (course.groups.length > 0) {
+      throw new ConflictException(
+        `Bu fanga ${course.groups.length} ta guruh bog'langan — avval guruhlarni boshqa fanga o'tkazing`,
+      );
+    }
     return this.prisma.course.delete({
       where: { id },
     });
