@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { numVal } from '@/lib/format';
 import Link from 'next/link';
 import {
   CheckCircle2,
@@ -412,7 +413,7 @@ export default function InstagramBioPage() {
                 max={1000}
                 step={10}
                 value={studentCount}
-                onChange={(e) => setStudentCount(Number(e.target.value))}
+                onChange={(e) => setStudentCount(numVal(e))}
                 className="w-full accent-pink-500 cursor-pointer h-2 bg-slate-100 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">
@@ -437,7 +438,7 @@ export default function InstagramBioPage() {
                 max={1500000}
                 step={50000}
                 value={coursePrice}
-                onChange={(e) => setCoursePrice(Number(e.target.value))}
+                onChange={(e) => setCoursePrice(numVal(e))}
                 className="w-full accent-purple-500 cursor-pointer h-2 bg-slate-100 rounded-lg"
               />
               <div className="flex justify-between text-[10px] text-slate-500 font-medium">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import { numVal } from '@/lib/format';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
@@ -774,7 +775,7 @@ function PortalContent() {
                       min={1000}
                       step={5000}
                       value={payAmount}
-                      onChange={(e) => setPayAmount(Number(e.target.value))}
+                      onChange={(e) => setPayAmount(numVal(e))}
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold text-emerald-600 focus:outline-none focus:border-emerald-500"
                     />
                     <span className="absolute right-3.5 top-2.5 text-xs font-bold text-slate-500">UZS</span>

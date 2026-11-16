@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { numVal } from '@/lib/format';
 import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
@@ -638,7 +639,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                   <input
                     type="number"
                     value={hwForm.maxScore}
-                    onChange={(e) => setHwForm({ ...hwForm, maxScore: Number(e.target.value) })}
+                    onChange={(e) => setHwForm({ ...hwForm, maxScore: numVal(e) })}
                     className="w-full mt-1.5 px-3.5 py-2 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900"
                   />
                 </div>
@@ -797,7 +798,7 @@ export default function LmsView({ groupId, groupName, students = [] }: LmsViewPr
                             onChange={(e) =>
                               setGradingState({
                                 ...gradingState,
-                                [sub.id]: { ...currentGrade, score: Number(e.target.value) },
+                                [sub.id]: { ...currentGrade, score: numVal(e) },
                               })
                             }
                             className="w-full px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-xs text-slate-900"
