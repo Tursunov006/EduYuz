@@ -7,7 +7,7 @@ import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
-  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive
+  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown
 } from 'lucide-react';
 
 interface Group {
@@ -93,6 +93,7 @@ export default function GroupsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
+  const [courseListOpen, setCourseListOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'cards' | 'timetable'>('cards');
   // Tahrirlanayotgan guruh (null bo'lsa, yangi guruh ochiladi)
@@ -166,6 +167,7 @@ export default function GroupsPage() {
 
   const closeGroupModal = () => {
     setIsModalOpen(false);
+    setCourseListOpen(false);
     setEditingGroupId(null);
     setFormData(emptyForm());
   };
@@ -175,7 +177,8 @@ export default function GroupsPage() {
     if (!isModalOpen && !isCourseModalOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      if (isCourseModalOpen) setIsCourseModalOpen(false);
+      if (courseListOpen) setCourseListOpen(false);
+      else if (isCourseModalOpen) setIsCourseModalOpen(false);
       else closeGroupModal();
     };
     window.addEventListener('keydown', onKey);
@@ -244,6 +247,25 @@ export default function GroupsPage() {
   };
 
   const [courseSaving, setCourseSaving] = useState(false);
+
+  // Fanni o'chirish: guruh bog'langan fan o'chirilmaydi
+  const handleDeleteCourse = async (c: CourseItem) => {
+    const used = groups.filter((g) => g.course?.id === c.id).length;
+    if (used > 0) {
+      alert(`«${c.title}» faniga ${used} ta guruh bog'langan. Avval guruhlarni boshqa fanga o'tkazing yoki arxivlang.`);
+      return;
+    }
+    if (!confirm(`«${c.title}» fanini o'chirasizmi?`)) return;
+    try {
+      await axios.delete(`/courses/${c.id}`, { headers: getHeaders() });
+      const rest = courses.filter((x) => x.id !== c.id);
+      setCourses(rest);
+      setFormData((prev) => (prev.courseId === c.id ? { ...prev, courseId: rest[0]?.id || '' } : prev));
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.response?.data?.error || "Fanni o'chirib bo'lmadi";
+      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    }
+  };
 
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -747,21 +769,58 @@ export default function GroupsPage() {
                     + Yangi fan qo'shish
                   </button>
                 </div>
-                <select
-                  value={formData.courseId}
-                  onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500"
-                >
-                  {courses.length === 0 ? (
-                    <option value="">Standart Kurs (Avtomatik yaratiladi)</option>
-                  ) : (
-                    courses.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.title} ({Number(c.price).toLocaleString('uz-UZ')} so'm)
-                      </option>
-                    ))
-                  )}
-                </select>
+                {courses.length === 0 ? (
+                  <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-500 text-xs sm:text-sm">
+                    Standart Kurs (Avtomatik yaratiladi)
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setCourseListOpen((v) => !v)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-700 text-xs sm:text-sm focus:outline-none focus:border-indigo-500 text-left"
+                    >
+                      <span className="truncate">
+                        {(() => {
+                          const c = courses.find((x) => x.id === formData.courseId);
+                          return c ? `${c.title} (${Number(c.price).toLocaleString('uz-UZ')} so'm)` : 'Fanni tanlang';
+                        })()}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                    </button>
+                    {courseListOpen && (
+                      <ul className="absolute z-20 mt-1 w-full max-h-60 overflow-auto bg-white border border-slate-200 rounded-2xl shadow-lg py-1">
+                        {courses.map((c) => (
+                          <li
+                            key={c.id}
+                            className={`flex items-center justify-between gap-2 px-4 py-2 text-xs sm:text-sm cursor-pointer hover:bg-indigo-50 ${
+                              c.id === formData.courseId ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-slate-700'
+                            }`}
+                            onClick={() => {
+                              setFormData({ ...formData, courseId: c.id });
+                              setCourseListOpen(false);
+                            }}
+                          >
+                            <span className="truncate">
+                              {c.title} ({Number(c.price).toLocaleString('uz-UZ')} so'm)
+                            </span>
+                            <button
+                              type="button"
+                              title="Fanni o'chirish"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCourse(c);
+                              }}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 shrink-0"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* O'qituvchi tanlash */}
