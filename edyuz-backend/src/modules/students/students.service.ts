@@ -54,6 +54,7 @@ export class StudentsService {
         middleName: dto.middleName?.trim() || null,
         kind: dto.kind || 'oquvchi',
         discount: dto.discount ?? 0,
+        direction: dto.direction?.trim() || null,
       },
     });
     // O'quvchi qo'shilishi bilan uning ma'lumotlari Arxivga zaxiralanadi
@@ -90,6 +91,7 @@ export class StudentsService {
         status: st.status,
         balance: Number(st.balance),
         discount: st.discount,
+        direction: st.direction,
         totalPaid: Number(paid._sum.amount || 0),
         groups: st.groups.map((g) => g.group?.name).filter(Boolean),
         certificates: st.certificates.map((c) => ({
@@ -147,6 +149,7 @@ export class StudentsService {
       status: st.status,
       balance: Number(st.balance),
       discount: st.discount,
+      direction: st.direction,
       totalPaid: paid.get(st.id) || 0,
       groups: st.groups.map((g) => g.group?.name).filter(Boolean),
       certificates: st.certificates.map((c) => ({
@@ -318,6 +321,7 @@ export class StudentsService {
     if (dto.middleName !== undefined) dataToUpdate.middleName = dto.middleName?.trim() || null;
     if (dto.kind !== undefined) dataToUpdate.kind = dto.kind;
     if (dto.discount !== undefined) dataToUpdate.discount = dto.discount;
+    if (dto.direction !== undefined) dataToUpdate.direction = dto.direction?.trim() || null;
 
     if (dto.parentChatId !== undefined) {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;

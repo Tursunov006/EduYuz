@@ -142,6 +142,8 @@ model Student {
   kind         String        @default("oquvchi") @db.VarChar(20)
   // Oylik to'lovdan chegirma, foizda (0–100)
   discount     Int           @default(0) @map("discount_percent")
+  // Yo'nalish (fan): IT, Ingliz tili (Beginner), Ingliz tili (CEFR), Robototexnika, Boshqa
+  direction    String?       @db.VarChar(50)
   createdAt    DateTime      @default(now()) @map("created_at")
 
   center           Center               @relation(fields: [centerId], references: [id], onDelete: Cascade)
