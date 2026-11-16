@@ -1,4 +1,4 @@
-import { IsIn, IsDateString, IsEnum, MaxLength, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsInt, Min, Max, IsDateString, IsEnum, MaxLength, IsNumber, IsOptional, IsString } from 'class-validator';
 import { StudentStatus } from '@prisma/client';
 
 export class UpdateStudentDto {
@@ -55,4 +55,11 @@ export class UpdateStudentDto {
   @IsOptional()
   @IsIn(['oquvchi', 'talaba'], { message: 'Turi noto\'g\'ri (oquvchi yoki talaba)' })
   kind?: string;
+
+  // Oylik to'lovdan chegirma (foiz, 0–100)
+  @IsOptional()
+  @IsInt({ message: 'Chegirma butun son bo\'lishi kerak' })
+  @Min(0, { message: 'Chegirma 0% dan kam bo\'lmaydi' })
+  @Max(100, { message: 'Chegirma 100% dan oshmaydi' })
+  discount?: number;
 }

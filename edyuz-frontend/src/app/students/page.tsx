@@ -36,6 +36,7 @@ export default function StudentsPage() {
     phone: '',
     parentPhone: '',
     balance: 0,
+    discount: 0,
     status: 'active',
     passport: '',
     birthDate: '',
@@ -85,6 +86,7 @@ export default function StudentsPage() {
       phone: '',
       parentPhone: '',
       balance: 0,
+      discount: 0,
       status: 'active',
       passport: '',
       birthDate: '',
@@ -104,6 +106,7 @@ export default function StudentsPage() {
       phone: student.phone || '',
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
+      discount: Number(student.discount) || 0,
       status: student.status || 'active',
       passport: student.passport || '',
       birthDate: student.birthDate ? String(student.birthDate).slice(0, 10) : '',
@@ -153,6 +156,7 @@ export default function StudentsPage() {
             phone: form.phone,
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
+            discount: Number(form.discount) || 0,
             status: form.status,
             passport: form.passport,
             birthDate: form.birthDate || undefined,
@@ -166,6 +170,7 @@ export default function StudentsPage() {
           body: JSON.stringify({
             ...form,
             balance: Number(form.balance),
+            discount: Number(form.discount) || 0,
             birthDate: form.birthDate || undefined,
           }),
         });
@@ -341,6 +346,9 @@ export default function StudentsPage() {
                               </Link>
                               {kindOf(s) === 'talaba' && (
                                 <span className="inline-flex items-center h-5 px-2 rounded-md bg-violet-500/10 text-violet-600 text-[11px] font-semibold shrink-0">Talaba</span>
+                              )}
+                              {Number(s.discount) > 0 && (
+                                <span title="Oylik to‘lovdan chegirma" className="inline-flex items-center h-5 px-2 rounded-md bg-emerald-500/10 text-emerald-700 text-[11px] font-semibold shrink-0">-{s.discount}%</span>
                               )}
                             </div>
                             <p className="text-xs text-slate-500 truncate">
@@ -570,6 +578,19 @@ export default function StudentsPage() {
                     onChange={(e) => setForm({ ...form, balance: numVal(e) })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Chegirma (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    placeholder="0"
+                    value={form.discount}
+                    onChange={(e) => setForm({ ...form, discount: Math.min(100, Math.max(0, Math.round(numVal(e)))) })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">Oylik to‘lov shu foizga kamaytirib yechiladi</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Holati</label>
