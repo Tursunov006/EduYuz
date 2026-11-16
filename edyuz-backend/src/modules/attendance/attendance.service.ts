@@ -199,4 +199,47 @@ export class AttendanceService {
       orderBy: { date: 'desc' },
     });
   }
+
+  // Davomat jurnali: guruhning bir oylik davomati (o'quvchilar × kunlar)
+  async getMonthlyJournal(groupId: string, month?: string) {
+    const now = new Date();
+    const m = month && /^\d{4}-\d{2}$/.test(month) ? month : `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const [y, mo] = m.split('-').map(Number);
+    if (mo < 1 || mo > 12) throw new BadRequestException("Oy formati noto'g'ri (YYYY-MM)");
+    const from = new Date(Date.UTC(y, mo - 1, 1));
+    const to = new Date(Date.UTC(y, mo, 1));
+
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+      select: {
+        id: true,
+        name: true,
+        days: true,
+        students: { select: { student: { select: { id: true, fullName: true } } } },
+      },
+    });
+    if (!group) throw new NotFoundException('Guruh topilmadi');
+
+    const records = await this.prisma.attendance.findMany({
+      where: { groupId, date: { gte: from, lt: to } },
+      select: { studentId: true, date: true, status: true, student: { select: { id: true, fullName: true } } },
+      orderBy: { date: 'asc' },
+    });
+
+    // Hozirgi a'zolar + shu oyda davomati bor (keyin guruhdan chiqqan) o'quvchilar
+    const students = new Map<string, { id: string; fullName: string }>();
+    group.students.forEach((gs) => gs.student && students.set(gs.student.id, gs.student));
+    records.forEach((r) => r.student && !students.has(r.student.id) && students.set(r.student.id, r.student));
+
+    return {
+      month: m,
+      group: { id: group.id, name: group.name, days: group.days },
+      students: Array.from(students.values()).sort((a, b) => a.fullName.localeCompare(b.fullName)),
+      records: records.map((r) => ({
+        studentId: r.studentId,
+        date: r.date.toISOString().slice(0, 10),
+        status: r.status,
+      })),
+    };
+  }
 }
