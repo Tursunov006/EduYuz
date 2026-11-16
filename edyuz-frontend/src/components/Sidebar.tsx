@@ -159,18 +159,6 @@ export default function Sidebar() {
         <div className="px-5 pt-7 pb-3">
           <Brand />
         </div>
-        {user.centerName && user.role !== 'superadmin' && (
-          <div className="mx-5 mb-2 flex items-center gap-2.5 rounded-xl bg-slate-50 px-3 py-2">
-            {user.centerLogo ? (
-              <img src={user.centerLogo} alt="" className="w-8 h-8 rounded-lg object-cover shrink-0" />
-            ) : (
-              <span className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-sm font-bold shrink-0">
-                {user.centerName.charAt(0).toUpperCase()}
-              </span>
-            )}
-            <span className="text-xs font-semibold text-slate-700 truncate">{user.centerName}</span>
-          </div>
-        )}
         {content()}
       </aside>
 
