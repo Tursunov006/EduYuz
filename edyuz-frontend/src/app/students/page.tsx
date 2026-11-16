@@ -411,7 +411,7 @@ export default function StudentsPage() {
                           </Link>
                           <button
                             onClick={() => {
-                              const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Edyuz_crmbot';
+                              const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Aksioma_1_bot';
                               const link = `https://t.me/${botUser}?start=student_${s.id}`;
                               setTelegramLinkModal({ isOpen: true, link, copied: false });
                             }}
