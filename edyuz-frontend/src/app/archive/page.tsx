@@ -137,7 +137,8 @@ export default function ArchivePage() {
   }
 
   function exportRegistry() {
-    const statusLabel = (r: any) => (r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : 'Kursni tugatgan');
+    const statusLabel = (r: any) =>
+      r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : r.status === 'dropped' ? 'Kelmagan' : 'Kursni tugatgan';
     exportToExcel(
       `EduYuz_Oquvchilar_bazasi_${new Date().toISOString().split('T')[0]}`,
       [
@@ -303,10 +304,12 @@ export default function ArchivePage() {
                                 ? 'bg-rose-500/10 text-rose-600'
                                 : r.status === 'active'
                                   ? 'bg-emerald-500/10 text-emerald-600'
-                                  : 'bg-slate-100 text-slate-500'
+                                  : r.status === 'dropped'
+                                    ? 'bg-amber-500/10 text-amber-700'
+                                    : 'bg-slate-100 text-slate-500'
                             }`}
                           >
-                            {r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : 'Kursni tugatgan'}
+                            {r.deleted ? 'O‘chirilgan' : r.status === 'active' ? 'Faol' : r.status === 'dropped' ? 'Kelmagan' : 'Kursni tugatgan'}
                           </span>
                         </td>
                       </tr>

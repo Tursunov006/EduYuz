@@ -15,7 +15,8 @@ enum RoleType {
 
 enum StudentStatus {
   active
-  inactive
+  inactive // kursni tugatgan
+  dropped // kelmagan (o'qishni tashlagan)
 }
 
 enum AttendanceStatus {
