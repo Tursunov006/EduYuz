@@ -132,6 +132,22 @@ export class AuthService {
     };
   }
 
+  async profile(userId: string) {
+    const u = await this.prisma.user.findUnique({ where: { id: userId }, include: { center: true } });
+    if (!u) throw new UnauthorizedException();
+    return {
+      id: u.id,
+      centerId: u.centerId,
+      centerName: u.center?.name,
+      centerLogo: u.center?.logoUrl || null,
+      fullName: u.fullName,
+      phone: u.phone,
+      role: u.role,
+      trialEndsAt: u.center?.trialEndsAt,
+      subscriptionStatus: u.center?.subscriptionStatus || 'trial',
+    };
+  }
+
   private generateToken(userId: string, phone: string, role: string, centerId: string) {
     return this.jwtService.sign({
       sub: userId,

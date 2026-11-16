@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Archive, LogOut, X } from 'lucide-react';
@@ -47,11 +48,23 @@ export default function Sidebar() {
   const [user, setUser] = useState<{ fullName?: string; role?: string; centerName?: string; centerLogo?: string | null }>({});
 
   useEffect(() => {
+    let saved: any = {};
     try {
-      setUser(JSON.parse(localStorage.getItem('user') || '{}'));
-    } catch {
-      setUser({});
-    }
+      saved = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {}
+    setUser(saved);
+    // Markaz nomi/rasmi yoki ism o'zgargan bo'lsa, qayta kirmasdan yangilanadi
+    if (!localStorage.getItem('token')) return;
+    apiFetch('/auth/me')
+      .then((res) => {
+        if (!res?.user) return;
+        const fresh = { ...saved, ...res.user };
+        setUser(fresh);
+        try {
+          localStorage.setItem('user', JSON.stringify(fresh));
+        } catch {}
+      })
+      .catch(() => {});
   }, []);
 
   if (

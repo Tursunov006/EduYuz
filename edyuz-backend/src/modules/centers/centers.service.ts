@@ -101,12 +101,22 @@ export class CentersService {
   }
 
   async update(id: string, dto: UpdateCenterDto) {
-    await this.findOne(id);
+    const old: any = await this.findOne(id);
 
-    return this.prisma.center.update({
+    const updated = await this.prisma.center.update({
       where: { id },
       data: dto,
     });
+
+    // Markaz yaratilganda direktor ismi "<markaz nomi> Rahbari" qilib qo'yiladi.
+    // Nom saqlanganda shu avtomatik ism ham yangilanadi (direktor o'zi boshqa ism bergan bo'lsa tegilmaydi).
+    if (dto.name?.trim() && old) {
+      await this.prisma.user.updateMany({
+        where: { centerId: id, role: 'admin', fullName: { endsWith: ' Rahbari' } },
+        data: { fullName: `${dto.name.trim()} Rahbari` },
+      });
+    }
+    return updated;
   }
 
   async updateStatus(
