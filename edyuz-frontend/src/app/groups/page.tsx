@@ -117,6 +117,18 @@ export default function GroupsPage() {
     title: '',
     price: 500000,
   });
+  // Tahrirlanayotgan fan (null bo'lsa — yangi fan qo'shiladi)
+  const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
+  const closeCourseModal = () => {
+    setIsCourseModalOpen(false);
+    setEditingCourseId(null);
+    setCourseForm({ title: '', price: 500000 });
+  };
+  const openEditCourse = (c: { id: string; title: string; price: any }) => {
+    setEditingCourseId(c.id);
+    setCourseForm({ title: c.title, price: Number(c.price) || 0 });
+    setIsCourseModalOpen(true);
+  };
 
   const getHeaders = () => {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -179,7 +191,7 @@ export default function GroupsPage() {
       if (e.key !== 'Escape') return;
       e.preventDefault(); // umumiy Esc yopuvchisi (EscCloser) ikkinchi marta yopmasin
       if (courseListOpen) setCourseListOpen(false);
-      else if (isCourseModalOpen) setIsCourseModalOpen(false);
+      else if (isCourseModalOpen) closeCourseModal();
       else closeGroupModal();
     };
     // document darajasida: window'dagi umumiy yopuvchidan oldin ishlaydi
@@ -273,6 +285,24 @@ export default function GroupsPage() {
     e.preventDefault();
     if (courseSaving) return; // ikki marta bosilib, bir xil fan ikki marta qo'shilmasin
     setCourseSaving(true);
+    if (editingCourseId) {
+      // Mavjud fanni tahrirlash: guruh oynasi ochiq qoladi
+      try {
+        await axios.patch(
+          `/courses/${editingCourseId}`,
+          { title: courseForm.title, price: Number(courseForm.price) },
+          { headers: getHeaders() }
+        );
+        closeCourseModal();
+        await fetchData();
+      } catch (err: any) {
+        const msg = err.response?.data?.message || err.response?.data?.error || "Fanni saqlab bo'lmadi";
+        alert(Array.isArray(msg) ? msg.join(', ') : msg);
+      } finally {
+        setCourseSaving(false);
+      }
+      return;
+    }
     try {
       const centersRes = await axios.get('/centers', { headers: getHeaders() }).catch(() => ({ data: [] }));
       const centerId = centersRes.data?.[0]?.id;
@@ -808,6 +838,18 @@ export default function GroupsPage() {
                             </span>
                             <button
                               type="button"
+                              title="Fanni tahrirlash"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setCourseListOpen(false);
+                                openEditCourse(c);
+                              }}
+                              className="ml-auto p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 shrink-0"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
                               title="Fanni o'chirish"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -930,10 +972,10 @@ export default function GroupsPage() {
           <div className="bg-white border border-slate-200 rounded-2xl max-w-sm w-full p-6 shadow-sm space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <GraduationCap size={18} className="text-cyan-600" /> Yangi fan (kurs) qo'shish
+                <GraduationCap size={18} className="text-cyan-600" /> {editingCourseId ? 'Fanni tahrirlash' : "Yangi fan (kurs) qo'shish"}
               </h2>
               <button 
-                onClick={() => setIsCourseModalOpen(false)}
+                onClick={closeCourseModal}
                 className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
@@ -968,7 +1010,7 @@ export default function GroupsPage() {
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsCourseModalOpen(false)}
+                  onClick={closeCourseModal}
                   className="px-4 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold"
                 >
                   Yopish
@@ -978,7 +1020,7 @@ export default function GroupsPage() {
                   disabled={courseSaving}
                   className="px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold shadow-sm disabled:opacity-60"
                 >
-                  {courseSaving ? 'Saqlanmoqda…' : "Qo'shish"}
+                  {courseSaving ? 'Saqlanmoqda…' : editingCourseId ? 'Saqlash' : "Qo'shish"}
                 </button>
               </div>
             </form>

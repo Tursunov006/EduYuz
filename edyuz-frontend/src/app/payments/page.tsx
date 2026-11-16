@@ -22,6 +22,7 @@ import {
   FileText,
   ShieldAlert,
   Trash2,
+  Pencil,
   PieChart,
   Brain,
   AlertTriangle,
@@ -269,6 +270,30 @@ export default function UnifiedFinancePage() {
       loadAllFinanceData();
     } catch (err: any) {
       alert('Xarajat kiritishda xatolik: ' + err.message);
+    }
+  }
+
+  // To'lov izohini tahrirlash (summa o'zgarmaydi)
+  async function handleEditPayment(p: any) {
+    const next = prompt("To'lov izohi:", p.comment || '');
+    if (next === null) return;
+    try {
+      await apiFetch(`/payments/${p.id}`, { method: 'PATCH', body: JSON.stringify({ comment: next }) });
+      loadAllFinanceData();
+    } catch (err: any) {
+      alert('Saqlashda xatolik: ' + err.message);
+    }
+  }
+
+  // Xato kiritilgan to'lovni bekor qilish: o'quvchi balansidan summa qaytariladi
+  async function handleCancelPayment(p: any) {
+    const sum = Math.abs(Number(p.amount)).toLocaleString('uz-UZ');
+    if (!confirm(`${p.student?.fullName || "O'quvchi"} — ${sum} so'm to'lovini bekor qilasizmi?\n\nO'quvchi balansidan ${sum} so'm qaytarib olinadi.`)) return;
+    try {
+      await apiFetch(`/payments/${p.id}`, { method: 'DELETE' });
+      loadAllFinanceData();
+    } catch (err: any) {
+      alert('Bekor qilishda xatolik: ' + err.message);
     }
   }
 
@@ -664,7 +689,7 @@ export default function UnifiedFinancePage() {
                     <th className="py-3.5 px-5">To&apos;lov usuli</th>
                     <th className="py-3.5 px-5">Izoh</th>
                     <th className="py-3.5 px-5">Sana</th>
-                    <th className="py-3.5 px-5 text-right">Chek</th>
+                    <th className="py-3.5 px-5 text-right">Amallar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/60">
@@ -698,13 +723,29 @@ export default function UnifiedFinancePage() {
                         <td className="py-3.5 px-5 text-slate-500">
                           {new Date(p.paidAt).toLocaleDateString('uz-UZ')}
                         </td>
-                        <td className="py-3.5 px-5 text-right">
+                        <td className="py-3.5 px-5 text-right whitespace-nowrap">
                           <button
                             onClick={() => setReceiptModal(p)}
                             className="px-2.5 py-1.5 text-xs font-bold text-indigo-700 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 rounded-xl inline-flex items-center gap-1 transition"
                           >
                             <Receipt size={14} /> Chek
                           </button>
+                          <button
+                            onClick={() => handleEditPayment(p)}
+                            title="Izohni tahrirlash"
+                            className="ml-1.5 p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 inline-flex align-middle"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                          {p.paymentMethod !== 'click' && p.paymentMethod !== 'payme' && (
+                            <button
+                              onClick={() => handleCancelPayment(p)}
+                              title="To'lovni bekor qilish"
+                              className="ml-0.5 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 inline-flex align-middle"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))

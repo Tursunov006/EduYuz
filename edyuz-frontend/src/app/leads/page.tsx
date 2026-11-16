@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Sparkles,
   Trash2,
+  Pencil,
   ExternalLink,
   X,
   Copy,
@@ -120,6 +121,8 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Tahrirlanayotgan lid (null — yangi lid)
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
   const [isInstaModalOpen, setIsInstaModalOpen] = useState(false);
   const [centers, setCenters] = useState<any[]>([]);
   const [convertingId, setConvertingId] = useState<string | null>(null);
@@ -197,8 +200,47 @@ export default function LeadsPage() {
     localStorage.setItem('eduyuz_leads_v1', JSON.stringify(updated));
   };
 
+  const resetLeadForm = () =>
+    setForm({ fullName: '', phone: '+998', courseInterest: 'Frontend Dasturlash', source: 'Instagram', note: '' });
+
+  const closeLeadModal = () => {
+    setIsModalOpen(false);
+    setEditingLeadId(null);
+    resetLeadForm();
+  };
+
+  const openEditLead = (lead: Lead) => {
+    setEditingLeadId(lead.id);
+    setForm({
+      fullName: lead.fullName,
+      phone: lead.phone,
+      courseInterest: lead.courseInterest,
+      source: lead.source,
+      note: lead.note || '',
+    });
+    setIsModalOpen(true);
+  };
+
   const handleAddLead = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (editingLeadId) {
+      const id = editingLeadId;
+      const patch = { fullName: form.fullName, phone: form.phone, courseInterest: form.courseInterest, source: form.source, note: form.note };
+      try {
+        // Faqat serverdagi lidlar uchun (vaqtinchalik "lead-..." yozuvlari faqat shu brauzerda)
+        if (!id.startsWith('lead-')) {
+          await apiFetch(`/instagram/leads/${id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ fullName: form.fullName, phone: form.phone, course: form.courseInterest, note: form.note }),
+          });
+        }
+        saveLeads(leads.map((l) => (l.id === id ? { ...l, ...patch } : l)));
+        closeLeadModal();
+      } catch (err: any) {
+        alert(err?.message || "Lidni saqlab bo'lmadi");
+      }
+      return;
+    }
     const tempLead: Lead = {
       id: `lead-${Date.now()}`,
       fullName: form.fullName,
@@ -446,6 +488,14 @@ export default function LeadsPage() {
                           </span>
                           <h4 className="text-sm font-bold text-slate-900 mt-1.5">{lead.fullName}</h4>
                         </div>
+                        <div className="flex items-center shrink-0">
+                        <button
+                          onClick={() => openEditLead(lead)}
+                          className="text-slate-400 hover:text-indigo-600 p-1 opacity-0 group-hover:opacity-100 transition"
+                          title="Tahrirlash"
+                        >
+                          <Pencil size={14} />
+                        </button>
                         <button
                           onClick={() => deleteLead(lead.id)}
                           className="text-slate-400 hover:text-rose-600 p-1 opacity-0 group-hover:opacity-100 transition"
@@ -453,6 +503,7 @@ export default function LeadsPage() {
                         >
                           <Trash2 size={14} />
                         </button>
+                        </div>
                       </div>
 
                       <div className="text-xs space-y-1 text-slate-600">
@@ -711,10 +762,10 @@ export default function LeadsPage() {
           <div className="bg-white border border-slate-200 rounded-2xl max-w-md w-full p-6 shadow-sm space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <UserPlus size={18} className="text-cyan-600" /> Yangi Murojaat (Lid)
+                <UserPlus size={18} className="text-cyan-600" /> {editingLeadId ? 'Lidni tahrirlash' : 'Yangi Murojaat (Lid)'}
               </h2>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeLeadModal}
                 className="text-slate-500 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-100"
               >
                 <X size={18} />
@@ -786,7 +837,7 @@ export default function LeadsPage() {
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeLeadModal}
                   className="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-xs font-bold"
                 >
                   Bekor qilish
@@ -795,7 +846,7 @@ export default function LeadsPage() {
                   type="submit"
                   className="px-6 py-2.5 rounded-2xl text-white text-xs font-bold shadow-sm bg-indigo-600"
                 >
-                  Voronkaga Qo&apos;shish
+                  {editingLeadId ? 'Saqlash' : <>Voronkaga Qo&apos;shish</>}
                 </button>
               </div>
             </form>
