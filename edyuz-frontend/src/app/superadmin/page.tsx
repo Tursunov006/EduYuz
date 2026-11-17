@@ -253,20 +253,31 @@ export default function SuperAdminPage() {
     }
   }
 
-  const filteredCenters = centers.filter(
+  // Superadmin biriktirilgan texnik "tizim markazi" o'quv markazi emas — ro'yxat va statistikada ko'rsatilmaydi
+  // (uni o'chirib ham bo'lmaydi, chunki superadmin hisobi shunga bog'langan).
+  const myCenterId = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('user') || '{}').centerId || '';
+    } catch {
+      return '';
+    }
+  })();
+  const customerCenters = centers.filter((c) => c.id !== myCenterId);
+
+  const filteredCenters = customerCenters.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       (c.phone && c.phone.includes(search)),
   );
 
-  const activeCentersCount = centers.filter((c) => c.subscriptionStatus !== 'expired').length;
-  const totalStudentsAcrossSaaS = centers.reduce(
+  const activeCentersCount = customerCenters.filter((c) => c.subscriptionStatus !== 'expired').length;
+  const totalStudentsAcrossSaaS = customerCenters.reduce(
     (acc, c) => acc + (c._count?.students || 0),
     0,
   );
-  const totalGroupsAcrossSaaS = centers.reduce((acc, c) => acc + (c._count?.groups || 0), 0);
+  const totalGroupsAcrossSaaS = customerCenters.reduce((acc, c) => acc + (c._count?.groups || 0), 0);
   // Obuna to'lovlari hali tizimda qayd etilmaydi — taxminiy summa ko'rsatilmaydi, faqat haqiqiy qiymat (0)
-  const proCentersCount = centers.filter((c) => c.subscriptionStatus === 'active').length;
+  const proCentersCount = customerCenters.filter((c) => c.subscriptionStatus === 'active').length;
   const monthlySaasRevenue = 0;
 
   return (
@@ -345,9 +356,9 @@ export default function SuperAdminPage() {
             <span>Jami O‘quv Markazlari</span>
             <Building2 className="text-purple-600" size={18} />
           </div>
-          <h2 className="text-3xl font-bold text-slate-900 mt-2">{centers.length} ta</h2>
+          <h2 className="text-3xl font-bold text-slate-900 mt-2">{customerCenters.length} ta</h2>
           <p className="text-[11px] text-emerald-600 mt-1 font-semibold">
-            {activeCentersCount} ta faol • {centers.length - activeCentersCount} ta bloklangan
+            {activeCentersCount} ta faol • {customerCenters.length - activeCentersCount} ta bloklangan
           </p>
         </div>
 
