@@ -87,7 +87,8 @@ Savolingiz: **"${message}"**
     const groupName = ctx.groupInfo?.name || student?.groups?.[0]?.group?.name || 'Guruh';
     const courseTitle = ctx.groupInfo?.course?.title || student?.groups?.[0]?.group?.course?.title || 'O‘quv kursi';
     const teacherName = ctx.teacher?.fullName || ctx.groupInfo?.teacher?.fullName || 'Guruh Ustozi';
-    const teacherPhone = ctx.teacher?.phone || '+998 90 123 45 67';
+    const teacherPhone = ctx.teacher?.phone || ctx.center?.phone || '';
+    const centerName = ctx.center?.name || 'O‘quv markazi';
 
     // 1. Davomat haqida so'ralsa
     if (
@@ -126,7 +127,7 @@ Savolingiz: **"${message}"**
 ❌ <b>Qoldirgan:</b> ${absentCount} ta
 🕒 <b>Oxirgi dars:</b> ${lastStatusText}
 
-<i>EduYuz AI: Farzandingiz darslarga mas'uliyat bilan qatnashmoqda! Har qanday savolingiz bo'lsa, bemalol yozing.</i>`;
+<i>Har qanday savolingiz bo'lsa, bemalol yozing.</i>`;
     }
 
     // 2. To'lov va Qarz haqida so'ralsa
@@ -176,10 +177,10 @@ Farzandingiz bo‘yicha to‘lovlar to‘liq amalga oshirilgan! Qarzdorlik mavju
 👤 <b>Ustoz:</b> ${teacherName}
 📚 <b>Fan/Kurs:</b> ${courseTitle}
 🏫 <b>Guruh:</b> ${groupName}
-📞 <b>Aloqa uchun:</b> ${teacherPhone}
-
+${teacherPhone ? `📞 <b>Aloqa uchun:</b> ${teacherPhone}\n` : ''}
 💬 <i>Ustozga xabar qoldirmoqchimisiz?</i>
-Shunchaki: <b>"Ustozga xabar: Farzandim bugun 10 daqiqa kechikadi"</b> deb yozib yuboring — EduYuz AI bu xabarni darhol ustozga yetkazadi! 🙏`;
+Shunday yozing: <b>Ustozga xabar: Farzandim bugun 10 daqiqa kechikadi</b>
+Xabaringiz markazga yozib qo‘yiladi va ustoz uni platformada ko‘radi. 🙏`;
     }
 
     // 5. O'quv markazi va Kurslar haqida
@@ -191,46 +192,28 @@ Shunchaki: <b>"Ustozga xabar: Farzandim bugun 10 daqiqa kechikadi"</b> deb yozib
       text.includes('qanday kurs') ||
       text.includes('filial')
     ) {
-      const coursesList = ctx.allCourses && ctx.allCourses.length > 0
-        ? ctx.allCourses.map((c: any) => `• <b>${c.title}</b> — ${Number(c.price || 500000).toLocaleString('uz-UZ')} so'm/oy`).join('\n')
-        : `• <b>Dasturlash (Frontend & Backend)</b>\n• <b>Ingliz tili & IELTS</b>\n• <b>Matematika va Mantiq</b>\n• <b>Robototexnika va IT</b>`;
+      const coursesList =
+        ctx.allCourses && ctx.allCourses.length > 0
+          ? ctx.allCourses.map((c: any) => `• <b>${c.title}</b> — ${Number(c.price || 0).toLocaleString('uz-UZ')} so'm/oy`).join('\n')
+          : '• Kurslar ro‘yxati hozircha kiritilmagan';
 
-      return `🏫 <b>EduYuz Zamonaviy Ta'lim Markazi:</b>
+      return `🏫 <b>${centerName}</b>
 
-Bizning markazimizda ilg‘or texnologiyalar, interaktiv LMS platformasi, jonli o‘yinlar va sun'iy intellekt repetitori asosida ta'lim beriladi.
-
-📋 <b>Mavjud Kurslarimiz:</b>
+📋 <b>Kurslarimiz:</b>
 ${coursesList}
-
-📍 <b>Manzil:</b> Markaziy bino, Toshkent sh.
-📞 <b>Ma'lumot uchun:</b> +998 71 200 00 00
-🌐 <b>Mobil Mini Ilova:</b> /app havolasi orqali ochiladi.`;
-    }
-
-    // 6. Ustozga xabar qoldirish (xabar / kechikadi / kelolmaydi)
-    if (
-      text.includes('kechik') ||
-      text.includes('kelolmay') ||
-      text.includes('bormay') ||
-      text.includes('kasal') ||
-      text.includes('iltimos')
-    ) {
-      return `✅ <b>Xabaringiz Qabul Qilindi!</b>
-
-Hurmatli ota-ona, <b>${studentName}</b> haqidagi xabaringiz guruh ustozi <b>${teacherName}</b> va markaz ma'muriyatiga yetkazildi. 
-Farzandingiz salomatligi va ta'limiga befarq bo'lmaganingiz uchun tashakkur! 🙏`;
+${ctx.center?.phone ? `\n📞 <b>Ma'lumot uchun:</b> ${ctx.center.phone}` : ''}`;
     }
 
     // 7. Umumiy salomlashish va yo'riqnoma
     return `Assalomu alaykum, hurmatli ota-ona! 😊
 
-Men <b>EduYuz AI</b> — ta'lim markazining rasmiy aqlli yordamchisiman.
+Men <b>${centerName}</b> yordamchi botiman.
 Men sizga farzandingiz <b>${studentName}</b> bo‘yicha quyidagi ma'lumotlarni berishga tayyorman:
 
 • 📊 <b>Davomati:</b> Darslarga qatnashuvi va yo‘qlamasi;
 • 💳 <b>To‘lovlar:</b> Oylik to‘lov, qarzdorlik va kvitansiyalar;
 • 👨‍🏫 <b>Ustoz:</b> Guruh ustozi bilan bog‘lanish va xabar qoldirish;
-• 🏫 <b>Kurslar:</b> Markazimizdagi barcha yangi yo‘nalishlar.
+• 🏫 <b>Kurslar:</b> Markazimizdagi yo‘nalishlar.
 
 Savolingizni bemalol yozishingiz yoki quyidagi menyudan foydalanishingiz mumkin! 👇`;
   }

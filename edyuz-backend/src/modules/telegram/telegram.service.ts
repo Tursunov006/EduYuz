@@ -110,7 +110,7 @@ export class TelegramService implements OnModuleInit {
             { command: 'jadval', description: '🗓 Dars jadvali va uyga vazifalar' },
             { command: 'tolov', description: '💰 To‘lovlar tarixi va balans' },
             { command: 'sertifikat', description: '🎓 QR-Sertifikatlar' },
-            { command: 'kurslar', description: '🎁 Bepul sinov darsi (+100,000 so‘m vaucher)' },
+            { command: 'kurslar', description: '🎁 Kurslar va sinov darsiga yozilish' },
             { command: 'app', description: '📱 EduYuz Mobil Mini Ilovasi' },
           ],
         }),
@@ -235,7 +235,7 @@ export class TelegramService implements OnModuleInit {
     }
 
     const message = `
-📢 <b>EduYuz — Davomat Bildirishnomasi</b>
+📢 <b>Davomat bildirishnomasi</b>
 
 Hurmatli ota-ona!
 Farzandingiz <b>${studentName}</b> bugun quyidagi dars bo'yicha yo'qlama qilindi:
@@ -262,7 +262,7 @@ Farzandingiz <b>${studentName}</b> bugun quyidagi dars bo'yicha yo'qlama qilindi
     if (!parentChatId) return;
 
     const message = `
-🧾 <b>EduYuz — Rasmiy Elektron Kvitansiya</b>
+🧾 <b>To‘lov kvitansiyasi</b>
 
 Hurmatli ota-ona!
 Farzandingiz <b>${studentName}</b> uchun to'lov muvaffaqiyatli qabul qilindi.
@@ -288,7 +288,7 @@ ${comment ? `📝 <b>Izoh:</b> ${comment}\n` : ''}📅 <b>Vaqt:</b> ${new Date()
     if (!parentChatId) return;
 
     const message = `
-⚠️ <b>EduYuz — To'lov Eslatmasi</b>
+⚠️ <b>To'lov eslatmasi</b>
 
 Hurmatli ota-ona!
 Farzandingiz <b>${studentName}</b> (${groupName}) bo'yicha to'lov muddati yetib keldi.
@@ -296,8 +296,6 @@ Farzandingiz <b>${studentName}</b> (${groupName}) bo'yicha to'lov muddati yetib 
 📌 <b>Qarzdorlik miqdori:</b> ${Math.abs(debtAmount).toLocaleString()} so'm
 
 Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshirishingizni so'raymiz.
-
-<i>EduYuz Ta'lim Markazi</i>
     `.trim();
 
     await this.sendMessage(parentChatId, message);
@@ -338,6 +336,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
     let student = await this.prisma.student.findFirst({
       where: { parentChatId: BigInt(chatId) },
       include: {
+        center: { select: { id: true, name: true, phone: true } },
         certificates: { orderBy: { issuedAt: 'desc' } },
         payments: { orderBy: { paidAt: 'desc' }, take: 5 },
         groups: {
@@ -446,7 +445,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
               name: senderName,
               course: 'Telegram Bot (Bepul Dars)',
               source: 'Telegram Bot (@EduYuz)',
-              notes: `Telegram orqali raqam qoldirdi. ChatID: ${chatId}. Vaucher: EDUYUZ100`,
+              notes: `Telegram orqali raqam qoldirdi. ChatID: ${chatId}.`,
               createdAt: new Date().toISOString(),
             });
             await this.prisma.smsLog.create({
@@ -461,7 +460,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
 
         await this.sendMessage(
           chatId,
-          `🎉 <b>Arizangiz qabul qilindi, ${senderName}!</b>\n\n📞 Telefon raqamingiz (<b>+${cleanPhone}</b>) o‘quv markazimizning <b>«Bepul Sinov Darsi»</b> ro‘yxatiga qo‘shildi!\n\n🎟 <b>Sizning 100,000 so‘mlik vaucher kodingiz:</b> <code>EDUYUZ100</code>\n\nTez orada menejerlarimiz siz bilan bog‘lanib, o‘zingizga qulay dars vaqtini belgilab berishadi!`,
+          `🎉 <b>Arizangiz qabul qilindi, ${senderName}!</b>\n\n📞 Telefon raqamingiz (<b>+${cleanPhone}</b>) o‘quv markazimizning <b>«Sinov darsi»</b> ro‘yxatiga qo‘shildi!\n\nTez orada menejerlarimiz siz bilan bog‘lanib, o‘zingizga qulay dars vaqtini belgilab berishadi!`,
           quickReplyKeyboard,
         );
         return;
@@ -530,7 +529,7 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
 
       await this.sendMessage(
         chatId,
-        `👋 <b>Assalomu alaykum, hurmatli ota-ona va o‘quvchilar!</b>\n\nBu <b>EduYuz CRM</b> rasmiy ta’lim va nazorat botidir.${linkedBanner}\n\nMen orqali:\n• 📊 <b>Kunlik Davomat</b> (keldi/kelmadi hisoboti)\n• 🗓 <b>Dars Jadvali va Uyga Vazifalar (LMS)</b>\n• 💰 <b>Oylik To‘lovlar, Balans va Kvitansiyalar</b>\n• 🎓 <b>QR-Sertifikatlar</b>\n• 🎁 <b>Bepul Sinov Darsiga Yozilish (+100,000 so‘m vaucher)</b>\nxizmatlaridan foydalanishingiz mumkin!`,
+        `👋 <b>Assalomu alaykum, hurmatli ota-ona va o‘quvchilar!</b>\n\nBu o‘quv markazining rasmiy botidir.${linkedBanner}\n\nMen orqali:\n• 📊 <b>Kunlik Davomat</b> (keldi/kelmadi hisoboti)\n• 🗓 <b>Dars Jadvali va Uyga Vazifalar (LMS)</b>\n• 💰 <b>Oylik To‘lovlar, Balans va Kvitansiyalar</b>\n• 🎓 <b>QR-Sertifikatlar</b>\n• 🎁 <b>Sinov darsiga yozilish</b>\nxizmatlaridan foydalanishingiz mumkin!`,
         quickReplyKeyboard,
       );
       return;
@@ -588,7 +587,10 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
 
     // 6. BEPUL DARSGA YOZILISH (Yangi o'quvchilar / Lidlar uchun)
     if (text.includes('Bepul Darsga Yozilish') || text === '/kurslar') {
-      const courses = await this.prisma.course.findMany({ take: 8 });
+      // Faqat ulangan o'quvchining markazi (yoki TELEGRAM_DEFAULT_CENTER_ID) kurslari — boshqa markazlarniki aralashmaydi
+      const linked = await this.findLinkedStudent(chatId);
+      const centerId = linked?.centerId || this.configService.get<string>('TELEGRAM_DEFAULT_CENTER_ID') || null;
+      const courses = centerId ? await this.prisma.course.findMany({ where: { centerId }, take: 10 }) : [];
       const courseLines =
         courses.length > 0
           ? courses
@@ -597,11 +599,11 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
                   `${i + 1}. 📚 <b>${c.title}</b> — ${Number(c.price).toLocaleString()} so‘m/oy`,
               )
               .join('\n')
-          : `1. 📚 <b>Frontend & Web Dasturlash</b> — 500,000 so‘m/oy\n2. 📚 <b>Python & Sun’iy Intellekt</b> — 500,000 so‘m/oy\n3. 📚 <b>Ingliz tili & IELTS Bootcamp</b> — 450,000 so‘m/oy`;
+          : `Kurslar haqida batafsil ma’lumot uchun telefon raqamingizni qoldiring — menejerlarimiz bog‘lanishadi.`;
 
       await this.sendMessage(
         chatId,
-        `🎁 <b>BEPUL SINOV DARSI VA 100,000 SO‘M VAUCHER!</b>\n\nO‘quv markazimizdagi barcha yo‘nalishlarning 1-darsi <b>100% BEPUL</b>:\n\n${courseLines}\n\n🎟 <b>Maxsus promokod:</b> <code>EDUYUZ100</code> (1-oy uchun 100,000 so‘m chegirma!)\n\n👇 <b>Ro‘yxatdan o‘tish uchun</b> pastdagi chap burchakdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bosing yoki telefon raqamingizni shu yerga yozib yuboring!`,
+        `🎁 <b>KURSLAR VA SINOV DARSI</b>\n\n${courseLines}\n\n👇 <b>Sinov darsiga yozilish uchun</b> pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bosing yoki telefon raqamingizni shu yerga yozib yuboring!`,
         quickReplyKeyboard,
       );
       return;
@@ -794,6 +796,41 @@ Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bo
       return;
     }
 
+    // 11b. Ota-onaning ustozga xabari: haqiqatan saqlanadi (o'quvchi izohiga, sana bilan) —
+    // markaz va ustoz uni platformada ko'radi. Avval bot "yetkazildi" derdi, lekin xabar hech qayerga bormasdi.
+    const lower = text.toLowerCase();
+    const isTeacherNote =
+      /^ustozga\s+xabar/.test(lower) ||
+      ['kechik', 'kelolmay', 'kelmaydi', 'bormay', 'kasal'].some((w) => lower.includes(w));
+    if (student && isTeacherNote) {
+      const body = text.replace(/^ustozga\s+xabar\s*[:\-–]?\s*/i, '').trim().slice(0, 500);
+      if (body.length < 3) {
+        await this.sendMessage(
+          chatId,
+          `✍️ Xabaringizni shunday yozing:\n<b>Ustozga xabar: Farzandim bugun 10 daqiqa kechikadi</b>`,
+          quickReplyKeyboard,
+        );
+        return;
+      }
+      const now = new Date();
+      const stamp = `${String(now.getDate()).padStart(2, '0')}.${String(now.getMonth() + 1).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      const line = `[${stamp} ota-ona xabari] ${body}`;
+      const notes = student.notes ? `${student.notes}\n${line}` : line;
+      await this.prisma.student.update({
+        where: { id: student.id },
+        data: { notes: notes.slice(-2000) },
+      });
+      const teacherName = student.groups?.[0]?.group?.teacher?.fullName;
+      const contactPhone = student.groups?.[0]?.group?.teacher?.phone || (student as any).center?.phone;
+      await this.sendMessage(
+        chatId,
+        `✅ <b>Xabaringiz qabul qilindi.</b>\n\n<b>${student.fullName}</b> haqidagi xabaringiz markazga yozib qo‘yildi${teacherName ? ` — ustoz <b>${teacherName}</b> uni platformada ko‘radi` : ''}.` +
+          (contactPhone ? `\n\nShoshilinch bo‘lsa, qo‘ng‘iroq qiling: ${contactPhone}` : ''),
+        quickReplyKeyboard,
+      );
+      return;
+    }
+
     // 12. Ota-onadan kelgan boshqa har qanday erkin savol (AI tahlili)
     try {
       const attendances = student
@@ -804,9 +841,10 @@ Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bo
           })
         : [];
 
-      const allCourses = await this.prisma.course.findMany({
-        take: 6,
-      });
+      // Faqat o'quvchining o'z markazi kurslari (avval barcha markazlarning kurslari aralash chiqardi)
+      const allCourses = student
+        ? await this.prisma.course.findMany({ where: { centerId: student.centerId }, take: 10 })
+        : [];
 
       const groupInfo = student?.groups?.[0]?.group;
       const teacher = groupInfo?.teacher;
@@ -817,6 +855,7 @@ Iltimos, avval pastdagi <b>«📲 Farzandimni Ulash (Telefon)»</b> tugmasini bo
         teacher,
         attendances,
         allCourses,
+        center: (student as any)?.center,
       });
 
       await this.sendMessage(chatId, aiResponse + demoNotice, quickReplyKeyboard);
