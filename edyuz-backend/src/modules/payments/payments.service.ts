@@ -146,9 +146,15 @@ export class PaymentsService {
 
         // O'quvchining shaxsiy chegirmasi (foiz) hisobga olinadi
         const discount = Math.min(100, Math.max(0, Number(student.discount || 0)));
-        const amount = Math.round((price * (100 - discount)) / 100);
+        // Qat'iy summa chegirma (so'm) foizdan keyin ayiriladi
+        const discountAmount = Math.max(0, Number(student.discountAmount || 0));
+        const amount = Math.max(0, Math.round((price * (100 - discount)) / 100) - discountAmount);
         if (amount <= 0) continue; // 100% chegirma — to'lov yechilmaydi
-        const studentComment = discount > 0 ? `${comment} (chegirma ${discount}%)` : comment;
+        const parts = [
+          discount > 0 ? `${discount}%` : '',
+          discountAmount > 0 ? `${String(discountAmount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} so'm` : '',
+        ].filter(Boolean);
+        const studentComment = parts.length ? `${comment} (chegirma ${parts.join(' + ')})` : comment;
 
         // Tugma ikki marta bosilsa yoki so'rov qayta yuborilsa — ikkinchi marta yechilmaydi
         const already = await this.prisma.payment.findFirst({

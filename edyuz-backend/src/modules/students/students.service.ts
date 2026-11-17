@@ -54,6 +54,7 @@ export class StudentsService {
         middleName: dto.middleName?.trim() || null,
         kind: dto.kind || 'oquvchi',
         discount: dto.discount ?? 0,
+        discountAmount: dto.discountAmount ?? 0,
         direction: dto.direction?.trim() || null,
       },
     });
@@ -91,6 +92,7 @@ export class StudentsService {
         status: st.status,
         balance: Number(st.balance),
         discount: st.discount,
+        discountAmount: st.discountAmount,
         direction: st.direction,
         totalPaid: Number(paid._sum.amount || 0),
         groups: st.groups.map((g) => g.group?.name).filter(Boolean),
@@ -149,6 +151,7 @@ export class StudentsService {
       status: st.status,
       balance: Number(st.balance),
       discount: st.discount,
+      discountAmount: st.discountAmount,
       direction: st.direction,
       totalPaid: paid.get(st.id) || 0,
       groups: st.groups.map((g) => g.group?.name).filter(Boolean),
@@ -321,6 +324,7 @@ export class StudentsService {
     if (dto.middleName !== undefined) dataToUpdate.middleName = dto.middleName?.trim() || null;
     if (dto.kind !== undefined) dataToUpdate.kind = dto.kind;
     if (dto.discount !== undefined) dataToUpdate.discount = dto.discount;
+    if (dto.discountAmount !== undefined) dataToUpdate.discountAmount = dto.discountAmount;
     if (dto.direction !== undefined) dataToUpdate.direction = dto.direction?.trim() || null;
 
     if (dto.parentChatId !== undefined) {

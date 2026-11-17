@@ -51,6 +51,7 @@ export default function StudentsPage() {
     parentPhone: '',
     balance: 0,
     discount: 0,
+    discountAmount: 0,
     direction: '',
     status: 'active',
     passport: '',
@@ -102,6 +103,7 @@ export default function StudentsPage() {
       parentPhone: '',
       balance: 0,
       discount: 0,
+      discountAmount: 0,
       direction: '',
       status: 'active',
       passport: '',
@@ -123,6 +125,7 @@ export default function StudentsPage() {
       parentPhone: student.parentPhone,
       balance: Number(student.balance) || 0,
       discount: Number(student.discount) || 0,
+      discountAmount: Number(student.discountAmount) || 0,
       direction: student.direction || '',
       status: student.status || 'active',
       passport: student.passport || '',
@@ -174,6 +177,7 @@ export default function StudentsPage() {
             parentPhone: form.parentPhone,
             balance: Number(form.balance),
             discount: Number(form.discount) || 0,
+            discountAmount: Number(form.discountAmount) || 0,
             direction: form.direction,
             status: form.status,
             passport: form.passport,
@@ -189,6 +193,7 @@ export default function StudentsPage() {
             ...form,
             balance: Number(form.balance),
             discount: Number(form.discount) || 0,
+            discountAmount: Number(form.discountAmount) || 0,
             direction: form.direction,
             birthDate: form.birthDate || undefined,
           }),
@@ -368,6 +373,11 @@ export default function StudentsPage() {
                               )}
                               {Number(s.discount) > 0 && (
                                 <span title="Oylik to‘lovdan chegirma" className="inline-flex items-center h-5 px-2 rounded-md bg-emerald-500/10 text-emerald-700 text-[11px] font-semibold shrink-0">-{s.discount}%</span>
+                              )}
+                              {Number(s.discountAmount) > 0 && (
+                                <span title="Oylik to‘lovdan chegirma (so‘m)" className="inline-flex items-center h-5 px-2 rounded-md bg-emerald-500/10 text-emerald-700 text-[11px] font-semibold shrink-0 whitespace-nowrap">
+                                  -{Number(s.discountAmount).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
+                                </span>
                               )}
                             </div>
                             <p className="text-xs text-slate-500 truncate">
@@ -629,6 +639,18 @@ export default function StudentsPage() {
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   />
                   <p className="mt-1 text-[11px] text-slate-400">Oylik to‘lov shu foizga kamaytirib yechiladi</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">Chegirma (so‘m)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="0"
+                    value={form.discountAmount}
+                    onChange={(e) => setForm({ ...form, discountAmount: Math.max(0, Math.round(numVal(e))) })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">Masalan 200000 — oylik to‘lovdan shu summa ayiriladi</p>
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Holati</label>

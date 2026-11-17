@@ -73,4 +73,11 @@ export class CreateStudentDto {
   @IsString()
   @MaxLength(50)
   direction?: string;
+
+  // Oylik to'lovdan qat'iy summa chegirma (so'm)
+  @IsOptional()
+  @IsInt({ message: 'Chegirma summasi butun son bo\'lishi kerak' })
+  @Min(0, { message: 'Chegirma summasi manfiy bo\'lmaydi' })
+  @Max(100000000, { message: 'Chegirma summasi juda katta' })
+  discountAmount?: number;
 }

@@ -32,4 +32,18 @@ describe('PaymentsService.chargeMonthly — chegirma', () => {
     expect(res.totalCharged).toBe(1050000);
     expect(res.count).toBe(2);
   });
+
+  it("qat'iy summa chegirma (so'm) ayiriladi, foiz bilan birga ham ishlaydi", async () => {
+    const { svc, created } = build([
+      { id: 'a', status: 'active', discount: 0, discountAmount: 200000 },
+      { id: 'b', status: 'active', discount: 10, discountAmount: 40000 },
+      { id: 'c', status: 'active', discount: 0, discountAmount: 900000 },
+    ]);
+    const res = await svc.chargeMonthly('center');
+    // 600 000 - 200 000 = 400 000; 600 000 * 90% - 40 000 = 500 000; 900 000 chegirma -> yechilmaydi
+    expect(created.map((c) => c.amount)).toEqual([-400000, -500000]);
+    expect(created[0].comment).toContain("chegirma 200 000 so'm");
+    expect(created[1].comment).toContain("chegirma 10% + 40 000 so'm");
+    expect(res.count).toBe(2);
+  });
 });
