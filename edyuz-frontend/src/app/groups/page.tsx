@@ -220,6 +220,23 @@ export default function GroupsPage() {
   };
 
   // Kursi tugagan guruh o'chirilmaydi, Arxivga olinadi (Arxiv bo'limidan qaytarish yoki o'chirish mumkin)
+  // Guruhni butunlay o'chirish (xato yaratilgan yoki keraksiz guruh uchun)
+  const handleDeleteGroup = async (g: Group) => {
+    const count = g._count?.students || 0;
+    const warn =
+      count > 0
+        ? `\n\nDiqqat: guruhda ${count} ta o'quvchi bor. Ular guruhdan chiqariladi va shu guruhning davomat tarixi o'chadi (o'quvchilarning o'zi o'chmaydi).`
+        : '';
+    if (!confirm(`"${g.name}" guruhini butunlay o'chirasizmi?${warn}\n\nBu amalni ortga qaytarib bo'lmaydi. Kurs tugagan bo'lsa, o'chirish o'rniga Arxivga oling.`)) return;
+    try {
+      await axios.delete(`/groups/${g.id}`, { headers: getHeaders() });
+      setGroups((prev) => prev.filter((x) => x.id !== g.id));
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Guruhni o'chirib bo'lmadi";
+      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    }
+  };
+
   const handleArchiveGroup = async (g: Group) => {
     const ok = confirm(
       `"${g.name}" guruhini arxivga olasizmi?\n\n` +
@@ -730,6 +747,15 @@ export default function GroupsPage() {
                     className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-amber-600 hover:border-amber-300 hover:bg-amber-50 transition"
                   >
                     <Archive size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteGroup(group)}
+                    title="Guruhni o'chirish"
+                    aria-label="Guruhni o'chirish"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 transition"
+                  >
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
