@@ -66,7 +66,7 @@ export default function AttendancePage() {
         // Arxivdagi (faol bo'lmagan) o'quvchilar davomatga chiqmaydi
         const members: Student[] = (group?.students || [])
           .map((gs: any) => gs.student)
-          .filter((st: any) => st && (st.status === undefined || st.status === 'active'));
+          .filter((st: any) => st && st.status !== 'inactive'); // "Kelmagan" o'quvchilar ham ko'rinadi, faqat kursni tugatganlar yo'q
         const savedMap: Record<string, Status> = {};
         (Array.isArray(prev) ? prev : []).forEach((r: any) => {
           savedMap[r.studentId] = String(r.status).toUpperCase() as Status;
