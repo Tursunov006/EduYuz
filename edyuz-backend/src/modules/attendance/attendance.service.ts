@@ -84,8 +84,8 @@ export class AttendanceService {
     if (outsiders.length > 0) {
       throw new BadRequestException("Ro'yxatda bu guruhga tegishli bo'lmagan o'quvchi bor");
     }
-    // Arxivdagi (faol bo'lmagan) o'quvchiga davomat qo'yilmaydi
-    const inactive = members.filter((m) => m.student?.status !== 'active').map((m) => m.studentId);
+    // Arxivdagi (kursni tugatgan) o'quvchiga davomat qo'yilmaydi. "Kelmagan" (dropped) o'quvchi guruhda qoladi.
+    const inactive = members.filter((m) => m.student?.status === 'inactive').map((m) => m.studentId);
     if (inactive.length > 0) {
       throw new BadRequestException("Arxivdagi o'quvchiga davomat qo'yib bo'lmaydi");
     }
@@ -234,7 +234,7 @@ export class AttendanceService {
     // Faqat guruhning hozirgi faol a'zolari (guruhdan chiqarilgan yoki arxivdagi o'quvchilar ko'rsatilmaydi)
     const students = new Map<string, { id: string; fullName: string }>();
     group.students.forEach(
-      (gs) => gs.student && gs.student.status === 'active' && students.set(gs.student.id, { id: gs.student.id, fullName: gs.student.fullName }),
+      (gs) => gs.student && gs.student.status !== 'inactive' && students.set(gs.student.id, { id: gs.student.id, fullName: gs.student.fullName }),
     );
 
     return {
