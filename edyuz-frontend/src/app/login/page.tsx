@@ -20,16 +20,38 @@ export default function LoginPage() {
     }
   }, [router]);
 
+  // Telefon raqam ko'rinishidagi loginni tekshiradi va +998XXXXXXXXX shakliga keltiradi.
+  // Matnli login (masalan "admin") bo'lsa — o'zgarishsiz qaytaradi.
+  function checkPhone(value: string): { phone?: string; error?: string } {
+    const v = value.trim();
+    if (!/^[+\d\s()-]+$/.test(v) || !/\d/.test(v)) return {};
+    const digits = v.replace(/\D/g, '');
+    const local = digits.startsWith('998') ? digits.slice(3) : digits;
+    if (!digits.startsWith('998') && digits.length > 9) {
+      return { error: 'Telefon raqam +998 bilan boshlanishi kerak' };
+    }
+    if (local.length < 9) {
+      return { error: `Telefon raqam to‘liq emas: +998 dan keyin 9 ta raqam bo‘lishi kerak (siz ${local.length} ta yozdingiz)` };
+    }
+    if (local.length > 9) {
+      return { error: `Telefon raqamda ortiqcha raqam bor: +998 dan keyin 9 ta raqam bo‘lishi kerak (siz ${local.length} ta yozdingiz)` };
+    }
+    return { phone: '+998' + local };
+  }
+
   async function handleLogin(e?: React.FormEvent) {
     if (e) e.preventDefault();
-    setLoading(true);
     setError('');
+    const phoneCheck = checkPhone(login);
+    // Xato matni login maydoni ostida ko'rinib turadi — serverga yuborilmaydi
+    if (phoneCheck.error) return;
+    setLoading(true);
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
 
       // Login kiritilganda (masalan, admin yoki superadmin), tizimdagi mos hisobga yo'naltirish
-      let accountLogin = login.trim();
+      let accountLogin = phoneCheck.phone || login.trim();
       const lowerLogin = accountLogin.toLowerCase();
       const isSuperAdminLogin =
         lowerLogin === 'tursunov1976' || lowerLogin === 'superadmin' || lowerLogin === 'dasturchi';
@@ -99,11 +121,14 @@ export default function LoginPage() {
                 required
                 type="text"
                 value={login}
-                onChange={(e) => setLogin(e.target.value)}
+                onChange={(e) => { setLogin(e.target.value); setError(''); }}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 placeholder="Login yoki telefon raqamingiz"
               />
             </div>
+            {login.trim() && checkPhone(login).error && (
+              <p className="mt-1.5 text-[11px] text-amber-600">{checkPhone(login).error}</p>
+            )}
           </div>
 
           {/* Parol maydoni */}
