@@ -99,15 +99,23 @@ export default function AttendanceJournalPage() {
     const [y, mo] = data.month.split('-').map(Number);
     const lessonDays = parseDays(data.group.days);
     const marked = new Set(data.records.map((r) => r.date));
+    // Guruh ochilishidan oldingi kunlar ko'rsatilmaydi (davomat belgilangan kun bo'lsa — ko'rsatiladi)
+    const createdAt = groups.find((g) => g.id === data.group.id)?.createdAt;
+    const startDate = createdAt
+      ? (() => {
+          const c = new Date(createdAt);
+          return `${c.getFullYear()}-${String(c.getMonth() + 1).padStart(2, '0')}-${String(c.getDate()).padStart(2, '0')}`;
+        })()
+      : '';
     const total = new Date(y, mo, 0).getDate();
     const cols = [];
     for (let d = 1; d <= total; d++) {
       const date = `${data.month}-${String(d).padStart(2, '0')}`;
       const dow = DOW[new Date(y, mo - 1, d).getDay()];
-      if (lessonDays.has(dow) || marked.has(date)) cols.push({ date, day: d, dow });
+      if (marked.has(date) || (lessonDays.has(dow) && (!startDate || date >= startDate))) cols.push({ date, day: d, dow });
     }
     return cols;
-  }, [data]);
+  }, [data, groups]);
 
   const byKey = useMemo(() => {
     const m = new Map<string, Status>();
@@ -221,7 +229,7 @@ export default function AttendanceJournalPage() {
         ) : !data || data.students.length === 0 ? (
           <div className="p-12 text-center text-sm text-slate-500">Bu guruhda o‘quvchilar yo‘q</div>
         ) : columns.length === 0 ? (
-          <div className="p-12 text-center text-sm text-slate-500">Bu oyda dars kunlari yo‘q</div>
+          <div className="p-12 text-center text-sm text-slate-500">Bu oyda dars kunlari yo‘q (guruh hali ochilmagan bo‘lishi mumkin)</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm border-collapse">
