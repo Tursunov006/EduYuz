@@ -29,12 +29,17 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 
+// Server va brauzerda bir xil natija beradi (toLocaleString farq qilib, sahifa yuklanishida xato chiqarardi)
+function groupNum(n: number) {
+  return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
 function Instagram({ size = 16, className = '' }: { size?: number; className?: string }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 24"
+      viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -43,7 +48,7 @@ function Instagram({ size = 16, className = '' }: { size?: number; className?: s
       className={className}
     >
       <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
-      <path d="M16 11.37A4 4 0 1 12.63 8 16 11.37z" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
       <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
     </svg>
   );
@@ -134,7 +139,7 @@ export default function InstagramBioPage() {
   function handleClaimFromCalculator() {
     setForm((prev) => ({
       ...prev,
-      note: `Kalkulyator: ${studentCount} ta o'quvchi, kurs narxi ${coursePrice.toLocaleString('uz-UZ')} so'm (Oyiga +${extraProfitWithEduYuz.toLocaleString('uz-UZ')} so'm o'sish)${isFollowed ? ' + VIP Vaucher EDUYUZ100' : ''}`,
+      note: `Kalkulyator: ${studentCount} ta o'quvchi, kurs narxi ${groupNum(coursePrice)} so'm (Oyiga +${groupNum(extraProfitWithEduYuz)} so'm o'sish)${isFollowed ? ' + VIP Vaucher EDUYUZ100' : ''}`,
     }));
     setActiveTab('form');
   }
@@ -429,7 +434,7 @@ export default function InstagramBioPage() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-600">O&apos;rtacha oylik kurs narxi:</span>
                 <span className="text-sm font-bold text-purple-600 bg-purple-500/10 border border-purple-500/20 px-3 py-0.5 rounded-xl">
-                  {coursePrice.toLocaleString('uz-UZ')} so&apos;m
+                  {groupNum(coursePrice)} so&apos;m
                 </span>
               </div>
               <input
@@ -456,7 +461,7 @@ export default function InstagramBioPage() {
                   <AlertTriangle size={14} /> CRM-siz oylik yo&apos;qotish:
                 </div>
                 <div className="text-lg sm:text-xl font-bold text-rose-600">
-                  -{monthlyLossWithoutCrm.toLocaleString('uz-UZ')} so&apos;m
+                  -{groupNum(monthlyLossWithoutCrm)} so&apos;m
                 </div>
                 <p className="text-[11px] text-slate-500 leading-snug">
                   Unutilgan qarzlar, kechikkan to&apos;lovlar va javobsiz qolgan Instagram lidlar hisobiga (~16%)
@@ -468,7 +473,7 @@ export default function InstagramBioPage() {
                   <TrendingUp size={14} /> EduYuz bilan oylik o&apos;sish:
                 </div>
                 <div className="text-lg sm:text-xl font-bold text-emerald-600">
-                  +{extraProfitWithEduYuz.toLocaleString('uz-UZ')} so&apos;m
+                  +{groupNum(extraProfitWithEduYuz)} so&apos;m
                 </div>
                 <p className="text-[11px] text-slate-500 leading-snug">
                   Avto-SMS eslatma, Kanban voronka va Ota-onalar Boti orqali saqlab qolingan o&apos;quvchilar (+22%)
