@@ -2,10 +2,33 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { decryptDeep, encryptBackupData, encryptWriteData, hasEncryptionKey, isEncrypted } from '../../common/crypto/field-crypto';
 
+/**
+ * Serverless (Vercel) muhitida baza manzilini moslaydi.
+ * Har bir Vercel funksiya nusxasi o'z ulanishlarini ochadi; Supabase pooler'ining "session" rejimida
+ * (5432-port) ulanishlar soni 15 ta bilan cheklangan va tez tugaydi (EMAXCONNSESSION).
+ * Shuning uchun Vercel'da "transaction" rejimi (6543-port, pgbouncer=true) va har nusxaga 1 ta ulanish ishlatiladi.
+ * Render/Docker/kompyuterda manzil o'zgarmaydi.
+ */
+export function serverlessDatabaseUrl(raw: string | undefined, isServerless: boolean): string | undefined {
+  if (!raw || !isServerless) return raw;
+  try {
+    const u = new URL(raw);
+    if (u.hostname.endsWith('pooler.supabase.com') && (u.port === '5432' || u.port === '')) {
+      u.port = '6543';
+      u.searchParams.set('pgbouncer', 'true');
+    }
+    if (!u.searchParams.has('connection_limit')) u.searchParams.set('connection_limit', '1');
+    return u.toString();
+  } catch {
+    return raw;
+  }
+}
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
-    super();
+    const url = serverlessDatabaseUrl(process.env.DATABASE_URL, !!process.env.VERCEL);
+    super(url && url !== process.env.DATABASE_URL ? { datasources: { db: { url } } } : undefined);
     // Maxfiy maydonlar (pasport, manzil, izoh) bazaga shifrlanib yoziladi va o'qilganda avtomatik ochiladi.
     this.$use(async (params, next) => {
       const model = params.model as string | undefined;
@@ -36,7 +59,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     await this.$connect();
     // Kalit sozlangan bo'lsa, eski (shifrlanmagan) yozuvlar fonda bir martalik shifrlanadi
-    if (hasEncryptionKey()) this.encryptExisting().catch((e) => console.error('Eski ma\'lumotlarni shifrlashda xato:', e));
+    // Vercel'da har "sovuq" ishga tushishda takrorlanmaydi (ulanishlarni band qiladi); bu ish Render'da bajarilgan.
+    if (hasEncryptionKey() && !process.env.VERCEL) this.encryptExisting().catch((e) => console.error('Eski ma\'lumotlarni shifrlashda xato:', e));
   }
 
   // Idempotent: faqat hali shifrlanmagan qatorlarga tegadi, shuning uchun har ishga tushganda xavfsiz.
