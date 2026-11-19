@@ -1,10 +1,10 @@
 # Bepul serverlarni "uyg'oq" saqlash.
-# - Render bepul serveri 15 daqiqa so'rov kelmasa uxlaydi (bot va sayt sekin javob beradi).
+# - Vercel serveri so'rovlar orasida o'chadi — muntazam so'rov uni "iliq" ushlab turadi (birinchi ochilish tez).
 # - Supabase bepul bazasi bir hafta ishlatilmasa to'xtatib qo'yiladi.
 # Shu workflow ish vaqtida (Toshkent 06:00–23:59) har 10 daqiqada /health ga murojaat qiladi: u serverni
 # uyg'otadi va bazaga kichik so'rov (SELECT 1) yuboradi. Kechasi server uxlaydi — bepul limit tejaladi.
 # Server manzili: GitHub → Settings → Secrets and variables → Actions → Variables → BACKEND_HEALTH_URL
-# (masalan https://eduyuz-api-xxxx.europe-west1.run.app/api/v1/health). Berilmasa Render manzili ishlatiladi.
+# (masalan https://eduyuz-api-xxxx.europe-west1.run.app/api/v1/health). Berilmasa Vercel'dagi eduyuz-api manzili ishlatiladi.
 name: Keep alive
 
 on:
@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Ping backend health
         env:
-          URL: ${{ vars.BACKEND_HEALTH_URL || 'https://eduyuz.onrender.com/api/v1/health' }}
+          URL: ${{ vars.BACKEND_HEALTH_URL || 'https://eduyuz-api.vercel.app/api/v1/health' }}
         run: |
           for i in 1 2 3; do
             code=$(curl -s -o /tmp/out -w '%{http_code}' --max-time 90 "$URL") || code=000
