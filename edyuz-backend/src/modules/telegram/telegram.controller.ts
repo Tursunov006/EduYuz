@@ -18,7 +18,7 @@ export class TelegramController {
   @SkipThrottle()
   @HttpCode(200)
   @Post('webhook')
-  webhook(@Headers('x-telegram-bot-api-secret-token') secret: string, @Body() update: any) {
+  async webhook(@Headers('x-telegram-bot-api-secret-token') secret: string, @Body() update: any) {
     // Diagnostika: har bir so'rov logga yoziladi (kim yuborgani va qabul qilingani)
     console.log(
       `[TelegramWebhook] so'rov keldi: secret=${secret ? 'bor' : 'yo‘q'}, update_id=${update?.update_id ?? '-'}, ` +
@@ -28,7 +28,7 @@ export class TelegramController {
       console.warn('[TelegramWebhook] RAD ETILDI: maxfiy kalit mos kelmadi');
       throw new UnauthorizedException();
     }
-    this.telegramService.handleWebhookUpdate(update);
+    await this.telegramService.handleWebhookUpdate(update);
     return { ok: true };
   }
 
