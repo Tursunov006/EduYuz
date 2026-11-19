@@ -131,10 +131,12 @@ export class AttendanceService {
         where: { id: { in: changed.map((r) => r.studentId) } },
       });
 
+      // Xabarlar javob qaytarilishidan oldin yuboriladi (Cloud Run'da javobdan keyin protsessor to'xtatiladi)
+      const sends: Promise<unknown>[] = [];
       for (const student of students) {
         const record = recordMap.get(student.id);
         if (record && student.parentChatId) {
-          this.telegramService
+          sends.push(this.telegramService
             .sendAttendanceAlert(
               student.parentChatId,
               student.fullName,
@@ -142,16 +144,17 @@ export class AttendanceService {
               record.status,
               dto.date,
             )
-            .catch((e) => this.logger.warn(`Telegram davomat xabari xatosi: ${e.message}`));
+            .catch((e) => this.logger.warn(`Telegram davomat xabari xatosi: ${e.message}`)));
         }
 
         // SMS xabarnoma (agar darsga kelmagan bo'lsa)
         if (record && record.status === 'absent' && student.parentPhone) {
-          this.smsService
+          sends.push(this.smsService
             .sendAttendanceAlert(student.parentPhone, student.fullName, group.name)
-            .catch((e) => this.logger.warn(`SMS davomat xabari xatosi: ${e.message}`));
+            .catch((e) => this.logger.warn(`SMS davomat xabari xatosi: ${e.message}`)));
         }
       }
+      await Promise.all(sends);
     }
 
     return {

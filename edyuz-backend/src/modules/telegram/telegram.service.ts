@@ -56,13 +56,16 @@ export class TelegramService implements OnModuleInit {
     return a.length === b.length && timingSafeEqual(a, b);
   }
 
-  // Webhook orqali kelgan yangilanish (javob kutmasdan qayta ishlanadi)
-  handleWebhookUpdate(update: any) {
-    this.handleUpdate(update)
-      .then(() => this.logger.log(`Telegram yangilanishi qayta ishlandi (update_id=${update?.update_id})`))
-      .catch((err: any) =>
-        this.logger.warn(`Telegram yangilanishini qayta ishlashda xato: ${err?.message || err}`),
-      );
+  // Webhook orqali kelgan yangilanishni qayta ishlaydi. Javob (200) qayta ishlash tugagach yuboriladi:
+  // Google Cloud Run kabi serverlarda javob qaytgandan keyin protsessor to'xtatiladi, shuning uchun
+  // bot javobi javobdan oldin yuborilishi kerak. Xato bo'lsa ham reject qilinmaydi (Telegram qayta yubormasin).
+  async handleWebhookUpdate(update: any): Promise<void> {
+    try {
+      await this.handleUpdate(update);
+      this.logger.log(`Telegram yangilanishi qayta ishlandi (update_id=${update?.update_id})`);
+    } catch (err: any) {
+      this.logger.warn(`Telegram yangilanishini qayta ishlashda xato: ${err?.message || err}`);
+    }
   }
 
   // Webhook mumkin bo'lsa webhook, aks holda polling

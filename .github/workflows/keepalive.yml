@@ -1,13 +1,15 @@
 # Bepul serverlarni "uyg'oq" saqlash.
 # - Render bepul serveri 15 daqiqa so'rov kelmasa uxlaydi (bot va sayt sekin javob beradi).
 # - Supabase bepul bazasi bir hafta ishlatilmasa to'xtatib qo'yiladi.
-# Shu workflow har 10 daqiqada /health ga murojaat qiladi: u serverni uyg'otadi va bazaga
-# kichik so'rov (SELECT 1) yuboradi. Ochiq repozitoriyda GitHub Actions bepul.
+# Shu workflow ish vaqtida (Toshkent 06:00–23:59) har 10 daqiqada /health ga murojaat qiladi: u serverni
+# uyg'otadi va bazaga kichik so'rov (SELECT 1) yuboradi. Kechasi server uxlaydi — bepul limit tejaladi.
+# Server manzili: GitHub → Settings → Secrets and variables → Actions → Variables → BACKEND_HEALTH_URL
+# (masalan https://eduyuz-api-xxxx.europe-west1.run.app/api/v1/health). Berilmasa Render manzili ishlatiladi.
 name: Keep alive
 
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/10 1-18 * * *'
   workflow_dispatch:
 
 permissions: {}
@@ -18,9 +20,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Ping backend health
+        env:
+          URL: ${{ vars.BACKEND_HEALTH_URL || 'https://eduyuz.onrender.com/api/v1/health' }}
         run: |
           for i in 1 2 3; do
-            code=$(curl -s -o /tmp/out -w '%{http_code}' --max-time 90 https://eduyuz.onrender.com/api/v1/health) || code=000
+            code=$(curl -s -o /tmp/out -w '%{http_code}' --max-time 90 "$URL") || code=000
             echo "Urinish $i: HTTP $code"; cat /tmp/out 2>/dev/null; echo
             [ "$code" = "200" ] && exit 0
             sleep 20

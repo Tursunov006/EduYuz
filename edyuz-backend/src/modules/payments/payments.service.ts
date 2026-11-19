@@ -80,7 +80,7 @@ export class PaymentsService {
 
     // Telegramga kvitansiya yuborish
     if (student.parentChatId) {
-      this.telegramService
+      await this.telegramService
         .sendPaymentReceipt(
           student.parentChatId,
           student.fullName,
@@ -94,7 +94,7 @@ export class PaymentsService {
 
     // SMS orqali kvitansiya yuborish
     if (student.parentPhone) {
-      this.smsService
+      await this.smsService
         .sendPaymentReceipt(
           student.parentPhone,
           student.fullName,
@@ -195,7 +195,7 @@ export class PaymentsService {
         ]);
 
         if (Number(updatedStudent.balance) < 0 && student.parentChatId) {
-          this.telegramService
+          await this.telegramService
             .sendDebtAlert(
               student.parentChatId,
               student.fullName,
@@ -206,7 +206,7 @@ export class PaymentsService {
         }
 
         if (Number(updatedStudent.balance) < 0 && student.parentPhone) {
-          this.smsService
+          await this.smsService
             .sendDebtAlert(
               student.parentPhone,
               student.fullName,

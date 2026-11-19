@@ -20,7 +20,7 @@ import {
   Send,
   RefreshCw,
 } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, API_URL } from '@/lib/api';
 
 function Instagram({ size = 16, className = '' }: { size?: number; className?: string }) {
   return (
@@ -616,12 +616,12 @@ export default function LeadsPage() {
                 <div className="flex items-center gap-2">
                   <input
                     readOnly
-                    value="https://eduyuz.onrender.com/api/v1/instagram/webhook"
+                    value={`${API_URL}/instagram/webhook`}
                     className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-cyan-700"
                   />
                   <button
                     onClick={() =>
-                      copyToClipboard('https://eduyuz.onrender.com/api/v1/instagram/webhook', 'webhook')
+                      copyToClipboard(`${API_URL}/instagram/webhook`, 'webhook')
                     }
                     className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-900 flex items-center gap-1"
                   >
