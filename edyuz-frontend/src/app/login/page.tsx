@@ -48,7 +48,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
 
       // Login kiritilganda (masalan, admin yoki superadmin), tizimdagi mos hisobga yo'naltirish
       let accountLogin = phoneCheck.phone || login.trim();

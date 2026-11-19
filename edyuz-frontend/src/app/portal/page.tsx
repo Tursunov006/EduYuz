@@ -137,7 +137,7 @@ function PortalContent() {
 
     setPayLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
       const res = await axios.post(`${apiUrl}/payments/atmos/create-invoice`, {
         studentId: selectedStudentId,
         amount: Number(payAmount),

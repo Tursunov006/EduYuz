@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz.onrender.com/api/v1';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
 
 axios.defaults.baseURL = API_URL;
 
