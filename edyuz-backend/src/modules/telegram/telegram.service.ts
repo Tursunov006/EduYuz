@@ -27,6 +27,9 @@ export class TelegramService implements OnModuleInit {
       this.logger.warn(
         '⚠️ TELEGRAM_BOT_TOKEN sozlanmagan. Telegram xabarlar simulyatsiya (console) rejimida ishlaydi.',
       );
+    } else if (process.env.VERCEL && process.env.VERCEL_ENV !== 'production') {
+      // Vercel preview (sinov) nusxalari botni asosiy serverdan tortib olmasligi kerak
+      this.logger.log('Vercel preview muhiti: Telegram bot ulanmaydi (faqat xabar yuborish ishlaydi).');
     } else {
       await this.connect();
       this.logger.log('🤖 EduYuz 2.0 Super Telegram Bot muvaffaqiyatli ulandi!');
@@ -40,7 +43,10 @@ export class TelegramService implements OnModuleInit {
   private webhookUrl(): string | null {
     const explicit = this.configService.get<string>('TELEGRAM_WEBHOOK_URL')?.trim();
     if (explicit) return explicit;
-    const base = this.configService.get<string>('RENDER_EXTERNAL_URL')?.trim();
+    const render = this.configService.get<string>('RENDER_EXTERNAL_URL')?.trim();
+    // Vercel: loyihaning asosiy (production) domeni, masalan "eduyuz-api.vercel.app"
+    const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+    const base = render || (vercel ? `https://${vercel}` : '');
     return base ? `${base.replace(/\/+$/, '')}/api/v1/telegram/webhook` : null;
   }
 
@@ -70,8 +76,22 @@ export class TelegramService implements OnModuleInit {
 
   // Webhook mumkin bo'lsa webhook, aks holda polling
   private async connect() {
-    await this.clearWebhookAndSetupMenu();
     const url = this.webhookUrl();
+    // Vercel (serverless): har bir "sovuq" ishga tushishda webhook'ni qayta o'rnatmaslik uchun avval tekshiriladi.
+    // Polling bu yerda ishlay olmaydi — server so'rovlar orasida to'xtatiladi.
+    if (process.env.VERCEL) {
+      if (!url) {
+        this.logger.warn('Vercel: webhook manzili aniqlanmadi (TELEGRAM_WEBHOOK_URL bering). Bot xabar qabul qilmaydi.');
+        return;
+      }
+      try {
+        const info: any = await (await fetch(`https://api.telegram.org/bot${this.botToken}/getWebhookInfo`)).json();
+        if (info?.result?.url === url) return;
+      } catch {
+        /* tekshirib bo'lmasa — qayta o'rnatiladi */
+      }
+    }
+    await this.clearWebhookAndSetupMenu();
     if (url) {
       try {
         const res = await fetch(`https://api.telegram.org/bot${this.botToken}/setWebhook`, {
@@ -93,6 +113,7 @@ export class TelegramService implements OnModuleInit {
         this.logger.warn(`Webhook o'rnatishda xato: ${e.message}. Polling ishlatiladi.`);
       }
     }
+    if (process.env.VERCEL) return;
     this.startPolling();
   }
 
