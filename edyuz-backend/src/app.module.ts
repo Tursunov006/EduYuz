@@ -23,6 +23,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { InstagramModule } from './modules/instagram/instagram.module';
 import { HealthModule } from './modules/health/health.module';
 import { NewsModule } from './modules/news/news.module';
+import { AnnouncementsModule } from './modules/announcements/announcements.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { NewsModule } from './modules/news/news.module';
     PrismaModule,
     HealthModule,
     NewsModule,
+    AnnouncementsModule,
     SmsModule,
     TelegramModule,
     LmsModule,
