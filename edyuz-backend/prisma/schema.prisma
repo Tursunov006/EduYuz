@@ -59,6 +59,7 @@ model Center {
   groups   Group[]
   students Student[]
   expenses Expense[]
+  announcements Announcement[]
 
   @@map("centers")
 }
@@ -423,4 +424,23 @@ model PlatformNews {
 
   @@index([createdAt])
   @@map("platform_news")
+}
+
+// Markaz e'lonlari (o'quvchi, ota-ona, o'qituvchilar uchun). Telegram orqali ota-onalarga yuborilishi mumkin.
+model Announcement {
+  id         String   @id @default(uuid()) @db.VarChar(36)
+  centerId   String   @map("center_id") @db.VarChar(36)
+  title      String   @db.VarChar(200)
+  content    String   @db.Text
+  target     String   @default("all") @db.VarChar(20) // all | students | parents | teachers
+  priority   String   @default("medium") @db.VarChar(10) // low | medium | high
+  isPinned   Boolean  @default(false) @map("is_pinned")
+  authorName String?  @map("author_name") @db.VarChar(100)
+  sentCount  Int      @default(0) @map("sent_count")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  center Center @relation(fields: [centerId], references: [id], onDelete: Cascade)
+
+  @@index([centerId])
+  @@map("announcements")
 }

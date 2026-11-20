@@ -21,6 +21,7 @@ import {
   X
 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n/LanguageContext';
+import { apiFetch } from '@/lib/api';
 import AcademicHubNav from '@/components/AcademicHubNav';
 
 export interface Announcement {
@@ -31,45 +32,9 @@ export interface Announcement {
   priority: 'low' | 'medium' | 'high';
   isPinned: boolean;
   createdAt: string;
-  author: string;
-  viewsCount?: number;
+  authorName?: string | null;
+  sentCount?: number;
 }
-
-const initialAnnouncements: Announcement[] = [
-  {
-    id: 'ann-1',
-    title: 'Navro‘z bayrami munosabati bilan dam olish kunlari',
-    content: 'Hurmatli o‘quvchilar va o‘qituvchilar! 21-23 mart kunlari markazimizda darslar bo‘lmaydi. Barcha mashg‘ulotlar 24-mart dushanba kunidan odatdagi dars jadvali asosida davom etadi.',
-    target: 'all',
-    priority: 'high',
-    isPinned: true,
-    createdAt: '2026-03-18 10:30',
-    author: 'EduYuz Rahbariyati',
-    viewsCount: 142
-  },
-  {
-    id: 'ann-2',
-    title: 'Yangi "Full-Stack Dasturlash" guruhi uchun qabul ochildi',
-    content: 'Markazimizda yangi amaliy Full-Stack (Next.js & NestJS) o‘quv kursi start olmoqda. Darslar haftasiga 3 kun bo‘lib o‘tadi.',
-    target: 'students',
-    priority: 'medium',
-    isPinned: false,
-    createdAt: '2026-03-22 15:45',
-    author: 'Administrator',
-    viewsCount: 98
-  },
-  {
-    id: 'ann-3',
-    title: 'O‘qituvchilar uchun haftalik metodik yig‘ilish',
-    content: 'Shanba kuni soat 17:00 da o‘qituvchilar xonasida oylik yakuniy o‘zlashtirish va yangi interaktiv o‘yinlar bo‘yicha seminar bo‘lib o‘tadi. Barcha mentorlar qatnashishi shart.',
-    target: 'teachers',
-    priority: 'medium',
-    isPinned: false,
-    createdAt: '2026-03-24 09:15',
-    author: 'O‘quv Bo‘limi Boshlig‘i',
-    viewsCount: 35
-  }
-];
 
 export default function AnnouncementsPage() {
   const { t } = useTranslation();
@@ -88,81 +53,95 @@ export default function AnnouncementsPage() {
   const [sendTelegram, setSendTelegram] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Load from localStorage or initial
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem('eduyuz_announcements');
-      if (saved) {
-        setAnnouncements(JSON.parse(saved));
-      } else {
-        setAnnouncements(initialAnnouncements);
-        localStorage.setItem('eduyuz_announcements', JSON.stringify(initialAnnouncements));
-      }
-    } catch {
-      setAnnouncements(initialAnnouncements);
-    }
-  }, []);
-
-  const saveAnnouncements = (data: Announcement[]) => {
-    setAnnouncements(data);
-    localStorage.setItem('eduyuz_announcements', JSON.stringify(data));
-  };
-
-  const handleCreateAnnouncement = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTitle.trim() || !newContent.trim()) return;
-
-    const newAnn: Announcement = {
-      id: 'ann-' + Date.now(),
-      title: newTitle.trim(),
-      content: newContent.trim(),
-      target: newTarget,
-      priority: newPriority,
-      isPinned: false,
-      createdAt: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      author: 'Administrator',
-      viewsCount: 0
-    };
-
-    const updated = [newAnn, ...announcements];
-    saveAnnouncements(updated);
-
-    setIsModalOpen(false);
-    setNewTitle('');
-    setNewContent('');
-
-    // Trigger toast
-    if (sendTelegram) {
-      showToast('E‘lon saqlandi va Telegram orqali xabarnoma yuborildi! ');
-    } else {
-      showToast('Yangi e‘lon muvaffaqiyatli chop etildi! ');
-    }
-  };
-
-  const togglePin = (id: string) => {
-    const updated = announcements.map(ann => 
-      ann.id === id ? { ...ann, isPinned: !ann.isPinned } : ann
-    );
-    saveAnnouncements(updated);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Ushbu e‘lonni o‘chirmoqchimisiz?')) {
-      const updated = announcements.filter(ann => ann.id !== id);
-      saveAnnouncements(updated);
-      showToast('E‘lon o‘chirildi');
-    }
-  };
-
-  const handleSendTelegram = (ann: Announcement) => {
-    showToast(`"${ann.title}" e‘loni Telegram bot orqali o‘quvchilar va guruhlarga yuborildi! `);
-  };
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
       setToastMessage(null);
     }, 4000);
+  };
+
+  // E'lonlar bazadan olinadi (markazning barcha xodimlari bir xil ro'yxatni ko'radi)
+  const load = async () => {
+    try {
+      const data = await apiFetch('/announcements');
+      setAnnouncements(Array.isArray(data) ? data : []);
+    } catch (e: any) {
+      showToast('E‘lonlarni yuklab bo‘lmadi: ' + e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleCreateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newContent.trim() || busy) return;
+    setBusy(true);
+    try {
+      const res = await apiFetch('/announcements', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: newTitle.trim(),
+          content: newContent.trim(),
+          target: newTarget,
+          priority: newPriority,
+          sendTelegram,
+        }),
+      });
+      setIsModalOpen(false);
+      setNewTitle('');
+      setNewContent('');
+      showToast(res?.message || 'E‘lon saqlandi');
+      load();
+    } catch (err: any) {
+      showToast('Saqlashda xatolik: ' + err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const togglePin = async (id: string) => {
+    const ann = announcements.find((a) => a.id === id);
+    if (!ann) return;
+    try {
+      await apiFetch(`/announcements/${id}`, { method: 'PATCH', body: JSON.stringify({ isPinned: !ann.isPinned }) });
+      load();
+    } catch (err: any) {
+      showToast('Xatolik: ' + err.message);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Ushbu e‘lonni o‘chirmoqchimisiz?')) return;
+    try {
+      await apiFetch(`/announcements/${id}`, { method: 'DELETE' });
+      showToast('E‘lon o‘chirildi');
+      load();
+    } catch (err: any) {
+      showToast('O‘chirishda xatolik: ' + err.message);
+    }
+  };
+
+  const handleSendTelegram = async (ann: Announcement) => {
+    if (busy) return;
+    if (!confirm(`"${ann.title}" e'loni Telegram botga ulangan barcha ota-onalarga yuborilsinmi?`)) return;
+    setBusy(true);
+    try {
+      const res = await apiFetch(`/announcements/${ann.id}/send`, { method: 'POST' });
+      showToast(res?.message || 'Yuborildi');
+      load();
+    } catch (err: any) {
+      showToast('Yuborishda xatolik: ' + err.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   // Filter & Search logic
@@ -322,7 +301,9 @@ export default function AnnouncementsPage() {
 
       {/* E‘lonlar Ro‘yxati */}
       <div className="space-y-4">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="p-12 text-center rounded-2xl border bg-white border-slate-200 text-sm text-slate-500">Yuklanmoqda...</div>
+        ) : filtered.length === 0 ? (
           <div className={`p-12 text-center rounded-2xl border bg-white border-slate-200`}>
             <Megaphone className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
             <h3 className={`text-base font-semibold text-slate-700`}>
@@ -383,7 +364,7 @@ export default function AnnouncementsPage() {
                       {/* Sana */}
                       <span className="text-xs text-slate-500 flex items-center gap-1">
                         <Calendar className="w-3.5 h-3.5" />
-                        {ann.createdAt}
+                        {new Date(ann.createdAt).toLocaleString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
@@ -398,10 +379,8 @@ export default function AnnouncementsPage() {
                     </p>
 
                     <div className="pt-2 text-xs text-slate-500 flex items-center gap-4">
-                      <span>Muallif: <b className={'text-slate-700'}>{ann.author}</b></span>
-                      {ann.viewsCount !== undefined && (
-                        <span>Ko‘rishlar: <b>{ann.viewsCount} ta</b></span>
-                      )}
+                      {ann.authorName && <span>Muallif: <b className={'text-slate-700'}>{ann.authorName}</b></span>}
+                      {!!ann.sentCount && <span>Telegramda yuborilgan: <b>{ann.sentCount} ta</b></span>}
                     </div>
                   </div>
 
