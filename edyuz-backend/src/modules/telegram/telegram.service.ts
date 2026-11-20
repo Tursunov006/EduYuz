@@ -308,8 +308,8 @@ ${comment ? `📝 <b>Izoh:</b> ${comment}\n` : ''}📅 <b>Vaqt:</b> ${new Date()
     studentName: string,
     debtAmount: number,
     groupName: string,
-  ) {
-    if (!parentChatId) return;
+  ): Promise<boolean> {
+    if (!parentChatId) return false;
 
     const message = `
 ⚠️ <b>To'lov eslatmasi</b>
@@ -322,7 +322,7 @@ Farzandingiz <b>${studentName}</b> (${groupName}) bo'yicha to'lov muddati yetib 
 Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshirishingizni so'raymiz.
     `.trim();
 
-    await this.sendMessage(parentChatId, message);
+    return this.sendMessage(parentChatId, message);
   }
 
   // Telegram botda ota-onani /start orqali avtomatik aniqlash (Polling)
