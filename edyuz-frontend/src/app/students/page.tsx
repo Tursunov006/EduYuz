@@ -650,7 +650,14 @@ export default function StudentsPage() {
                     onChange={(e) => setForm({ ...form, discountAmount: Math.max(0, Math.round(numVal(e))) })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                   />
-                  <p className="mt-1 text-[11px] text-slate-400">Masalan 200000 — oylik to‘lovdan shu summa ayiriladi</p>
+                  {Number(form.discountAmount) > 0 ? (
+                    <p className={`mt-1 text-[11px] ${Number(form.discountAmount) < 1000 ? 'text-amber-600 font-semibold' : 'text-emerald-700'}`}>
+                      = {Number(form.discountAmount).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
+                      {Number(form.discountAmount) < 1000 ? ' — juda kam! 200 ming bo‘lsa 200000 deb yozing' : ' chegirma'}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[11px] text-slate-400">Masalan 200000 — oylik to‘lovdan shu summa ayiriladi</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Holati</label>
