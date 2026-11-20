@@ -161,6 +161,34 @@ function PortalContent() {
     setShowPayModal(false);
   };
 
+  // Click (shartnoma bo'yicha merchant) to'lov havolasi: skanerlanganda Click ilovasi ochiladi,
+  // markaz va o'quvchi ID (transaction_param) avtomatik to'ldiriladi, qarz bo'lsa summa ham.
+  // To'lovdan keyin Click serverga xabar beradi va o'quvchi balansi o'zi yangilanadi.
+  const clickServiceId = process.env.NEXT_PUBLIC_CLICK_SERVICE_ID;
+  const clickMerchantId = process.env.NEXT_PUBLIC_CLICK_MERCHANT_ID;
+  const debtAmount = Math.max(0, -Math.round(Number(studentData?.balance || 0)));
+  const clickPayUrl =
+    clickServiceId && clickMerchantId && selectedStudentId
+      ? `https://my.click.uz/services/pay?service_id=${encodeURIComponent(clickServiceId)}&merchant_id=${encodeURIComponent(
+          clickMerchantId,
+        )}&transaction_param=${encodeURIComponent(selectedStudentId)}${debtAmount > 0 ? `&amount=${debtAmount}` : ''}`
+      : '';
+  const [clickQr, setClickQr] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    if (!clickPayUrl) {
+      setClickQr('');
+      return;
+    }
+    import('qrcode')
+      .then((Q) => Q.toDataURL(clickPayUrl, { margin: 1, width: 400, color: { dark: '#111827', light: '#ffffff' } }))
+      .then((url) => !cancelled && setClickQr(url))
+      .catch(() => !cancelled && setClickQr(''));
+    return () => {
+      cancelled = true;
+    };
+  }, [clickPayUrl]);
+
   const copyCardNumber = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText('8600060925939614');
@@ -523,18 +551,22 @@ function PortalContent() {
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod</h4>
                 <p className="text-[11px] text-slate-600 relative z-10">
-                  QR kodni <b>Click</b> ilovasi bilan skaner qiling — to‘lov oynasi ochiladi. QR ishlamasa, pastdagi karta raqamiga pul o‘tkazing.
+                  {clickQr
+                    ? 'QR kodni telefon kamerasi yoki Click ilovasi bilan skaner qiling — Click ochiladi, o‘quvchi ma’lumotlari o‘zi to‘ladi. To‘lov balansga avtomatik yoziladi.'
+                    : 'QR kodni Click ilovasi bilan skaner qiling — to‘lov oynasi ochiladi. QR ishlamasa, pastdagi karta raqamiga pul o‘tkazing.'}
                 </p>
                 
                 {/* QR KOD RASMI */}
                 <div className="p-2 bg-white rounded-2xl shadow-sm relative z-10 mx-auto max-w-[200px] border border-slate-200">
                   {/* Markaz egasi bergan Click QR kodi (Click ilovasi bilan skanerlanadi) */}
                   <img
-                    src="/click-qr.svg"
+                    src={clickQr || '/click-qr.svg'}
                     alt="O‘quv markazining Click to‘lov QR kodi"
                     className="w-full h-auto object-contain rounded-xl"
                   />
-                  <p className="text-center text-xs font-bold text-[#00AEEF] pb-1">Click orqali to‘lash</p>
+                  <p className="text-center text-xs font-bold text-[#00AEEF] pb-1">
+                    Click orqali to‘lash{clickQr && debtAmount > 0 ? ` • ${debtAmount.toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m` : ''}
+                  </p>
                 </div>
 
                 <p className="text-[11px] font-mono bg-white px-3 py-1.5 rounded-lg text-slate-600 relative z-10">
@@ -600,7 +632,7 @@ function PortalContent() {
 
                 <div className="flex gap-2 w-full pt-1 relative z-10">
                   <a 
-                    href="https://my.click.uz/pay?card=8600060925939614"
+                    href={clickPayUrl || 'https://my.click.uz/pay?card=8600060925939614'}
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 bg-[#00AEEF] hover:bg-[#0096cc] text-slate-900 font-bold py-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition shadow-sm"
