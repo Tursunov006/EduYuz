@@ -36,11 +36,25 @@ export class PaymentsController {
 
   @Roles(RoleType.admin)
   @Post('charge-monthly')
-  async chargeMonthly(@CurrentUser() user: AuthUser, @Body('groupId') groupId?: string) {
+  async chargeMonthly(
+    @CurrentUser() user: AuthUser,
+    @Body('groupId') groupId?: string,
+    @Body('dryRun') dryRun?: boolean,
+    @Body('notify') notify?: boolean,
+  ) {
     if (groupId) await this.access.group(user, groupId);
     // Superadmin ham faqat o'z markazi bo'yicha yechadi — bir tugma bilan barcha
     // markazlardagi o'quvchilardan pul yechilib ketmasligi uchun.
-    return this.paymentsService.chargeMonthly(user.centerId, groupId);
+    return this.paymentsService.chargeMonthly(user.centerId, groupId, { dryRun: dryRun === true, notify: notify === true });
+  }
+
+  // Shu oyda guruhdan yechilgan oylik to'lovni bekor qilish (summalar balansga qaytariladi) — faqat admin
+  @Roles(RoleType.admin)
+  @Post('charge-monthly/cancel')
+  async cancelMonthlyCharge(@CurrentUser() user: AuthUser, @Body('groupId') groupId: string) {
+    if (!groupId) throw new BadRequestException('groupId kiritilishi shart');
+    await this.access.group(user, groupId);
+    return this.paymentsService.cancelMonthlyCharge(user.centerId, groupId);
   }
 
   // Xodim: o'z markazi to'lovlari. Anonim (portal): faqat ko'rsatilgan o'quvchining to'lovlari.
