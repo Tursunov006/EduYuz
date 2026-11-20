@@ -108,18 +108,7 @@ export class PaymentsService {
   }
 
   // Oylik avtomatik to'lov yechish (Avtomatik Billing)
-  /**
-   * Oylik kurs to'lovini yechish.
-   * - dryRun=true: hech narsa yozilmaydi, faqat kimdan qancha yechilishi ro'yxati qaytadi (oldindan ko'rish).
-   * - notify=true bo'lsagina ota-onalarga Telegram/SMS qarzdorlik xabari yuboriladi.
-   * Summa: kurs narxi − chegirma foizi − chegirma (so'm). Faqat "Faol" o'quvchilardan, oyiga bir marta.
-   */
-  async chargeMonthly(
-    centerId: string,
-    groupId?: string,
-    opts: { dryRun?: boolean; notify?: boolean } = {},
-  ) {
-    const { dryRun = false, notify = false } = opts;
+  async chargeMonthly(centerId: string, groupId?: string) {
     const groups = await this.prisma.group.findMany({
       // Arxivdagi (kursi tugagan) guruhlardan oylik to'lov yechilmaydi
       where: { centerId, archivedAt: null, ...(groupId ? { id: groupId } : {}) },
@@ -138,21 +127,10 @@ export class PaymentsService {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const fmt = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 
     let count = 0;
     let skipped = 0;
     let totalCharged = 0;
-    const items: {
-      studentId: string;
-      fullName: string;
-      groupName: string;
-      price: number;
-      discount: number;
-      discountAmount: number;
-      amount: number;
-      status: 'charge' | 'already' | 'free';
-    }[] = [];
 
     for (const group of groups) {
       const price = Number(group.course?.price || 0);
@@ -171,21 +149,12 @@ export class PaymentsService {
         // Qat'iy summa chegirma (so'm) foizdan keyin ayiriladi
         const discountAmount = Math.max(0, Number(student.discountAmount || 0));
         const amount = Math.max(0, Math.round((price * (100 - discount)) / 100) - discountAmount);
-        const row = {
-          studentId: student.id,
-          fullName: student.fullName,
-          groupName: group.name,
-          price,
-          discount,
-          discountAmount,
-          amount,
-          status: 'charge' as 'charge' | 'already' | 'free',
-        };
-        if (amount <= 0) {
-          row.status = 'free'; // 100% chegirma — to'lov yechilmaydi
-          items.push(row);
-          continue;
-        }
+        if (amount <= 0) continue; // 100% chegirma — to'lov yechilmaydi
+        const parts = [
+          discount > 0 ? `${discount}%` : '',
+          discountAmount > 0 ? `${String(discountAmount).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} so'm` : '',
+        ].filter(Boolean);
+        const studentComment = parts.length ? `${comment} (chegirma ${parts.join(' + ')})` : comment;
 
         // Tugma ikki marta bosilsa yoki so'rov qayta yuborilsa — ikkinchi marta yechilmaydi
         const already = await this.prisma.payment.findFirst({
@@ -202,18 +171,9 @@ export class PaymentsService {
           select: { id: true },
         });
         if (already) {
-          row.status = 'already';
-          items.push(row);
           skipped++;
           continue;
         }
-        items.push(row);
-        count++;
-        totalCharged += amount;
-        if (dryRun) continue;
-
-        const parts = [discount > 0 ? `${discount}%` : '', discountAmount > 0 ? `${fmt(discountAmount)} so'm` : ''].filter(Boolean);
-        const studentComment = parts.length ? `${comment} (chegirma ${parts.join(' + ')})` : comment;
 
         const [updatedStudent] = await this.prisma.$transaction([
           this.prisma.student.update({
@@ -234,62 +194,41 @@ export class PaymentsService {
           }),
         ]);
 
-        if (notify && Number(updatedStudent.balance) < 0 && student.parentChatId) {
+        if (Number(updatedStudent.balance) < 0 && student.parentChatId) {
           await this.telegramService
-            .sendDebtAlert(student.parentChatId, student.fullName, Number(updatedStudent.balance), group.name)
+            .sendDebtAlert(
+              student.parentChatId,
+              student.fullName,
+              Number(updatedStudent.balance),
+              group.name,
+            )
             .catch((e) => this.logger.error(`Telegram qarzdorlik xabari xatosi: ${e.message}`));
         }
 
-        if (notify && Number(updatedStudent.balance) < 0 && student.parentPhone) {
+        if (Number(updatedStudent.balance) < 0 && student.parentPhone) {
           await this.smsService
-            .sendDebtAlert(student.parentPhone, student.fullName, Number(updatedStudent.balance), group.name)
+            .sendDebtAlert(
+              student.parentPhone,
+              student.fullName,
+              Number(updatedStudent.balance),
+              group.name,
+            )
             .catch((e) => this.logger.error(`SMS qarzdorlik xabari xatosi: ${e.message}`));
         }
+
+        count++;
+        totalCharged += amount;
       }
     }
 
     return {
       success: true,
-      dryRun,
-      period,
       count,
       skipped,
       totalCharged,
-      items,
-      message: dryRun
-        ? `${count} ta o'quvchidan jami ${fmt(totalCharged)} so'm yechiladi`
-        : `${count} ta o'quvchidan jami ${fmt(totalCharged)} so'm oylik to'lov yechildi` +
-          (skipped > 0 ? ` (${skipped} ta o'quvchidan bu oy uchun avval yechilgan — o'tkazib yuborildi)` : ''),
-    };
-  }
-
-  /**
-   * Shu oyda guruhdan yechilgan oylik to'lovlarni bekor qilish (noto'g'ri summa bilan yechilgan bo'lsa).
-   * Har bir yechish yozuvi o'chiriladi va summa o'quvchi balansiga qaytariladi. Keyin qayta to'g'ri yechish mumkin.
-   */
-  async cancelMonthlyCharge(centerId: string, groupId: string) {
-    const group = await this.prisma.group.findFirst({ where: { id: groupId, centerId }, select: { id: true, name: true } });
-    if (!group) throw new NotFoundException('Guruh topilmadi');
-    const now = new Date();
-    const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const charges = await this.prisma.payment.findMany({
-      where: { amount: { lt: 0 }, comment: { contains: `[oylik:${group.id}:${period}]` } },
-      select: { id: true, studentId: true, amount: true },
-    });
-    let refunded = 0;
-    for (const c of charges) {
-      await this.prisma.$transaction([
-        this.prisma.payment.delete({ where: { id: c.id } }),
-        this.prisma.student.update({ where: { id: c.studentId }, data: { balance: { decrement: Number(c.amount) } } }),
-      ]);
-      refunded += -Number(c.amount);
-    }
-    return {
-      cancelled: charges.length,
-      refunded,
-      message: charges.length
-        ? `${group.name}: ${charges.length} ta o'quvchidan yechilgan jami ${String(refunded).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')} so'm balansga qaytarildi`
-        : `${group.name}: bu oy uchun yechilgan to'lov topilmadi`,
+      message:
+        `${count} ta o'quvchidan jami ${totalCharged.toLocaleString()} so'm oylik to'lov yechildi` +
+        (skipped > 0 ? ` (${skipped} ta o'quvchidan bu oy uchun avval yechilgan — o'tkazib yuborildi)` : ''),
     };
   }
 

@@ -34,7 +34,6 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { numVal } from '@/lib/format';
-import ChargeMonthlyModal from '@/components/finance/ChargeMonthlyModal';
 import { exportToExcel } from '@/lib/excelExport';
 
 const CATEGORY_MAP: Record<string, { label: string; icon: any; color: string; bg: string }> = {
@@ -296,9 +295,24 @@ export default function UnifiedFinancePage() {
     }
   }
 
-  // Oylik abonent to'lovini yechish — avval oldindan ko'rish oynasi ochiladi
-  function handleChargeMonthly() {
-    setChargingMonthly(true);
+  // Oylik abonent to'lovini yechish
+  async function handleChargeMonthly() {
+    if (
+      !confirm(
+        "Barcha faol o'quvchilarning balansidan oylik kurs to'lovini yechishni tasdiqlaysizmi?"
+      )
+    )
+      return;
+    try {
+      setChargingMonthly(true);
+      const res = await apiFetch('/payments/charge-monthly', { method: 'POST' });
+      alert(res?.message || "Oylik kurs to'lovlari muvaffaqiyatli hisoblandi!");
+      loadAllFinanceData();
+    } catch (err: any) {
+      alert(err.message || 'Xatolik yuz berdi');
+    } finally {
+      setChargingMonthly(false);
+    }
   }
 
   // 5. Chiqim / Xarajat qo'shish funksiyasi
@@ -767,9 +781,10 @@ export default function UnifiedFinancePage() {
               </div>
               <button
                 onClick={handleChargeMonthly}
+                disabled={chargingMonthly}
                 className="text-xs font-bold text-amber-700 hover:text-amber-700 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-xl transition"
               >
-                Oylik kurs to&apos;lovini yechish
+                {chargingMonthly ? 'Hisoblanmoqda...' : "Oylik kurs to'lovini yechish"}
               </button>
             </div>
 
@@ -1455,9 +1470,6 @@ export default function UnifiedFinancePage() {
             </div>
           </div>
         </div>
-      )}
-      {chargingMonthly && (
-        <ChargeMonthlyModal onClose={() => setChargingMonthly(false)} onDone={loadAllFinanceData} />
       )}
     </div>
   );
