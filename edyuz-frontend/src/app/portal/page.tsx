@@ -523,18 +523,18 @@ function PortalContent() {
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2 relative z-10"><CreditCard size={18} className="text-[#00AEEF]"/> To'lov uchun QR-Kod</h4>
                 <p className="text-[11px] text-slate-600 relative z-10">
-                  QR kodni bank ilovasi (Click, Payme, Uzum) yoki telefon kamerasi bilan skaner qiling: o‘quv markazining karta raqami chiqadi, shu kartaga pul o‘tkazing.
+                  QR kodni <b>Click</b> ilovasi bilan skaner qiling — to‘lov oynasi ochiladi. QR ishlamasa, pastdagi karta raqamiga pul o‘tkazing.
                 </p>
                 
                 {/* QR KOD RASMI */}
                 <div className="p-2 bg-white rounded-2xl shadow-sm relative z-10 mx-auto max-w-[200px] border border-slate-200">
-                  {/* O'quv markazi kartasi (UzCard 8600 0609 2593 9614) raqamini saqlovchi QR */}
+                  {/* Markaz egasi bergan Click QR kodi (Click ilovasi bilan skanerlanadi) */}
                   <img
-                    src="/card-qr.svg"
-                    alt="O‘quv markazi karta raqami QR kodi: 8600 0609 2593 9614"
+                    src="/click-qr.svg"
+                    alt="O‘quv markazining Click to‘lov QR kodi"
                     className="w-full h-auto object-contain rounded-xl"
                   />
-                  <p className="text-center font-mono text-xs font-bold text-slate-800 pb-1">8600 0609 2593 9614</p>
+                  <p className="text-center text-xs font-bold text-[#00AEEF] pb-1">Click orqali to‘lash</p>
                 </div>
 
                 <p className="text-[11px] font-mono bg-white px-3 py-1.5 rounded-lg text-slate-600 relative z-10">
