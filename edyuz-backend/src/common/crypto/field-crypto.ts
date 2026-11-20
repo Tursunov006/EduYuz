@@ -76,9 +76,22 @@ export function decryptDeep<T>(data: T): T {
 }
 
 /** Shifrlanadigan maydonlar: model → maydon nomlari */
+// Qidiruv, kirish, bot ulanishi yoki hisob-kitobda ishlatiladigan maydonlar (ism, telefon, summa,
+// to'lov izohidagi tranzaksiya belgisi, lid JSON'i) shifrlanmaydi — ular baza so'rovlarida qatnashadi.
 export const SENSITIVE_FIELDS: Record<string, string[]> = {
-  Student: ['passport', 'address', 'notes'],
+  Student: ['passport', 'address', 'notes', 'middleName'],
+  Expense: ['comment'],
+  SalaryPayment: ['comment'],
+  HomeworkSubmission: ['content', 'feedback'],
 };
+
+/** Har bir shifrlanadigan model uchun Prisma delegati nomi va asosiy kalit */
+export const SENSITIVE_MODELS: { model: string; delegate: string; idField: string }[] = [
+  { model: 'Student', delegate: 'student', idField: 'id' },
+  { model: 'Expense', delegate: 'expense', idField: 'id' },
+  { model: 'SalaryPayment', delegate: 'salaryPayment', idField: 'id' },
+  { model: 'HomeworkSubmission', delegate: 'homeworkSubmission', idField: 'id' },
+];
 
 /** Yozishdan oldin: data ichidagi maxfiy maydonlarni shifrlaydi (oddiy qiymat yoki { set } ko'rinishida). */
 export function encryptWriteData(model: string, data: any) {
@@ -94,7 +107,7 @@ export function encryptWriteData(model: string, data: any) {
 /** Zaxira jadvali (StudentBackup.data JSON) ichidagi maxfiy maydonlar ham shifrlanadi. */
 export function encryptBackupData(data: any) {
   if (!data || typeof data !== 'object') return;
-  for (const f of ['passport', 'address', 'notes']) {
+  for (const f of SENSITIVE_FIELDS.Student) {
     if (typeof data[f] === 'string') data[f] = encryptField(data[f]);
   }
 }
