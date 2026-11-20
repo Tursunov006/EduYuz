@@ -251,6 +251,30 @@ export class PaymentsService {
     });
   }
 
+  // Qarzdor o'quvchining ota-onasiga Telegram bot orqali to'lov eslatmasini yuborish.
+  async remindDebt(studentId: string) {
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      include: { groups: { include: { group: { select: { name: true } } } } },
+    });
+    if (!student) throw new NotFoundException("O'quvchi topilmadi");
+    const balance = Number(student.balance);
+    if (balance >= 0) {
+      throw new BadRequestException("Bu o'quvchida qarzdorlik yo'q");
+    }
+    if (!student.parentChatId) {
+      return {
+        sent: false,
+        message: "Ota-ona Telegram botga ulanmagan. O'quvchilar bo'limidagi Telegram havolasini ota-onaga yuboring.",
+      };
+    }
+    const groupName = student.groups.map((g) => g.group?.name).filter(Boolean).join(', ') || 'kurs';
+    const ok = await this.telegramService.sendDebtAlert(student.parentChatId, student.fullName, balance, groupName);
+    return ok
+      ? { sent: true, message: 'Eslatma ota-onaga Telegram orqali yuborildi' }
+      : { sent: false, message: "Telegram xabar yuborilmadi (ota-ona botni bloklagan bo'lishi mumkin)" };
+  }
+
   async updateComment(id: string, comment: string) {
     await this.findOne(id);
     return this.prisma.payment.update({ where: { id }, data: { comment: comment.trim() || null } });

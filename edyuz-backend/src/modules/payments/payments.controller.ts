@@ -63,6 +63,14 @@ export class PaymentsController {
     return this.paymentsService.findOne(id);
   }
 
+  // Qarzdorga Telegram orqali to'lov eslatmasi — faqat admin
+  @Roles(RoleType.admin)
+  @Post('remind/:studentId')
+  async remindDebt(@Param('studentId') studentId: string, @CurrentUser() user: AuthUser) {
+    await this.access.student(user, studentId);
+    return this.paymentsService.remindDebt(studentId);
+  }
+
   // To'lov izohini tahrirlash — faqat admin. Summa o'zgartirilmaydi (xato bo'lsa bekor qilib, qayta kiritiladi).
   @Roles(RoleType.admin)
   @Patch(':id')

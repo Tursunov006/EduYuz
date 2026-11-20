@@ -33,6 +33,7 @@ import {
   Users,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { numVal } from '@/lib/format';
 import { exportToExcel } from '@/lib/excelExport';
 
 const CATEGORY_MAP: Record<string, { label: string; icon: any; color: string; bg: string }> = {
@@ -50,6 +51,10 @@ const COLORS = ['bg-indigo-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'
 
 type FinanceTab = 'income' | 'debtors' | 'expenses' | 'reports';
 
+const PAY_METHOD_LABELS: Record<string, string> = { cash: 'Naqd', card: 'Karta', click: 'Click', payme: 'Payme' };
+const fmt = (n: number) => Math.round(Number(n) || 0).toLocaleString('uz-UZ').replace(/,/g, ' ');
+const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+
 export default function UnifiedFinancePage() {
   const [activeTab, setActiveTab] = useState<FinanceTab>('income');
   const [loading, setLoading] = useState(true);
@@ -66,11 +71,23 @@ export default function UnifiedFinancePage() {
   const [isExpModalOpen, setIsExpModalOpen] = useState(false);
   const [receiptModal, setReceiptModal] = useState<any>(null);
   const [chargingMonthly, setChargingMonthly] = useState(false);
+  // Ikki marta bosilganda ikki marta saqlanib ketmasligi uchun
+  const [paySubmitting, setPaySubmitting] = useState(false);
+  const [expSubmitting, setExpSubmitting] = useState(false);
+  const [remindingId, setRemindingId] = useState<string | null>(null);
+  // Ma'lumot yuklanmasa — nol ko'rsatib aldamaslik uchun xato aniq ko'rsatiladi
+  const [loadError, setLoadError] = useState('');
+  const [studentQuery, setStudentQuery] = useState('');
+  const [centerName, setCenterName] = useState('');
 
   // Filtrlar (Kirim uchun)
   const [search, setSearch] = useState('');
   const [methodFilter, setMethodFilter] = useState('ALL');
-  const [periodFilter, setPeriodFilter] = useState<'ALL' | 'TODAY' | 'MONTH'>('ALL');
+  const [periodFilter, setPeriodFilter] = useState<'ALL' | 'TODAY' | 'MONTH' | 'PICK'>('ALL');
+  const [pickedMonth, setPickedMonth] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  });
 
   // Filtrlar (Chiqim uchun)
   const [expSearch, setExpSearch] = useState('');
@@ -95,22 +112,29 @@ export default function UnifiedFinancePage() {
   async function loadAllFinanceData() {
     try {
       setLoading(true);
+      setLoadError('');
+      const failed: string[] = [];
+      const get = (path: string, label: string) =>
+        apiFetch(path).catch(() => {
+          failed.push(label);
+          return null;
+        });
       const [pays, stds, exps, tchrs, grps] = await Promise.all([
-        apiFetch('/payments').catch(() => []),
-        apiFetch('/students').catch(() => []),
-        apiFetch('/expenses').catch(() => []),
-        apiFetch('/teachers').catch(() => []),
-        apiFetch('/groups').catch(() => []),
+        get('/payments', "to'lovlar"),
+        get('/students', "o'quvchilar"),
+        get('/expenses', 'chiqimlar'),
+        get('/teachers', "o'qituvchilar"),
+        get('/groups', 'guruhlar'),
       ]);
 
-      setPayments(pays || []);
-      setStudents(stds || []);
-      setExpenses(exps || []);
-      setTeachers(tchrs || []);
-      setGroups(grps || []);
-
-      if (stds && stds[0] && !payForm.studentId) {
-        setPayForm((f) => ({ ...f, studentId: stds[0].id }));
+      // Yuklanmagan ro'yxat eski qiymatida qoladi (nolga tushirilmaydi)
+      if (Array.isArray(pays)) setPayments(pays);
+      if (Array.isArray(stds)) setStudents(stds);
+      if (Array.isArray(exps)) setExpenses(exps);
+      if (Array.isArray(tchrs)) setTeachers(tchrs);
+      if (Array.isArray(grps)) setGroups(grps);
+      if (failed.length) {
+        setLoadError(`Quyidagi ma'lumotlar yuklanmadi: ${failed.join(', ')}. Raqamlar to'liq bo'lmasligi mumkin.`);
       }
     } catch (err) {
       console.error(err);
@@ -125,6 +149,11 @@ export default function UnifiedFinancePage() {
       const tabParam = params.get('tab') as FinanceTab | null;
       if (tabParam && ['income', 'debtors', 'expenses', 'reports'].includes(tabParam)) {
         setActiveTab(tabParam);
+      }
+      try {
+        setCenterName(JSON.parse(localStorage.getItem('user') || '{}')?.centerName || '');
+      } catch {
+        /* user ma'lumoti yo'q */
       }
     }
     loadAllFinanceData();
@@ -147,7 +176,12 @@ export default function UnifiedFinancePage() {
 
   // 2. Filtrlangan to'lovlar (Kassa tab'i)
   const filteredPayments = positivePayments.filter((p) => {
-    const matchesSearch = p.student?.fullName?.toLowerCase().includes(search.toLowerCase());
+    const q = search.trim().toLowerCase();
+    const matchesSearch =
+      !q ||
+      (p.student?.fullName || '').toLowerCase().includes(q) ||
+      (p.student?.phone || '').includes(q) ||
+      (p.comment || '').toLowerCase().includes(q);
     const matchesMethod = methodFilter === 'ALL' || p.paymentMethod === methodFilter;
 
     let matchesPeriod = true;
@@ -158,12 +192,29 @@ export default function UnifiedFinancePage() {
         matchesPeriod = pd.toDateString() === now.toDateString();
       } else if (periodFilter === 'MONTH') {
         matchesPeriod = pd.getMonth() === now.getMonth() && pd.getFullYear() === now.getFullYear();
+      } else if (periodFilter === 'PICK') {
+        matchesPeriod = monthKey(pd) === pickedMonth;
       }
     }
     return matchesSearch && matchesMethod && matchesPeriod;
   });
 
   const filteredIncomeTotal = filteredPayments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+
+  // Bugungi kassa (kun yakunida kassani sanash uchun)
+  const todayStr = new Date().toDateString();
+  const todayPayments = positivePayments.filter((p) => p.paidAt && new Date(p.paidAt).toDateString() === todayStr);
+  const todayCash = todayPayments.filter((p) => p.paymentMethod === 'cash').reduce((a, p) => a + Number(p.amount || 0), 0);
+  const todayOther = todayPayments.reduce((a, p) => a + Number(p.amount || 0), 0) - todayCash;
+
+  // To'lov oynasi: o'quvchini qidirish va tanlangan o'quvchi
+  const sq = studentQuery.trim().toLowerCase();
+  const pickableStudents = students
+    .filter((s) => s.status !== 'inactive' || s.id === payForm.studentId || Number(s.balance || 0) < 0)
+    .filter((s) => !sq || (s.fullName || '').toLowerCase().includes(sq) || (s.phone || '').includes(sq) || (s.parentPhone || '').includes(sq))
+    .sort((a, b) => (a.fullName || '').localeCompare(b.fullName || ''));
+  const selectedStudent = students.find((s) => s.id === payForm.studentId);
+  const payAmountNum = Number(payForm.amount || 0);
 
   // 3. Filtrlangan xarajatlar (Chiqim tab'i)
   const filteredExpenses = expenses.filter((e) => {
@@ -184,6 +235,14 @@ export default function UnifiedFinancePage() {
   // 4. To'lov qabul qilish funksiyasi
   async function handlePaymentSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (paySubmitting) return;
+    const amount = Number(payForm.amount);
+    if (!payForm.studentId) return alert("O'quvchini tanlang");
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isInteger(amount)) {
+      return alert("To'lov miqdori musbat butun son bo'lishi kerak");
+    }
+    if (amount > 100_000_000) return alert("To'lov miqdori juda katta — raqamni tekshiring");
+    setPaySubmitting(true);
     try {
       const newPay = await apiFetch('/payments', {
         method: 'POST',
@@ -194,16 +253,20 @@ export default function UnifiedFinancePage() {
       });
       setIsPayModalOpen(false);
       setReceiptModal(newPay);
-      setPayForm({
-        studentId: students[0]?.id || '',
-        amount: '',
-        paymentMethod: 'cash',
-        comment: '',
-      });
+      setPayForm({ studentId: '', amount: '', paymentMethod: 'cash', comment: '' });
+      setStudentQuery('');
       loadAllFinanceData();
     } catch (err: any) {
       alert("To'lov qabul qilishda xatolik: " + err.message);
+    } finally {
+      setPaySubmitting(false);
     }
+  }
+
+  function openPayModal() {
+    setPayForm({ studentId: '', amount: '', paymentMethod: 'cash', comment: '' });
+    setStudentQuery('');
+    setIsPayModalOpen(true);
   }
 
   // Qarzdor ustiga bosib 1-Click to'lov oynasini ochish
@@ -214,18 +277,22 @@ export default function UnifiedFinancePage() {
       paymentMethod: 'cash',
       comment: "Qarzdorlik to'lovi",
     });
+    setStudentQuery('');
     setIsPayModalOpen(true);
   }
 
-  // Qarzdorga Telegram orqali 1-Click eslatma yuborish
-  function sendTelegramReminder(student: any) {
-    const debt = Math.abs(Number(student.balance || 0)).toLocaleString('uz-UZ');
-    const rawPhone = (student.parentPhone || student.phone || '').replace(/\D/g, '');
-    const cleanPhone = rawPhone.startsWith('998') ? `+${rawPhone}` : `+998${rawPhone}`;
-    const text = encodeURIComponent(
-      `Assalomu alaykum! Farzandingiz ${student.fullName}ning o'quv kursi uchun ${debt} so'm qarzdorligi mavjud. Iltimos, to'lovni amalga oshirishingizni so'raymiz. Hurmat bilan, O'quv Markazi Ma'muriyati.`
-    );
-    window.open(`https://t.me/${cleanPhone}?text=${text}`, '_blank');
+  // Qarzdorning ota-onasiga markaz Telegram boti orqali eslatma yuborish
+  async function sendTelegramReminder(student: any) {
+    if (remindingId) return;
+    setRemindingId(student.id);
+    try {
+      const res = await apiFetch(`/payments/remind/${student.id}`, { method: 'POST' });
+      alert(res?.message || 'Yuborildi');
+    } catch (err: any) {
+      alert('Eslatma yuborilmadi: ' + err.message);
+    } finally {
+      setRemindingId(null);
+    }
   }
 
   // Oylik abonent to'lovini yechish
@@ -251,6 +318,11 @@ export default function UnifiedFinancePage() {
   // 5. Chiqim / Xarajat qo'shish funksiyasi
   async function handleExpenseSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (expSubmitting) return;
+    const amount = Number(expForm.amount);
+    if (!Number.isFinite(amount) || amount <= 0) return alert("Summa musbat son bo'lishi kerak");
+    if (amount > 1_000_000_000) return alert('Summa juda katta — raqamni tekshiring');
+    setExpSubmitting(true);
     try {
       await apiFetch('/expenses', {
         method: 'POST',
@@ -270,6 +342,8 @@ export default function UnifiedFinancePage() {
       loadAllFinanceData();
     } catch (err: any) {
       alert('Xarajat kiritishda xatolik: ' + err.message);
+    } finally {
+      setExpSubmitting(false);
     }
   }
 
@@ -400,7 +474,7 @@ export default function UnifiedFinancePage() {
           { header: 'Faol guruhlar soni', key: 'groups', width: 150, align: 'center' },
           { header: "Jami o'quvchilar soni", key: 'students', width: 160, align: 'center' },
           {
-            header: "50% KPI Oylik Maosh (so'm)",
+            header: "Taxminiy oylik (so'm)",
             key: 'kpiSalary',
             width: 200,
             isCurrency: true,
@@ -410,7 +484,7 @@ export default function UnifiedFinancePage() {
         teacherStats,
         {
           title: "EduYuz CRM — O'qituvchilar KPI va Ish Haqi Hisoboti",
-          summaryLabel: 'JAMI KPI MAOSH FONDI:',
+          summaryLabel: 'JAMI TAXMINIY OYLIK FONDI:',
           summaryValue: `${totalKpi.toLocaleString('uz-UZ')} so'm`,
         }
       );
@@ -517,15 +591,19 @@ export default function UnifiedFinancePage() {
       );
       const estimatedRevenue = tGroups.reduce((acc: number, g: any) => {
         const count = g.students?.length || g._count?.students || 0;
-        const price = Number(g.course?.price || 400000);
+        const price = Number(g.course?.price || 0); // narx kiritilmagan bo'lsa — 0 (taxminiy raqam o'ylab topilmaydi)
         return acc + count * price;
       }, 0);
-      const kpiSalary = Math.round(estimatedRevenue * 0.5); // 50% KPI ulushi
+      // O'qituvchining o'z sozlamasi: foiz (daromaddan) yoki qat'iy oylik
+      const rate = Number(t.salaryRate ?? 0);
+      const isFixed = t.salaryType === 'fixed';
+      const kpiSalary = isFixed ? Math.round(rate) : Math.round((estimatedRevenue * rate) / 100);
       return {
         name: t.fullName,
         students: studentCount,
         groups: tGroups.length,
         kpiSalary,
+        rateLabel: isFixed ? "qat'iy oylik" : `${rate}%`,
       };
     })
     .sort((a, b) => b.students - a.students);
@@ -554,7 +632,7 @@ export default function UnifiedFinancePage() {
             <TrendingDown size={16} /> Chiqim kiritish
           </button>
           <button
-            onClick={() => setIsPayModalOpen(true)}
+            onClick={openPayModal}
             className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-500 transition"
           >
             <Plus size={16} /> To‘lov qabul qilish
@@ -562,10 +640,24 @@ export default function UnifiedFinancePage() {
         </div>
       </div>
 
+      {loadError && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <span className="flex items-center gap-2">
+            <AlertTriangle size={16} /> {loadError}
+          </span>
+          <button
+            onClick={loadAllFinanceData}
+            className="self-start sm:self-auto px-3 py-1.5 rounded-lg bg-white border border-rose-200 text-xs font-bold hover:bg-rose-100"
+          >
+            Qayta yuklash
+          </button>
+        </div>
+      )}
+
       {/* Asosiy ko'rsatkichlar */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[
-          { key: 'income', label: 'Jami kirim', value: totalIncome, tone: 'text-emerald-600', foot: `Naqd: ${totalIncome ? cashIncome.toLocaleString('uz-UZ') : 0} • Karta: ${digitalIncome.toLocaleString('uz-UZ')}` },
+          { key: 'income', label: 'Jami kirim', value: totalIncome, tone: 'text-emerald-600', foot: `Naqd: ${fmt(cashIncome)} • Karta/onlayn: ${fmt(digitalIncome)}` },
           { key: 'expenses', label: 'Jami chiqim', value: totalExpense, tone: 'text-rose-600', foot: `${expenses.length} ta xarajat yozuvi` },
           { key: 'reports', label: 'Sof foyda', value: netProfit, tone: netProfit >= 0 ? 'text-indigo-700' : 'text-rose-600', foot: 'Kirim minus barcha xarajatlar' },
           { key: 'debtors', label: 'Qarzdorlik', value: totalDebt, tone: totalDebt > 0 ? 'text-rose-600' : 'text-slate-800', foot: `${debtors.length} ta qarzdor o‘quvchi` },
@@ -619,11 +711,11 @@ export default function UnifiedFinancePage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             {/* Qidiruv */}
-            <div className="relative md:col-span-2">
+            <div className={`relative ${periodFilter === 'PICK' ? '' : 'md:col-span-2'}`}>
               <Search className="absolute left-3.5 top-3 text-slate-500" size={18} />
               <input
                 type="text"
-                placeholder="O'quvchi ismi bo'yicha qidiruv..."
+                placeholder="Ism, telefon yoki izoh bo'yicha qidiruv..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
@@ -636,6 +728,7 @@ export default function UnifiedFinancePage() {
                 { k: 'ALL', l: 'Barchasi' },
                 { k: 'MONTH', l: 'Shu oy' },
                 { k: 'TODAY', l: 'Bugun' },
+                { k: 'PICK', l: 'Oy tanlash' },
               ].map((p) => (
                 <button
                   key={p.k}
@@ -649,6 +742,15 @@ export default function UnifiedFinancePage() {
               ))}
             </div>
 
+            {periodFilter === 'PICK' && (
+              <input
+                type="month"
+                value={pickedMonth}
+                onChange={(e) => e.target.value && setPickedMonth(e.target.value)}
+                className="bg-white border border-slate-200 rounded-2xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-indigo-500"
+              />
+            )}
+
             {/* To'lov usuli filtri */}
             <div className="flex items-center bg-white border border-slate-200 rounded-2xl px-3 py-2">
               <Filter size={16} className="text-slate-500 mr-2" />
@@ -657,7 +759,7 @@ export default function UnifiedFinancePage() {
                 onChange={(e) => setMethodFilter(e.target.value)}
                 className="w-full bg-transparent text-xs sm:text-sm text-slate-700 focus:outline-none"
               >
-                <option value="ALL" className="bg-white">Barcha usullar ({filteredIncomeTotal.toLocaleString()} so&apos;m)</option>
+                <option value="ALL" className="bg-white">Barcha usullar</option>
                 <option value="cash" className="bg-white">Naqd pul (cash)</option>
                 <option value="card" className="bg-white">Plastik karta (card)</option>
                 <option value="click" className="bg-white">Click</option>
@@ -668,9 +770,15 @@ export default function UnifiedFinancePage() {
 
           <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
             <div className="px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-slate-50">
-              <span className="text-xs font-bold text-slate-600">
-                Tanlangan filtr bo&apos;yicha jami: <strong className="text-emerald-600">{filteredIncomeTotal.toLocaleString('uz-UZ')} so&apos;m</strong> ({filteredPayments.length} ta to&apos;lov)
-              </span>
+              <div className="text-xs font-bold text-slate-600 space-y-0.5">
+                <div>
+                  Tanlangan filtr bo&apos;yicha jami: <strong className="text-emerald-600">{fmt(filteredIncomeTotal)} so&apos;m</strong> ({filteredPayments.length} ta to&apos;lov)
+                </div>
+                <div className="font-medium text-slate-500">
+                  Bugungi kassa: naqd <strong className="text-slate-800">{fmt(todayCash)}</strong> • karta/onlayn{' '}
+                  <strong className="text-slate-800">{fmt(todayOther)}</strong> so&apos;m ({todayPayments.length} ta)
+                </div>
+              </div>
               <button
                 onClick={handleChargeMonthly}
                 disabled={chargingMonthly}
@@ -715,13 +823,16 @@ export default function UnifiedFinancePage() {
                           +{Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so&apos;m
                         </td>
                         <td className="py-3.5 px-5 uppercase text-xs">
-                          <span className="px-2.5 py-1 bg-slate-100 border border-slate-300 text-indigo-700 font-semibold rounded-lg">
-                            {p.paymentMethod}
+                          <span className="px-2.5 py-1 bg-slate-100 border border-slate-300 text-indigo-700 font-semibold rounded-lg normal-case">
+                            {PAY_METHOD_LABELS[p.paymentMethod] || p.paymentMethod}
                           </span>
                         </td>
                         <td className="py-3.5 px-5 text-slate-500">{p.comment || '-'}</td>
                         <td className="py-3.5 px-5 text-slate-500">
-                          {new Date(p.paidAt).toLocaleDateString('uz-UZ')}
+                          {new Date(p.paidAt).toLocaleDateString('uz-UZ')}{' '}
+                          <span className="text-slate-400 text-xs">
+                            {new Date(p.paidAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </td>
                         <td className="py-3.5 px-5 text-right whitespace-nowrap">
                           <button
@@ -769,11 +880,11 @@ export default function UnifiedFinancePage() {
                 Qarzdor O&apos;quvchilar Ro&apos;yxati ({debtors.length} nafar)
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                1 tugma bilan qarzdorlikni qabul qiling yoki ota-onasiga Telegram eslatma yuboring
+                Qarzni qabul qiling yoki ota-onaga markaz Telegram boti orqali eslatma yuboring (ota-ona botga ulangan bo&apos;lishi kerak)
               </p>
             </div>
             <div className="text-sm font-bold text-amber-600 bg-amber-500/10 border border-amber-500/20 px-4 py-2 rounded-xl">
-              Jami haqdorlik: {totalDebt.toLocaleString('uz-UZ')} so&apos;m
+              Jami qarzdorlik: {fmt(totalDebt)} so&apos;m
             </div>
           </div>
 
@@ -788,7 +899,13 @@ export default function UnifiedFinancePage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/60">
-                {debtors.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="py-12 text-center text-slate-500">
+                      Yuklanmoqda...
+                    </td>
+                  </tr>
+                ) : debtors.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-12 text-center text-emerald-600 font-semibold">
                       Ajoyib! Hozirda qarzdor o&apos;quvchilar yo&apos;q!
@@ -808,9 +925,11 @@ export default function UnifiedFinancePage() {
                       <td className="py-4 px-5 text-right space-x-2 whitespace-nowrap">
                         <button
                           onClick={() => sendTelegramReminder(s)}
-                          className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-700 text-xs font-bold inline-flex items-center gap-1.5 transition"
+                          disabled={!!remindingId}
+                          title={s.parentChatId ? 'Ota-onaga bot orqali eslatma yuborish' : 'Ota-ona hali Telegram botga ulanmagan'}
+                          className="px-3 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/30 text-sky-700 text-xs font-bold inline-flex items-center gap-1.5 transition disabled:opacity-50"
                         >
-                          <Send size={13} /> Telegram eslatma
+                          <Send size={13} /> {remindingId === s.id ? 'Yuborilmoqda...' : 'Telegram eslatma'}
                         </button>
                         <button
                           onClick={() => openQuickPayForDebtor(s)}
@@ -1029,10 +1148,10 @@ export default function UnifiedFinancePage() {
             <div className="bg-white border border-slate-200 rounded-2xl p-5">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Users size={18} className="text-indigo-600" />
-                O&apos;qituvchilar Faolligi va KPI (50%)
+                O&apos;qituvchilar faolligi va taxminiy oylik
               </h2>
               <p className="text-xs text-slate-500 mt-0.5 mb-5">
-                Guruhlardagi o&apos;quvchilar soni bo&apos;yicha taxminiy oylik ulush
+                O&apos;qituvchi sozlamasidagi foiz yoki qat&apos;iy oylik bo&apos;yicha (kurs narxi × o&apos;quvchilar soni)
               </p>
 
               <div className="space-y-4">
@@ -1061,7 +1180,7 @@ export default function UnifiedFinancePage() {
                           />
                         </div>
                         <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
-                          <span>Taxminiy 50% KPI ulushi:</span>
+                          <span>Taxminiy oylik ({t.rateLabel}):</span>
                           <strong className="text-emerald-600">
                             {t.kpiSalary.toLocaleString('uz-UZ')} so&apos;m
                           </strong>
@@ -1090,32 +1209,64 @@ export default function UnifiedFinancePage() {
             </div>
             <form onSubmit={handlePaymentSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">O&apos;quvchini tanlang</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">O&apos;quvchini tanlang *</label>
+                <input
+                  type="text"
+                  placeholder="Ism yoki telefon bo'yicha qidirish..."
+                  value={studentQuery}
+                  onChange={(e) => setStudentQuery(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 mb-1.5 focus:outline-none focus:border-indigo-500"
+                />
                 <select
                   required
                   value={payForm.studentId}
                   onChange={(e) => setPayForm({ ...payForm, studentId: e.target.value })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 >
-                  {students.map((s) => (
+                  <option value="">— O&apos;quvchini tanlang ({pickableStudents.length} ta) —</option>
+                  {selectedStudent && !pickableStudents.some((s) => s.id === selectedStudent.id) && (
+                    <option value={selectedStudent.id}>{selectedStudent.fullName}</option>
+                  )}
+                  {pickableStudents.map((s) => (
                     <option key={s.id} value={s.id}>
-                      {s.fullName} (Balans: {Number(s.balance).toLocaleString('uz-UZ')} so&apos;m)
+                      {s.fullName}
+                      {s.phone ? ` • ${s.phone}` : ''} (balans: {fmt(Number(s.balance || 0))})
                     </option>
                   ))}
                 </select>
+                {selectedStudent && (
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Hozirgi balans:{' '}
+                    <strong className={Number(selectedStudent.balance) < 0 ? 'text-rose-600' : 'text-emerald-600'}>
+                      {fmt(Number(selectedStudent.balance || 0))} so&apos;m
+                    </strong>
+                    {payAmountNum > 0 && (
+                      <>
+                        {' '}→ to&apos;lovdan keyin:{' '}
+                        <strong className="text-slate-800">
+                          {fmt(Number(selectedStudent.balance || 0) + payAmountNum)} so&apos;m
+                        </strong>
+                      </>
+                    )}
+                  </p>
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">
-                  To&apos;lov miqdori (so&apos;mda)
+                  To&apos;lov miqdori (so&apos;mda) *
                 </label>
                 <input
                   required
                   type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
                   placeholder="Masalan: 500000"
                   value={payForm.amount}
-                  onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
+                  onChange={(e) => setPayForm({ ...payForm, amount: e.target.value === '' ? '' : String(numVal(e)) })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
+                {payAmountNum > 0 && <p className="mt-1 text-xs font-semibold text-emerald-700">{fmt(payAmountNum)} so&apos;m</p>}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">To&apos;lov usuli</label>
@@ -1150,9 +1301,10 @@ export default function UnifiedFinancePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold"
+                  disabled={paySubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-60"
                 >
-                  Tasdiqlash
+                  {paySubmitting ? 'Saqlanmoqda...' : 'Tasdiqlash'}
                 </button>
               </div>
             </form>
@@ -1216,9 +1368,11 @@ export default function UnifiedFinancePage() {
                 <input
                   required
                   type="number"
+                  min={1}
+                  inputMode="numeric"
                   placeholder="Masalan: 1500000"
                   value={expForm.amount}
-                  onChange={(e) => setExpForm({ ...expForm, amount: e.target.value })}
+                  onChange={(e) => setExpForm({ ...expForm, amount: e.target.value === '' ? '' : String(numVal(e)) })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
@@ -1242,9 +1396,10 @@ export default function UnifiedFinancePage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold"
+                  disabled={expSubmitting}
+                  className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold disabled:opacity-60"
                 >
-                  Chiqimni saqlash
+                  {expSubmitting ? 'Saqlanmoqda...' : 'Chiqimni saqlash'}
                 </button>
               </div>
             </form>
@@ -1257,12 +1412,14 @@ export default function UnifiedFinancePage() {
       {/* ========================================================================= */}
       {receiptModal && (
         <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white text-slate-900 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-sm">
+          {/* Chop etishda faqat chek chiqadi (sahifaning qolgan qismi emas) */}
+          <style>{`@media print { body * { visibility: hidden !important; } #print-receipt, #print-receipt * { visibility: visible !important; } #print-receipt { position: fixed; left: 0; top: 0; width: 80mm; box-shadow: none; } #print-receipt .no-print { display: none !important; } }`}</style>
+          <div id="print-receipt" className="bg-white text-slate-900 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-sm">
             <div className="text-center border-b border-dashed border-slate-300 pb-4">
               <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-2">
                 <CheckCircle2 size={28} />
               </div>
-              <h3 className="text-lg font-bold">EDUYUZ CRM</h3>
+              <h3 className="text-lg font-bold">{centerName || "O'quv markazi"}</h3>
               <p className="text-xs text-slate-500">To&apos;lov Kvitansiyasi (Chek #{receiptModal.id?.slice(0, 6)})</p>
             </div>
 
@@ -1277,7 +1434,7 @@ export default function UnifiedFinancePage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">To&apos;lov usuli:</span>
-                <strong className="uppercase">{receiptModal.paymentMethod}</strong>
+                <strong>{PAY_METHOD_LABELS[receiptModal.paymentMethod] || receiptModal.paymentMethod}</strong>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Sana:</span>
@@ -1297,10 +1454,10 @@ export default function UnifiedFinancePage() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-2">
+            <div className="no-print flex gap-2 pt-2">
               <button
                 onClick={() => window.print()}
-                className="flex-1 py-2.5 rounded-xl bg-white text-slate-900 text-xs font-bold flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold flex items-center justify-center gap-1.5"
               >
                 <Printer size={14} /> Chop etish
               </button>
