@@ -1,6 +1,14 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { decryptDeep, encryptBackupData, encryptWriteData, hasEncryptionKey, isEncrypted } from '../../common/crypto/field-crypto';
+import {
+  decryptDeep,
+  encryptBackupData,
+  encryptWriteData,
+  hasEncryptionKey,
+  isEncrypted,
+  SENSITIVE_FIELDS,
+  SENSITIVE_MODELS,
+} from '../../common/crypto/field-crypto';
 
 /**
  * Serverless (Vercel) muhitida baza manzilini moslaydi.
@@ -34,7 +42,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       const model = params.model as string | undefined;
       const a: any = params.args;
       if (model && a) {
-        if (model === 'Student') {
+        if (SENSITIVE_FIELDS[model]) {
           if (params.action === 'create' || params.action === 'update' || params.action === 'updateMany') {
             encryptWriteData(model, a.data);
           } else if (params.action === 'createMany') {
@@ -63,29 +71,36 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     if (hasEncryptionKey() && !process.env.VERCEL) this.encryptExisting().catch((e) => console.error('Eski ma\'lumotlarni shifrlashda xato:', e));
   }
 
-  // Idempotent: faqat hali shifrlanmagan qatorlarga tegadi, shuning uchun har ishga tushganda xavfsiz.
-  private async encryptExisting() {
-    const students = await this.$queryRaw<{ id: string }[]>`
-      SELECT id FROM students
-      WHERE (passport IS NOT NULL AND passport <> '' AND passport NOT LIKE 'enc:v1:%')
-         OR (address IS NOT NULL AND address <> '' AND address NOT LIKE 'enc:v1:%')
-         OR (notes IS NOT NULL AND notes <> '' AND notes NOT LIKE 'enc:v1:%')`;
-    for (const { id } of students) {
-      // O'qish natijasi deshifrlanadi (oddiy matn o'zgarmaydi), yozishda esa shifrlanadi
-      const st = await this.student.findUnique({ where: { id }, select: { passport: true, address: true, notes: true } });
-      if (!st) continue;
-      await this.student.update({ where: { id }, data: { passport: st.passport, address: st.address, notes: st.notes } });
+  // Idempotent: faqat hali shifrlanmagan qatorlarga tegadi, shuning uchun qayta ishga tushirish xavfsiz.
+  // Natija: shifrlangan yozuvlar soni.
+  async encryptExisting(): Promise<number> {
+    if (!hasEncryptionKey()) return 0;
+    let total = 0;
+    for (const { model, delegate, idField } of SENSITIVE_MODELS) {
+      const fields = SENSITIVE_FIELDS[model];
+      const d: any = (this as any)[delegate];
+      const rows: any[] = await d.findMany({
+        // SQL'da `<> ''` NULL qiymatlarni ham chiqarib tashlaydi (majburiy maydonlar uchun `not: null` ishlatib bo'lmaydi)
+        where: { OR: fields.map((f) => ({ AND: [{ [f]: { not: '' } }, { NOT: { [f]: { startsWith: 'enc:v1:' } } }] })) },
+        select: Object.fromEntries([[idField, true], ...fields.map((f) => [f, true])]),
+      });
+      // O'qilgan qiymat ochiq matn; yozishda middleware uni shifrlaydi
+      for (const row of rows) {
+        const data = Object.fromEntries(fields.map((f) => [f, row[f]]));
+        await d.update({ where: { [idField]: row[idField] }, data });
+      }
+      if (rows.length) console.log(`🔐 ${model}: ${rows.length} ta yozuv shifrlandi`);
+      total += rows.length;
     }
     const backups = await this.studentBackup.findMany();
-    let n = 0;
     for (const b of backups) {
-      const d: any = b.data;
-      if (d && typeof d === 'object' && ['passport', 'address', 'notes'].some((f) => typeof d[f] === 'string' && d[f] && !isEncrypted(d[f]))) {
-        await this.studentBackup.update({ where: { studentId: b.studentId }, data: { data: d } });
-        n++;
+      const data: any = b.data;
+      if (data && typeof data === 'object' && SENSITIVE_FIELDS.Student.some((f) => typeof data[f] === 'string' && data[f] && !isEncrypted(data[f]))) {
+        await this.studentBackup.update({ where: { studentId: b.studentId }, data: { data } });
+        total++;
       }
     }
-    if (students.length || n) console.log(`🔐 ${students.length} ta o'quvchi va ${n} ta zaxira yozuvi shifrlandi`);
+    return total;
   }
 
   async onModuleDestroy() {
