@@ -19,7 +19,6 @@ import {
   BookOpen
 } from 'lucide-react';
 import LmsView from '@/components/lms/LmsView';
-import ChargeMonthlyModal from '@/components/finance/ChargeMonthlyModal';
 
 export default function GroupDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -30,7 +29,7 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [billingOpen, setBillingOpen] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'students' | 'lms'>('students');
 
   const getHeaders = () => {
@@ -91,6 +90,32 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
     }
   }
 
+  // Oylik to'lov yechish (Avtomatik Billing)
+  async function handleChargeMonthly() {
+    const price = Number(group?.course?.price || 0);
+    const count = group?.students?.length || 0;
+    if (count === 0) return alert('Guruhda o\'quvchilar yo\'q!');
+
+    if (!confirm(`Ushbu guruhdagi ${count} ta o'quvchining har biridan ${price.toLocaleString()} so'm oylik to'lov yechilsinmi?`)) {
+      return;
+    }
+
+    try {
+      setBillingLoading(true);
+      const res = await axios.post(
+        '/payments/charge-monthly',
+        { groupId },
+        { headers: getHeaders() }
+      );
+      alert(res.data.message);
+      loadGroupData();
+    } catch (err: any) {
+      alert('To\'lov yechishda xatolik: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setBillingLoading(false);
+    }
+  }
+
   if (loading) {
     return <div className="p-12 text-center text-slate-500">Guruh ma'lumotlari yuklanmoqda...</div>;
   }
@@ -126,10 +151,11 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setBillingOpen(true)}
+            onClick={handleChargeMonthly}
+            disabled={billingLoading}
             className="flex items-center gap-2 bg-amber-600/20 border border-amber-500/30 hover:bg-amber-600/30 text-amber-700 px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm"
           >
-            <Sparkles size={16} /> Oylik to&apos;lovni yechish
+            <Sparkles size={16} /> {billingLoading ? 'Yechilmoqda...' : 'Oylik to\'lovni yechish'}
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
@@ -332,9 +358,6 @@ export default function GroupDetailPage({ params }: { params: Promise<{ id: stri
             </form>
           </div>
         </div>
-      )}
-      {billingOpen && (
-        <ChargeMonthlyModal groupId={groupId} onClose={() => setBillingOpen(false)} onDone={loadGroupData} />
       )}
     </div>
   );
