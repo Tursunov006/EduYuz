@@ -340,7 +340,7 @@ export default function StudentsPage() {
                 <th className="h-11 px-5 font-semibold">O‘quvchi</th>
                 <th className="h-11 px-5 font-semibold">Telefon</th>
                 <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
-                <th className="h-11 px-5 font-semibold">To‘lagan</th>
+                <th className="h-11 px-5 font-semibold">Summa</th>
                 <th className="h-11 px-5 font-semibold">Holat</th>
                 <th className="h-11 px-5" />
               </tr>
@@ -415,10 +415,12 @@ export default function StudentsPage() {
                         </p>
                       </td>
                       <td
-                        className={`px-5 py-3.5 font-semibold whitespace-nowrap ${(ledger[s.id]?.paid || 0) > 0 ? 'text-emerald-600' : 'text-slate-600'}`}
-                        title={`Balans: ${bal < 0 ? '-' : ''}${Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`}
+                        className={`px-5 py-3.5 font-semibold whitespace-nowrap ${bal < 0 ? 'text-rose-600' : (ledger[s.id]?.paid || 0) > 0 ? 'text-emerald-600' : 'text-slate-600'}`}
                       >
-                        {(ledger[s.id]?.paid || 0).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
+                        {/* Qarzi bo'lsa — qarz summasi (to'lov qilinganda kamayadi), bo'lmasa — jami to'lagan summasi */}
+                        {bal < 0
+                          ? `-${Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`
+                          : `${(ledger[s.id]?.paid || 0).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`}
                       </td>
                       <td className="px-5 py-3.5">
                         {s.status === 'dropped' ? (
