@@ -148,7 +148,7 @@ export class AttendanceService {
         }
 
         // SMS xabarnoma (agar darsga kelmagan bo'lsa)
-        if (record && record.status === 'absent' && student.parentPhone) {
+        if (record && record.status === 'absent' && student.parentPhone && !student.parentChatId) {
           sends.push(this.smsService
             .sendAttendanceAlert(student.parentPhone, student.fullName, group.name)
             .catch((e) => this.logger.warn(`SMS davomat xabari xatosi: ${e.message}`)));
