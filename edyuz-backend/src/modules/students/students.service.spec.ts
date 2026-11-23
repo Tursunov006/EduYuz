@@ -57,4 +57,24 @@ describe('StudentsService — takroriy ism', () => {
     expect(data).not.toHaveProperty('balance');
     expect(data.notes).toBe('x');
   });
+
+  it("balansni to'lovlar tarixi bilan solishtiradi va faqat apply=true da tuzatadi", async () => {
+    const prisma: any = makePrisma(null);
+    prisma.student.findMany = jest.fn().mockResolvedValue([
+      { id: 'a', fullName: 'A', balance: 400000 },
+      { id: 'b', fullName: 'B', balance: -250000 },
+    ]);
+    prisma.payment.groupBy = jest.fn().mockResolvedValue([
+      { studentId: 'a', _sum: { amount: 0 } },
+      { studentId: 'b', _sum: { amount: -250000 } },
+    ]);
+    const svc = new StudentsService(prisma);
+    jest.spyOn(svc, 'backup').mockResolvedValue(undefined);
+    const dry = await svc.reconcileBalances('c1', false);
+    expect(dry.mismatches).toEqual([{ id: 'a', fullName: 'A', balance: 400000, ledger: 0 }]);
+    expect(prisma.student.update).not.toHaveBeenCalled();
+    await svc.reconcileBalances('c1', true);
+    expect(prisma.student.update).toHaveBeenCalledWith({ where: { id: 'a' }, data: { balance: 0 } });
+    expect(prisma.student.update).toHaveBeenCalledTimes(1);
+  });
 });
