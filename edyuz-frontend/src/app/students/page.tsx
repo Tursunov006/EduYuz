@@ -30,7 +30,10 @@ export default function StudentsPage() {
   const { t } = useTranslation();
   const [students, setStudents] = useState<any[]>([]);
   // Har bir o'quvchi bo'yicha jami to'lagan (kirim) va yechilgan (oylik) summalar — balans qanday hosil bo'lganini ko'rsatish uchun
-  const [ledger, setLedger] = useState<Record<string, { paid: number; charged: number }>>({});
+  const [ledger, setLedger] = useState<Record<string, { paid: number; charged: number; paidMonth: number }>>({});
+  const [ledgerOk, setLedgerOk] = useState(false);
+  // 'all' | 'paid' | 'unpaid' — shu oy to'lov qilganlar / qilmaganlar
+  const [payFilter, setPayFilter] = useState<'all' | 'paid' | 'unpaid'>('all');
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   // Ro'yxat filtri: hammasi yoki yo'nalish (fan) bo'yicha
@@ -71,16 +74,21 @@ export default function StudentsPage() {
       ]);
       setStudents(data || []);
       if (Array.isArray(pays)) {
-        const m: Record<string, { paid: number; charged: number }> = {};
+        const m: Record<string, { paid: number; charged: number; paidMonth: number }> = {};
+        const now = new Date();
         for (const p of pays) {
           const id = p.studentId || p.student?.id;
           if (!id) continue;
           const a = Number(p.amount || 0);
-          const row = (m[id] ||= { paid: 0, charged: 0 });
-          if (a > 0) row.paid += a;
-          else row.charged += -a;
+          const row = (m[id] ||= { paid: 0, charged: 0, paidMonth: 0 });
+          if (a > 0) {
+            row.paid += a;
+            const d = new Date(p.paidAt);
+            if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) row.paidMonth += a;
+          } else row.charged += -a;
         }
         setLedger(m);
+        setLedgerOk(true);
       }
     } catch (err) {
       console.error(err);
@@ -260,7 +268,13 @@ export default function StudentsPage() {
   // Kursni tugatgan (nofaol) o'quvchilar Arxiv bo'limida
   // Ro'yxatda faol va "Kelmagan" o'quvchilar turadi; faqat "Kursni tugatgan"lar Arxivga o'tadi
   const activeAll = students.filter((x) => x.status !== 'inactive');
-  const visibleStudents = activeAll.filter((x) => kindFilter === 'all' || directionOf(x) === kindFilter);
+  const byKind = activeAll.filter((x) => kindFilter === 'all' || directionOf(x) === kindFilter);
+  const paidThisMonth = (x: any) => (ledger[x.id]?.paidMonth || 0) > 0;
+  const paidCount = byKind.filter(paidThisMonth).length;
+  const unpaidCount = byKind.length - paidCount;
+  const visibleStudents = byKind.filter((x) => payFilter === 'all' || (payFilter === 'paid') === paidThisMonth(x));
+  const MONTH_NAMES = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust', 'Sentabr', 'Oktabr', 'Noyabr', 'Dekabr'];
+  const monthName = MONTH_NAMES[new Date().getMonth()];
   const archivedCount = students.length - activeAll.length;
 
   return (
@@ -331,6 +345,30 @@ export default function StudentsPage() {
         ))}
       </div>
 
+      {/* Shu oy to'lov qilganlar / qilmaganlar */}
+      {ledgerOk && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-slate-500 mr-1">{monthName} oyi:</span>
+          {([
+            { key: 'all', label: 'Hammasi', count: byKind.length, on: 'bg-slate-800 border-slate-800 text-white' },
+            { key: 'paid', label: 'To‘lov qilindi', count: paidCount, on: 'bg-emerald-600 border-emerald-600 text-white' },
+            { key: 'unpaid', label: 'To‘lov qilinmadi', count: unpaidCount, on: 'bg-rose-600 border-rose-600 text-white' },
+          ] as const).map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setPayFilter(f.key)}
+              className={`inline-flex items-center gap-1.5 h-9 px-3.5 rounded-xl text-sm font-medium border transition ${
+                payFilter === f.key ? f.on : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              {f.label}
+              <span className={`text-xs ${payFilter === f.key ? 'text-white/80' : 'text-slate-400'}`}>{f.count}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Jadval */}
       <div className="rounded-2xl bg-white border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
@@ -341,6 +379,7 @@ export default function StudentsPage() {
                 <th className="h-11 px-5 font-semibold">Telefon</th>
                 <th className="h-11 px-5 font-semibold">Ota-ona telefoni</th>
                 <th className="h-11 px-5 font-semibold">Summa</th>
+                {ledgerOk && <th className="h-11 px-5 font-semibold">{monthName} oyi</th>}
                 <th className="h-11 px-5 font-semibold">Holat</th>
                 <th className="h-11 px-5" />
               </tr>
@@ -430,6 +469,19 @@ export default function StudentsPage() {
                               ? `${bal.toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`
                               : <span className="font-medium text-slate-400">To‘lov yo‘q</span>}
                       </td>
+                      {ledgerOk && (
+                        <td className="px-5 py-3.5 whitespace-nowrap">
+                          {paidThisMonth(s) ? (
+                            <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-700">
+                              To‘lov qilindi
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-rose-500/10 text-rose-600">
+                              To‘lov qilinmadi
+                            </span>
+                          )}
+                        </td>
+                      )}
                       <td className="px-5 py-3.5">
                         {s.status === 'dropped' ? (
                           <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-700">Kelmagan</span>
