@@ -63,6 +63,31 @@ export class StudentsService {
     return student;
   }
 
+  // Balans = o'quvchining barcha to'lov/yechish yozuvlari yig'indisi bo'lishi kerak.
+  // Mos kelmaganlarni qaytaradi; apply=true bo'lsa balansni to'lovlar tarixiga tenglaydi.
+  async reconcileBalances(centerId: string | undefined, apply: boolean, studentId?: string) {
+    const students = await this.prisma.student.findMany({
+      where: { ...(centerId ? { centerId } : {}), ...(studentId ? { id: studentId } : {}) },
+      select: { id: true, fullName: true, balance: true },
+    });
+    const sums = await this.prisma.payment.groupBy({
+      by: ['studentId'],
+      where: { studentId: { in: students.map((s) => s.id) } },
+      _sum: { amount: true },
+    });
+    const ledger = new Map(sums.map((r) => [r.studentId, Number(r._sum.amount || 0)]));
+    const mismatches = students
+      .map((s) => ({ id: s.id, fullName: s.fullName, balance: Number(s.balance), ledger: ledger.get(s.id) || 0 }))
+      .filter((m) => Math.round(m.balance) !== Math.round(m.ledger));
+    if (apply) {
+      for (const m of mismatches) {
+        await this.prisma.student.update({ where: { id: m.id }, data: { balance: m.ledger } });
+        await this.backup(m.id);
+      }
+    }
+    return { checked: students.length, applied: apply, mismatches };
+  }
+
   // O'quvchining joriy ma'lumotlari (guruhlar, sertifikatlar, to'lovlar jami bilan) zaxira jadvaliga yoziladi.
   // Zaxira xatosi asosiy amalni to'xtatmasligi kerak, shuning uchun xato faqat logga yoziladi.
   async backup(studentId: string, deleted = false) {

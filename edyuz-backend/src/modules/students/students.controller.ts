@@ -63,6 +63,19 @@ export class StudentsController {
     return this.studentsService.saveAnketa(id, key, dto);
   }
 
+  // Balanslarni to'lovlar tarixi bilan solishtirish (faqat admin).
+  // apply=1 bo'lmasa faqat nomuvofiqliklar ro'yxati qaytariladi, hech narsa o'zgarmaydi.
+  @Roles(RoleType.admin)
+  @Post('reconcile-balances')
+  reconcileBalances(
+    @CurrentUser() user: AuthUser,
+    @Query('apply') apply?: string,
+    @Query('studentId') studentId?: string,
+    @Query('centerId') centerId?: string,
+  ) {
+    return this.studentsService.reconcileBalances(this.access.scopeCenter(user, centerId), apply === '1', studentId);
+  }
+
   // Arxiv: barcha o'quvchilar bazasi (pasport ma'lumotlari bilan) — faqat admin
   @Roles(RoleType.admin)
   @Get('registry')
