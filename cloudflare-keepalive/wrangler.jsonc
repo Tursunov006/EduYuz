@@ -1,0 +1,12 @@
+{
+  // Cloudflare Workers: EduYuz serverini uyg'oq saqlash (README.md ga qarang)
+  "name": "eduyuz-keepalive",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "workers_dev": true,
+  "observability": { "enabled": true },
+  "triggers": {
+    // UTC vaqti: 02:00–17:55 = Toshkent 07:00–22:55, har 5 daqiqada
+    "crons": ["*/5 2-17 * * *"]
+  }
+}
