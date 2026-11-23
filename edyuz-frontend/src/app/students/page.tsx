@@ -29,6 +29,8 @@ function directionOf(x: any): string {
 export default function StudentsPage() {
   const { t } = useTranslation();
   const [students, setStudents] = useState<any[]>([]);
+  // Har bir o'quvchi bo'yicha jami to'lagan (kirim) va yechilgan (oylik) summalar — balans qanday hosil bo'lganini ko'rsatish uchun
+  const [ledger, setLedger] = useState<Record<string, { paid: number; charged: number }>>({});
   const [centers, setCenters] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   // Ro'yxat filtri: hammasi yoki yo'nalish (fan) bo'yicha
@@ -63,8 +65,23 @@ export default function StudentsPage() {
   async function fetchStudents() {
     try {
       setLoading(true);
-      const data = await apiFetch(`/students${search ? `?search=${encodeURIComponent(search)}` : ''}`);
+      const [data, pays] = await Promise.all([
+        apiFetch(`/students${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+        apiFetch('/payments').catch(() => null),
+      ]);
       setStudents(data || []);
+      if (Array.isArray(pays)) {
+        const m: Record<string, { paid: number; charged: number }> = {};
+        for (const p of pays) {
+          const id = p.studentId || p.student?.id;
+          if (!id) continue;
+          const a = Number(p.amount || 0);
+          const row = (m[id] ||= { paid: 0, charged: 0 });
+          if (a > 0) row.paid += a;
+          else row.charged += -a;
+        }
+        setLedger(m);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -399,6 +416,12 @@ export default function StudentsPage() {
                       </td>
                       <td className={`px-5 py-3.5 font-semibold whitespace-nowrap ${bal < 0 ? 'text-rose-600' : bal > 0 ? 'text-emerald-600' : 'text-slate-600'}`}>
                         {bal < 0 ? '-' : ''}{Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m
+                        {ledger[s.id] && (ledger[s.id].paid > 0 || ledger[s.id].charged > 0) && (
+                          <p className="text-[11px] font-normal text-slate-500" title="Balans = to‘lagan − yechilgan oylik to‘lovlar">
+                            To‘lagan {ledger[s.id].paid.toLocaleString('uz-UZ').replace(/,/g, ' ')} · Yechilgan{' '}
+                            {ledger[s.id].charged.toLocaleString('uz-UZ').replace(/,/g, ' ')}
+                          </p>
+                        )}
                       </td>
                       <td className="px-5 py-3.5">
                         {s.status === 'dropped' ? (
