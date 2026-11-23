@@ -30,6 +30,10 @@ export class TelegramService implements OnModuleInit {
     } else if (process.env.VERCEL && process.env.VERCEL_ENV !== 'production') {
       // Vercel preview (sinov) nusxalari botni asosiy serverdan tortib olmasligi kerak
       this.logger.log('Vercel preview muhiti: Telegram bot ulanmaydi (faqat xabar yuborish ishlaydi).');
+    } else if (process.env.VERCEL) {
+      // Vercel'da server har "uyg'onganda" birinchi so'rov shu tekshiruvni kutmasligi uchun fonda bajariladi
+      // (webhook allaqachon o'rnatilgan bo'ladi, bu faqat tekshiruv).
+      this.connect().catch((e) => this.logger.warn(`Telegram ulanishini tekshirishda xato: ${e?.message}`));
     } else {
       await this.connect();
       this.logger.log('🤖 EduYuz 2.0 Super Telegram Bot muvaffaqiyatli ulandi!');
