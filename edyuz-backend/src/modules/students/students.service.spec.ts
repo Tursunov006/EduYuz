@@ -46,4 +46,15 @@ describe('StudentsService — takroriy ism', () => {
     await svc.update('s1', { fullName: 'ali valiyev', notes: 'x' } as any);
     expect(prisma.student.findFirst).not.toHaveBeenCalled();
   });
+
+  it("tahrirda balansni to'g'ridan-to'g'ri o'zgartirmaydi (faqat to'lovlar orqali)", async () => {
+    const prisma = makePrisma(null);
+    const svc = new StudentsService(prisma as any);
+    jest.spyOn(svc, 'findOne').mockResolvedValue({ id: 's1', centerId: 'c1', fullName: 'Ali Valiyev' } as any);
+    jest.spyOn(svc, 'backup').mockResolvedValue(undefined);
+    await svc.update('s1', { notes: 'x', balance: 400000 } as any);
+    const data = prisma.student.update.mock.calls[0][0].data;
+    expect(data).not.toHaveProperty('balance');
+    expect(data.notes).toBe('x');
+  });
 });

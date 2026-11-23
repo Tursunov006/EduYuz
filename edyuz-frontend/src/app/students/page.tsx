@@ -175,7 +175,6 @@ export default function StudentsPage() {
             kind: form.kind,
             phone: form.phone,
             parentPhone: form.parentPhone,
-            balance: Number(form.balance),
             discount: Number(form.discount) || 0,
             discountAmount: Number(form.discountAmount) || 0,
             direction: form.direction,
@@ -619,13 +618,19 @@ export default function StudentsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1">Boshlang'ich balans</label>
+                  <label className="block text-xs font-medium text-slate-500 mb-1">
+                    {editingStudent ? 'Joriy balans' : "Boshlang'ich balans"}
+                  </label>
                   <input
                     type="number"
                     value={form.balance}
+                    disabled={!!editingStudent}
                     onChange={(e) => setForm({ ...form, balance: numVal(e) })}
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
                   />
+                  {editingStudent && (
+                    <p className="mt-1 text-[10px] text-slate-500">Balans faqat Moliya va kassa bo‘limida to‘lov orqali o‘zgaradi</p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1">Chegirma (%)</label>

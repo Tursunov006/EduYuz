@@ -331,9 +331,9 @@ export class StudentsService {
       dataToUpdate.parentChatId = dto.parentChatId ? BigInt(dto.parentChatId) : null;
     }
 
-    if (dto.balance !== undefined) {
-      dataToUpdate.balance = dto.balance;
-    }
+    // Balans bu yerda o'zgartirilmaydi: u faqat Moliya bo'limidagi to'lov/yechish yozuvlari orqali o'zgaradi.
+    // Aks holda eski ma'lumot bilan ochilgan tahrirlash oynasi saqlanganda yechilgan oylik "yo'qolib" qolardi
+    // va balans to'lovlar tarixiga mos kelmay qolardi.
 
     const updated = await this.prisma.student.update({
       where: { id },
