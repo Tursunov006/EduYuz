@@ -775,9 +775,6 @@ export default function UnifiedFinancePage() {
                   Tanlangan filtr bo&apos;yicha jami: <strong className="text-emerald-600">{fmt(filteredIncomeTotal)} so&apos;m</strong> ({filteredPayments.length} ta to&apos;lov)
                 </div>
                 <div className="font-medium text-slate-500">
-                  Bu ro&apos;yxatda faqat kirim (to&apos;langan pullar). Oylik to&apos;lov yechilganda u o&apos;quvchi balansidan ayiriladi.
-                </div>
-                <div className="font-medium text-slate-500">
                   Bugungi kassa: naqd <strong className="text-slate-800">{fmt(todayCash)}</strong> • karta/onlayn{' '}
                   <strong className="text-slate-800">{fmt(todayOther)}</strong> so&apos;m ({todayPayments.length} ta)
                 </div>
@@ -821,16 +818,6 @@ export default function UnifiedFinancePage() {
                       <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                         <td className="py-3.5 px-5 font-semibold text-slate-900">
                           {p.student?.fullName || "Noma'lum"}
-                          {(() => {
-                            const st = students.find((x) => x.id === (p.studentId || p.student?.id));
-                            if (!st) return null;
-                            const b = Number(st.balance || 0);
-                            return (
-                              <p className={`text-[11px] font-medium ${b < 0 ? 'text-rose-600' : 'text-slate-500'}`}>
-                                Hozirgi balans: {b < 0 ? '-' : ''}{fmt(Math.abs(b))} so&apos;m
-                              </p>
-                            );
-                          })()}
                         </td>
                         <td className="py-3.5 px-5 text-emerald-600 font-bold">
                           +{Math.abs(Number(p.amount)).toLocaleString('uz-UZ')} so&apos;m
