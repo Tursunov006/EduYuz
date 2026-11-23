@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, ServiceUnavailableException } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { RoleType } from '@prisma/client';
 import { SmsService } from './sms.service';
@@ -14,8 +14,23 @@ export class SmsController {
 
   @Throttle({ default: { ttl: 60_000, limit: 30 } })
   @Post('send')
-  sendSms(@Body() dto: SendSmsDto) {
-    return this.smsService.sendSms(dto.phone, dto.message);
+  async sendSms(@Body() dto: SendSmsDto) {
+    const res = await this.smsService.sendSms(dto.phone, dto.message);
+    if (!res.success) {
+      // Frontend "SMS yuborildi" deb yolg'on ko'rsatmasligi uchun xato qaytariladi
+      throw new ServiceUnavailableException(
+        res.status === 'not_configured'
+          ? "SMS xizmati hali sozlanmagan (Eskiz hisobi ulanmagan)"
+          : `SMS yuborilmadi: ${res.error || 'noma\'lum xato'}`,
+      );
+    }
+    return res;
+  }
+
+  // SMS xizmati ulanganmi va hisobda qancha SMS qolgani
+  @Get('status')
+  status() {
+    return this.smsService.getStatus();
   }
 
   // Jurnalda barcha markazlarning ota-ona raqamlari bor (jadvalda markaz ustuni yo'q),

@@ -93,7 +93,7 @@ export class PaymentsService {
     }
 
     // SMS orqali kvitansiya yuborish
-    if (student.parentPhone) {
+    if (student.parentPhone && !student.parentChatId) {
       await this.smsService
         .sendPaymentReceipt(
           student.parentPhone,
@@ -205,7 +205,7 @@ export class PaymentsService {
             .catch((e) => this.logger.error(`Telegram qarzdorlik xabari xatosi: ${e.message}`));
         }
 
-        if (Number(updatedStudent.balance) < 0 && student.parentPhone) {
+        if (Number(updatedStudent.balance) < 0 && student.parentPhone && !student.parentChatId) {
           await this.smsService
             .sendDebtAlert(
               student.parentPhone,
