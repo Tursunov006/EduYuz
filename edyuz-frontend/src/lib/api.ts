@@ -122,10 +122,23 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}, retr
     ...options.headers,
   };
 
-  const res = await fetch(`${API_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  // Faqat o'qish (GET) so'rovlari bir marta qayta uriniladi: server endigina uyg'onayotgan bo'lsa yoki
+  // tarmoq bir lahza uzilsa, foydalanuvchi xato ko'rmasin. To'lov kabi yozish so'rovlari hech qachon
+  // qayta yuborilmaydi (ikki marta yozilib qolmasligi uchun).
+  const isRead = !options.method || options.method.toUpperCase() === 'GET';
+  const doFetch = () => fetch(`${API_URL}${endpoint}`, { ...options, headers });
+  let res: Response;
+  try {
+    res = await doFetch();
+    if (isRead && [502, 503, 504].includes(res.status)) {
+      await new Promise((r) => setTimeout(r, 1500));
+      res = await doFetch();
+    }
+  } catch (e) {
+    if (!isRead) throw e;
+    await new Promise((r) => setTimeout(r, 1500));
+    res = await doFetch();
+  }
 
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));

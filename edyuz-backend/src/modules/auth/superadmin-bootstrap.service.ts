@@ -15,7 +15,13 @@ export class SuperadminBootstrapService implements OnApplicationBootstrap {
 
   constructor(private prisma: PrismaService) {}
 
-  async onApplicationBootstrap() {
+  onApplicationBootstrap() {
+    // Vercel'da birinchi so'rov bu tekshiruvni (bazaga so'rov + parol xeshi) kutmasligi uchun fonda bajariladi
+    const job = this.ensureSuperadmin().catch((e) => this.logger.warn(`Superadmin tekshiruvida xato: ${e?.message}`));
+    return process.env.VERCEL ? undefined : job;
+  }
+
+  async ensureSuperadmin() {
     const password = process.env.SUPERADMIN_PASSWORD?.trim();
     if (!password) return;
     const phone = process.env.SUPERADMIN_PHONE?.trim() || '+998901234567';
