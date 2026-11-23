@@ -373,7 +373,11 @@ export default function StudentsPage() {
                   const bal = Number(s.balance || 0);
                   return (
                     <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
-                      <td className="px-5 py-3.5">
+                      <td
+                        className="px-5 py-3.5 cursor-pointer"
+                        onClick={() => handleOpenEdit(s)}
+                        title="Tahrirlash uchun bosing"
+                      >
                         <div className="flex items-center gap-3">
                           <span className="w-6 shrink-0 text-right text-xs font-semibold text-slate-400 tabular-nums">{idx + 1}</span>
                           <span className="w-9 h-9 rounded-full bg-indigo-500/10 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
@@ -381,9 +385,9 @@ export default function StudentsPage() {
                           </span>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 min-w-0">
-                              <Link href={`/students/${s.id}`} className="font-semibold text-slate-800 truncate hover:text-indigo-600">
+                              <span className="font-semibold text-slate-800 truncate hover:text-indigo-600">
                                 {s.fullName}
-                              </Link>
+                              </span>
                               {kindOf(s) === 'talaba' && (
                                 <span className="inline-flex items-center h-5 px-2 rounded-md bg-violet-500/10 text-violet-600 text-[11px] font-semibold shrink-0">Talaba</span>
                               )}
@@ -420,7 +424,11 @@ export default function StudentsPage() {
                         {/* Qarzi bo'lsa — qarz summasi (to'lov qilinganda kamayadi), bo'lmasa — jami to'lagan summasi */}
                         {bal < 0
                           ? `-${Math.abs(bal).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`
-                          : `${(ledger[s.id]?.paid || 0).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`}
+                          : (ledger[s.id]?.paid || 0) > 0
+                            ? `${(ledger[s.id]?.paid || 0).toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`
+                            : bal > 0
+                              ? `${bal.toLocaleString('uz-UZ').replace(/,/g, ' ')} so‘m`
+                              : <span className="font-medium text-slate-400">To‘lov yo‘q</span>}
                       </td>
                       <td className="px-5 py-3.5">
                         {s.status === 'dropped' ? (
