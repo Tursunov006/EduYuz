@@ -5,13 +5,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { TelegramService } from '../telegram/telegram.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { AddStudentToGroupDto } from './dto/add-student.dto';
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private telegram: TelegramService,
+  ) {}
 
   async create(dto: CreateGroupDto, creatorId: string) {
     // Markaz controller'da foydalanuvchi tokenidan aniqlanadi.
@@ -100,6 +104,53 @@ export class GroupsService {
       },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // "Dars boshlanyapti" xabari: guruhdagi faol o'quvchilarning Telegram botga ulangan ota-onalariga yuboriladi.
+  // Telegramga ulanmaganlarga hech narsa ketmaydi (ular natijada alohida sanaladi).
+  async notifyLessonStart(groupId: string) {
+    const group = await this.prisma.group.findUnique({
+      where: { id: groupId },
+      include: { students: { include: { student: true } } },
+    });
+    if (!group) throw new NotFoundException('Guruh topilmadi');
+
+    const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const active = group.students.map((gs) => gs.student).filter((st) => st.status === 'active');
+    let sent = 0;
+    let failed = 0;
+    let noTelegram = 0;
+    const seen = new Set<string>();
+
+    for (const st of active) {
+      if (!st.parentChatId) {
+        noTelegram++;
+        continue;
+      }
+      const text =
+        `⏰ <b>Dars boshlanyapti!</b>\n\n` +
+        `Farzandingiz <b>${esc(st.fullName)}</b>ning <b>${esc(group.name)}</b> guruhi darsi ` +
+        `<b>${esc(group.startTime)}</b> da boshlanadi.`;
+      const key = `${st.parentChatId}:${st.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const ok = await this.telegram.sendMessage(st.parentChatId, text).catch(() => false);
+      if (ok) sent++;
+      else failed++;
+    }
+
+    return {
+      sent,
+      failed,
+      noTelegram,
+      total: active.length,
+      message:
+        sent > 0
+          ? `${sent} ta ota-onaga xabar yuborildi` + (noTelegram ? `, ${noTelegram} tasi Telegram'ga ulanmagan` : '')
+          : active.length === 0
+            ? "Guruhda faol o'quvchi yo'q"
+            : "Xabar yuborilmadi: ota-onalar Telegram botga ulanmagan",
+    };
   }
 
   async findOne(id: string) {

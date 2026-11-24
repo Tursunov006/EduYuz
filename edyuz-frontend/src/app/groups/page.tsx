@@ -7,7 +7,7 @@ import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
-  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown
+  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown, Send
 } from 'lucide-react';
 
 interface Group {
@@ -234,6 +234,23 @@ export default function GroupsPage() {
     } catch (err: any) {
       const msg = err.response?.data?.message || "Guruhni o'chirib bo'lmadi";
       alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    }
+  };
+
+  // Guruh ota-onalariga Telegram botdan "dars boshlanyapti" xabari (faqat tugma bosilganda)
+  const [notifyingId, setNotifyingId] = useState<string | null>(null);
+  const handleNotifyStart = async (g: Group) => {
+    if (notifyingId) return;
+    if (!confirm(`"${g.name}" guruhi ota-onalariga Telegram botdan "Dars boshlanyapti" xabari yuborilsinmi?\n\nDars vaqti: ${g.startTime}`)) return;
+    setNotifyingId(g.id);
+    try {
+      const res = await axios.post(`/groups/${g.id}/notify-start`, {}, { headers: getHeaders() });
+      alert(res.data?.message || 'Xabar yuborildi');
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Xabar yuborib bo‘lmadi';
+      alert(Array.isArray(msg) ? msg.join(', ') : msg);
+    } finally {
+      setNotifyingId(null);
     }
   };
 
@@ -730,6 +747,16 @@ export default function GroupsPage() {
                   >
                     Davomat
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => handleNotifyStart(group)}
+                    disabled={notifyingId === group.id}
+                    title="Ota-onalarga Telegramdan «Dars boshlanyapti» xabari"
+                    aria-label="Dars boshlanyapti xabarini yuborish"
+                    className="w-10 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 disabled:opacity-50 transition"
+                  >
+                    <Send size={15} />
+                  </button>
                   <button
                     type="button"
                     onClick={() => openEditModal(group)}
