@@ -26,6 +26,9 @@ export default function AttendancePage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [marks, setMarks] = useState<Record<string, Status>>({});
   const [saved, setSaved] = useState<Record<string, Status>>({});
+  // "Kelmadi" bo'lganda sabab (kasal, oilaviy va h.k.)
+  const [reasons, setReasons] = useState<Record<string, string>>({});
+  const [savedReasons, setSavedReasons] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -51,6 +54,8 @@ export default function AttendancePage() {
       setStudents([]);
       setMarks({});
       setSaved({});
+      setReasons({});
+      setSavedReasons({});
       return;
     }
     let cancelled = false;
@@ -68,8 +73,10 @@ export default function AttendancePage() {
           .map((gs: any) => gs.student)
           .filter((st: any) => st && st.status !== 'inactive'); // "Kelmagan" o'quvchilar ham ko'rinadi, faqat kursni tugatganlar yo'q
         const savedMap: Record<string, Status> = {};
+        const reasonMap: Record<string, string> = {};
         (Array.isArray(prev) ? prev : []).forEach((r: any) => {
           savedMap[r.studentId] = String(r.status).toUpperCase() as Status;
+          if (r.reason) reasonMap[r.studentId] = r.reason;
         });
         const initial: Record<string, Status> = {};
         members.forEach((s) => {
@@ -78,6 +85,8 @@ export default function AttendancePage() {
         setStudents(members);
         setSaved(savedMap);
         setMarks(initial);
+        setReasons(reasonMap);
+        setSavedReasons(reasonMap);
       } catch (err: any) {
         if (!cancelled) alert(err?.message || 'Guruh ma’lumotlarini yuklab bo‘lmadi');
       } finally {
@@ -98,7 +107,8 @@ export default function AttendancePage() {
     };
   }, [marks]);
   const alreadySaved = Object.keys(saved).length > 0;
-  const changed = students.some((s) => saved[s.id] !== marks[s.id]);
+  const reasonOf = (id: string) => (marks[id] === 'ABSENT' ? (reasons[id] || '').trim() : '');
+  const changed = students.some((s) => saved[s.id] !== marks[s.id] || reasonOf(s.id) !== (saved[s.id] === 'ABSENT' ? savedReasons[s.id] || '' : ''));
 
   function markAll() {
     const all: Record<string, Status> = {};
@@ -113,9 +123,14 @@ export default function AttendancePage() {
       await api.post('/attendance/mark', {
         groupId,
         date,
-        records: students.map((s) => ({ studentId: s.id, status: marks[s.id] || 'PRESENT' })),
+        records: students.map((s) => ({
+          studentId: s.id,
+          status: marks[s.id] || 'PRESENT',
+          ...(marks[s.id] === 'ABSENT' && reasonOf(s.id) ? { reason: reasonOf(s.id) } : {}),
+        })),
       });
       setSaved({ ...marks });
+      setSavedReasons(Object.fromEntries(students.filter((s) => reasonOf(s.id)).map((s) => [s.id, reasonOf(s.id)])));
       alert('Davomat saqlandi');
     } catch (err: any) {
       alert(err?.message || 'Davomatni saqlab bo‘lmadi');
@@ -260,6 +275,29 @@ export default function AttendancePage() {
                       </div>
                     ))}
                   </div>
+                  {current === 'ABSENT' && (
+                    <div className="sm:col-span-full flex flex-wrap items-center gap-2 pt-1">
+                      <input
+                        type="text"
+                        value={reasons[s.id] || ''}
+                        maxLength={200}
+                        onChange={(e) => setReasons((r) => ({ ...r, [s.id]: e.target.value }))}
+                        placeholder="Kelmaslik sababi (masalan: kasal)"
+                        aria-label={`${s.fullName} kelmaslik sababi`}
+                        className="h-9 w-full sm:w-80 px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-400"
+                      />
+                      {['Kasal', 'Oilaviy sabab', 'Safarda', 'Sababsiz'].map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => setReasons((r) => ({ ...r, [s.id]: q }))}
+                          className="h-8 px-2.5 rounded-full border border-slate-200 text-xs font-medium text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition"
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </li>
               );
             })}

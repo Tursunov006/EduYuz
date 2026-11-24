@@ -184,6 +184,7 @@ model Attendance {
   studentId String           @map("student_id") @db.VarChar(36)
   date      DateTime         @default(now()) @db.Date
   status    AttendanceStatus
+  reason    String?          @db.VarChar(200) // "Kelmadi" bo'lsa — sababi (kasal, oilaviy va h.k.)
   markedBy  String?          @map("marked_by") @db.VarChar(36)
   createdAt DateTime         @default(now()) @map("created_at")
 

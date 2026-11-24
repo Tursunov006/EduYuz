@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { AttendanceStatus } from '@prisma/client';
 
@@ -11,6 +11,12 @@ export class AttendanceRecordDto {
   @Transform(({ value }) => typeof value === 'string' ? value.toLowerCase() : value)
   @IsEnum(AttendanceStatus, { message: 'Holat present, absent yoki late bo\'lishi kerak' })
   status: AttendanceStatus;
+
+  // Faqat "kelmadi" holatida saqlanadi (boshqa holatda e'tiborga olinmaydi)
+  @IsOptional()
+  @IsString()
+  @MaxLength(200, { message: "Sabab 200 belgidan oshmasligi kerak" })
+  reason?: string;
 }
 
 export class MarkAttendanceDto {

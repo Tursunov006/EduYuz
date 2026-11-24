@@ -12,7 +12,7 @@ interface Journal {
   month: string;
   group: { id: string; name: string; days: any };
   students: { id: string; fullName: string }[];
-  records: { studentId: string; date: string; status: Status }[];
+  records: { studentId: string; date: string; status: Status; reason?: string | null }[];
 }
 
 const MARK: Record<Status, { sign: string; cls: string; label: string }> = {
@@ -120,6 +120,12 @@ export default function AttendanceJournalPage() {
   const byKey = useMemo(() => {
     const m = new Map<string, Status>();
     data?.records.forEach((r) => m.set(`${r.studentId}|${r.date}`, r.status));
+    return m;
+  }, [data]);
+  // Kelmaslik sabablari (sichqoncha belgi ustiga borganda ko'rinadi)
+  const reasonByKey = useMemo(() => {
+    const m = new Map<string, string>();
+    data?.records.forEach((r) => r.reason && m.set(`${r.studentId}|${r.date}`, r.reason));
     return m;
   }, [data]);
 
@@ -273,7 +279,7 @@ export default function AttendanceJournalPage() {
                       return (
                         <td key={c.date} className={`px-1 py-1.5 text-center ${c.date === today ? 'bg-indigo-50/50' : ''}`}>
                           {st ? (
-                            <span title={MARK[st].label} className={`w-7 h-7 inline-flex items-center justify-center rounded-lg text-xs font-bold ${MARK[st].cls}`}>
+                            <span title={reasonByKey.get(`${s.id}|${c.date}`) ? `${MARK[st].label}: ${reasonByKey.get(`${s.id}|${c.date}`)}` : MARK[st].label} className={`w-7 h-7 inline-flex items-center justify-center rounded-lg text-xs font-bold ${MARK[st].cls}`}>
                               {MARK[st].sign}
                             </span>
                           ) : (

@@ -97,6 +97,10 @@ export class AttendanceService {
     });
     const previousStatus = new Map(previous.map((p) => [p.studentId, p.status]));
 
+    // Sabab faqat "kelmadi" holatida saqlanadi; holat o'zgarsa eski sabab o'chadi
+    const reasonOf = (r: { status: string; reason?: string }) =>
+      String(r.status).toLowerCase() === 'absent' ? r.reason?.trim().slice(0, 200) || null : null;
+
     await this.prisma.$transaction([
       ...records.map((record) =>
         this.prisma.attendance.upsert({
@@ -109,6 +113,7 @@ export class AttendanceService {
           },
           update: {
             status: record.status,
+            reason: reasonOf(record),
             markedBy: userId,
           },
           create: {
@@ -116,6 +121,7 @@ export class AttendanceService {
             studentId: record.studentId,
             date: attendanceDate,
             status: record.status,
+            reason: reasonOf(record),
             markedBy: userId,
           },
         }),
@@ -230,7 +236,7 @@ export class AttendanceService {
 
     const records = await this.prisma.attendance.findMany({
       where: { groupId, date: { gte: from, lt: to } },
-      select: { studentId: true, date: true, status: true, student: { select: { id: true, fullName: true } } },
+      select: { studentId: true, date: true, status: true, reason: true, student: { select: { id: true, fullName: true } } },
       orderBy: { date: 'asc' },
     });
 
@@ -248,6 +254,7 @@ export class AttendanceService {
         studentId: r.studentId,
         date: r.date.toISOString().slice(0, 10),
         status: r.status,
+        reason: r.reason,
       })),
     };
   }
