@@ -76,6 +76,14 @@ export class GroupsController {
     return this.groupsService.remove(id);
   }
 
+  // Guruh ota-onalariga Telegram botdan "dars boshlanyapti" xabari (admin tugma bosganda)
+  @Roles(RoleType.admin)
+  @Post(':id/notify-start')
+  async notifyStart(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    await this.access.group(user, id);
+    return this.groupsService.notifyLessonStart(id);
+  }
+
   @Roles(RoleType.admin)
   @Post(':id/students')
   async addStudent(

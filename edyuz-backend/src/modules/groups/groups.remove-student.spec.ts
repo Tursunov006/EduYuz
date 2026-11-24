@@ -7,7 +7,7 @@ describe('GroupsService.removeStudent', () => {
       attendance: { deleteMany: jest.fn((a) => a) },
       $transaction: jest.fn((ops) => Promise.all(ops)),
     };
-    const svc = new (GroupsService as any)(prisma, {}, {}, {});
+    const svc = new (GroupsService as any)(prisma, {});
     await svc.removeStudent('g1', 's1');
     const where = prisma.attendance.deleteMany.mock.calls[0][0].where;
     expect(where.groupId).toBe('g1');
