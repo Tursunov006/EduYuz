@@ -93,9 +93,10 @@ export class AttendanceService {
     // Shu kun uchun avval qaysi holat belgilangani: ota-onaga xabar faqat holat o'zgarganda yuboriladi.
     const previous = await this.prisma.attendance.findMany({
       where: { groupId: dto.groupId, date: attendanceDate, studentId: { in: studentIds } },
-      select: { studentId: true, status: true },
+      select: { studentId: true, status: true, reason: true },
     });
     const previousStatus = new Map(previous.map((p) => [p.studentId, p.status]));
+    const previousReason = new Map(previous.map((p) => [p.studentId, p.reason || '']));
 
     // Sabab faqat "kelmadi" holatida saqlanadi; holat o'zgarsa eski sabab o'chadi
     const reasonOf = (r: { status: string; reason?: string }) =>
@@ -131,7 +132,15 @@ export class AttendanceService {
     // Ota-onaga Telegram orqali xabar yuborish (Keldi, Kechikdi va Kelmadi holatlari uchun!)
     // Xabar faqat holat haqiqatan o'zgarganda yuboriladi — davomat qayta saqlanganda
     // ota-onalarga takroriy Telegram/SMS (va SMS xarajati) ketmasligi uchun.
-    const changed = records.filter((r) => previousStatus.get(r.studentId) !== r.status);
+    // Istisno: "kelmadi" holati o'zgarmagan bo'lsa ham, o'qituvchi sabab (izoh) yozsa yoki o'zgartirsa,
+    // ota-onaga sabab bilan yangi xabar boradi.
+    const changed = records.filter(
+      (r) =>
+        previousStatus.get(r.studentId) !== r.status ||
+        (String(r.status).toLowerCase() === 'absent' &&
+          !!reasonOf(r) &&
+          reasonOf(r) !== previousReason.get(r.studentId)),
+    );
     if (changed.length > 0) {
       const students = await this.prisma.student.findMany({
         where: { id: { in: changed.map((r) => r.studentId) } },
@@ -149,6 +158,7 @@ export class AttendanceService {
               group.name,
               record.status,
               dto.date,
+              reasonOf(record) || undefined,
             )
             .catch((e) => this.logger.warn(`Telegram davomat xabari xatosi: ${e.message}`)));
         }
@@ -156,7 +166,7 @@ export class AttendanceService {
         // SMS xabarnoma (agar darsga kelmagan bo'lsa)
         if (record && record.status === 'absent' && student.parentPhone && !student.parentChatId) {
           sends.push(this.smsService
-            .sendAttendanceAlert(student.parentPhone, student.fullName, group.name)
+            .sendAttendanceAlert(student.parentPhone, student.fullName, group.name, reasonOf(record) || undefined)
             .catch((e) => this.logger.warn(`SMS davomat xabari xatosi: ${e.message}`)));
         }
       }

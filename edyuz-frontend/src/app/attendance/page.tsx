@@ -282,10 +282,13 @@ export default function AttendancePage() {
                         value={reasons[s.id] || ''}
                         maxLength={200}
                         onChange={(e) => setReasons((r) => ({ ...r, [s.id]: e.target.value }))}
-                        placeholder="Kelmaslik sababi (masalan: kasal)"
-                        aria-label={`${s.fullName} kelmaslik sababi`}
+                        placeholder="O‘qituvchi izohi: kelmaslik sababi (masalan: kasal)"
+                        aria-label={`${s.fullName} o‘qituvchi izohi`}
                         className="h-9 w-full sm:w-80 px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-400"
                       />
+                      <span className="w-full text-[11px] text-slate-400 -mb-0.5">
+                        Izoh saqlanganda ota-onaga Telegram botdan yuboriladi (Telegramga ulangan bo‘lsa)
+                      </span>
                       {['Kasal', 'Oilaviy sabab', 'Safarda', 'Sababsiz'].map((q) => (
                         <button
                           key={q}
