@@ -133,9 +133,10 @@ export class SmsService {
   }
 
   // 1. Davomatda kelmaganlik xabarnomasi
-  async sendAttendanceAlert(parentPhone: string, studentName: string, groupName: string) {
+  async sendAttendanceAlert(parentPhone: string, studentName: string, groupName: string, reason?: string) {
     if (!parentPhone) return;
-    const msg = `EduYuz: Hurmatli ota-ona! Farzandingiz ${studentName} bugun ${groupName} darsiga qatnashmadi.`;
+    const why = reason?.trim() ? ` Izoh: ${reason.trim()}.` : '';
+    const msg = `EduYuz: Hurmatli ota-ona! Farzandingiz ${studentName} bugun ${groupName} darsiga qatnashmadi.${why}`;
     return this.sendSms(parentPhone, msg);
   }
 

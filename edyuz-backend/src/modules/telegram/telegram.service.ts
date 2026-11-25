@@ -244,6 +244,7 @@ export class TelegramService implements OnModuleInit {
     groupName: string,
     status: string,
     date: string,
+    reason?: string,
   ) {
     if (!parentChatId) return;
 
@@ -253,7 +254,10 @@ export class TelegramService implements OnModuleInit {
 
     if (normalized === 'absent') {
       statusText = '❌ <b>Darsga qatnashmadi (Kelmadi)</b>';
-      bonusLine = '\n⚠️ <i>Iltimos, dars qoldirish sababini ma’muriyatga ma’lum qiling.</i>';
+      const safeReason = reason?.trim().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      bonusLine = safeReason
+        ? `\n📝 <b>O'qituvchi izohi:</b> ${safeReason}`
+        : '\n⚠️ <i>Iltimos, dars qoldirish sababini ma’muriyatga ma’lum qiling.</i>';
     } else if (normalized === 'late') {
       statusText = '⏳ <b>Darsga kechikib keldi</b>';
     } else if (normalized === 'present') {
