@@ -7,7 +7,7 @@ export interface LeadRecord {
   fullName: string;
   phone: string;
   course: string;
-  source: 'Instagram' | 'Telegram' | 'Tavsiya' | 'Qo\'ng\'iroq';
+  source: 'Instagram' | 'Sayt' | 'Telegram' | 'Tavsiya' | 'Qo\'ng\'iroq';
   stage: 'new' | 'contacted' | 'trial' | 'converted';
   createdAt: string;
   note?: string;
@@ -70,6 +70,18 @@ export class InstagramService {
     });
 
     return rows.map((r) => this.mapRowToLead(r));
+  }
+
+  // Veb-sayt lidlari qaysi markazga tushishini aniqlash
+  async resolveWebsiteCenterId(): Promise<string | null> {
+    const fixed = this.configService.get<string>('WEBSITE_CENTER_ID');
+    if (fixed) return fixed;
+    const c = await this.prisma.center.findFirst({
+      where: { name: { contains: 'Aksioma', mode: 'insensitive' } },
+      select: { id: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return c?.id ?? null;
   }
 
   // 2. Yangi lid yaratish (Instagram Bio, AI Chat, Webhook yoki CRM ichidan)
