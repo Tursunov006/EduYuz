@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aksioma IT Education — o'quv markazi</title>
+<meta name="description" content="Aksioma IT Education: kompyuter savodxonligi, dasturlash, sun'iy intellekt, robototexnika, grafik dizayn va ingliz tili kurslari.">
+<style>
+:root{--navy:#0b1630;--navy2:#111f42;--card:#15244a;--yellow:#ffc400;--text:#e9eefc;--muted:#9fb0d6;--line:#243665}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--navy);color:var(--text);line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:10;background:rgba(11,22,48,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-weight:800;font-size:1.15rem}.logo span{color:var(--yellow)}
+nav a{margin-left:20px;color:var(--muted);font-size:.95rem}nav a:hover{color:var(--yellow)}
+.btn{display:inline-block;background:var(--yellow);color:#0b1630;font-weight:700;padding:12px 24px;border-radius:10px;border:0;cursor:pointer;font-size:1rem}
+.btn:hover{filter:brightness(1.08)}
+.hero{padding:88px 0 72px;text-align:center;background:radial-gradient(ellipse at top,#1a2f66 0,var(--navy) 65%)}
+.hero h1{font-size:clamp(2rem,6vw,3.6rem);line-height:1.15;margin-bottom:16px}
+.hero h1 span{color:var(--yellow)}
+.hero p{color:var(--muted);max-width:620px;margin:0 auto 28px;font-size:1.1rem}
+section{padding:64px 0}
+h2{font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+.card h3{color:var(--yellow);font-size:1.1rem;margin-bottom:10px}
+.card ul{list-style:none}.card li{padding:4px 0 4px 18px;position:relative;color:var(--text);font-size:.95rem}
+.card li:before{content:"";position:absolute;left:0;top:13px;width:7px;height:7px;border-radius:50%;background:var(--yellow)}
+.badges{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.badge{background:var(--navy2);border:1px solid var(--yellow);border-radius:14px;padding:22px;text-align:center;font-weight:700;color:var(--yellow)}
+.alt{background:var(--navy2)}
+form{max-width:520px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
+label{display:block;font-size:.9rem;color:var(--muted);margin:14px 0 6px}
+input,select,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--navy);color:var(--text);font:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--yellow)}
+form .btn{width:100%;margin-top:20px}
+#msg{margin-top:14px;font-size:.95rem;min-height:1.4em}
+.ok{color:#5be39b}.err{color:#ff8a8a}
+.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+footer{padding:28px 0;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:.9rem}
+.hp{position:absolute;left:-9999px}
+@media(max-width:640px){nav{display:none}.hero{padding:60px 0 48px}section{padding:48px 0}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo" href="#top">Aksioma <span>IT Education</span></a>
+  <nav><a href="#courses">Kurslar</a><a href="#why">Afzalliklar</a><a href="#apply">Ariza</a></nav>
+  <a class="btn" href="#apply" style="padding:8px 18px">Yozilish</a>
+</div></header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+  <h1>Kelajak kasbini <span>Aksioma IT Education</span> bilan o'rganing</h1>
+  <p>O'quv markazimizda zamonaviy IT yo'nalishlari bo'yicha amaliy kurslar mavjud. Hoziroq ro'yxatdan o'ting!</p>
+  <a class="btn" href="#apply">Kursga yozilish</a>
+</div></div>
+
+<section id="courses"><div class="wrap">
+  <h2>Kurslarimiz</h2>
+  <p class="sub">O'quv markazimizda quyidagi kurslar mavjud!</p>
+  <div class="grid" id="courseGrid"></div>
+</div></section>
+
+<section id="why" class="alt"><div class="wrap">
+  <h2>Nega aynan biz?</h2><p class="sub">&nbsp;</p>
+  <div class="badges">
+    <div class="badge">Amaliy yondashuv</div>
+    <div class="badge">Tajribali ustozlar</div>
+    <div class="badge">Sertifikat beriladi</div>
+  </div>
+</div></section>
+
+<section id="apply"><div class="wrap">
+  <h2>Kursga yozilish</h2>
+  <p class="sub">Ma'lumotlaringizni qoldiring — administrator siz bilan bog'lanadi.</p>
+  <form id="f" novalidate>
+    <label for="n">Ismingiz</label><input id="n" maxlength="100" required autocomplete="name">
+    <label for="p">Telefon raqamingiz</label><input id="p" type="tel" placeholder="+998 90 123 45 67" maxlength="20" required autocomplete="tel">
+    <label for="c">Qiziqqan kurs</label><select id="c"></select>
+    <label for="o">Izoh (ixtiyoriy)</label><textarea id="o" rows="3" maxlength="400"></textarea>
+    <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" id="b" type="submit">Ariza yuborish</button>
+    <div id="msg" role="status"></div>
+  </form>
+</div></section>
+
+<section class="alt" id="contact"><div class="wrap" id="contactBox" hidden>
+  <h2>Aloqa</h2><div class="contact" id="contactLinks"></div>
+</div></section>
+</main>
+<footer><div class="wrap">© <span id="y"></span> Aksioma IT Education</div></footer>
+
+<script>
+// Sayt sozlamalari. Bo'sh qoldirilgan aloqa maydonlari ko'rsatilmaydi.
+var CONFIG={
+  api:"https://eduyuz-api.vercel.app/api/v1/instagram/site-lead",
+  phone:"",      // masalan "+998901234567"
+  telegram:"",   // masalan "https://t.me/..."
+  instagram:"",  // masalan "https://instagram.com/..."
+  address:""
+};
+var COURSES=[
+ ["Kompyuter savodxonligi",["Kompyuter bilan ishlash asoslari","Microsoft Word","Microsoft Excel","Microsoft PowerPoint","Google Docs / Sheets / Slides","Internet va raqamli savodxonlik"]],
+ ["Dasturlash kurslari",["Python","Frontend (HTML, CSS, JavaScript)","Backend","Web dasturlash","C++","Mobil ilovalar","Dasturlash asoslari (Scratch)"]],
+ ["Sun'iy intellekt",["AI asoslari","ChatGPT va Prompt Engineering","AI bilan kontent, rasm va video yaratish","AI Agentlar","Gemini va Claude bilan ishlash"]],
+ ["Robototexnika",["LEGO","Arduino (boshlang'ich)","Arduino Advanced","Robotlarni loyihalash va yig'ish","Python orqali robotlarni boshqarish","IoT"]],
+ ["Grafik dizayn va multimedia",["Canva","Photoshop","CorelDRAW","Illustrator","Video montaj (CapCut, Premiere Pro)","Motion Design"]],
+ ["Zamonaviy IT yo'nalishlari",["Kiberxavfsizlik","UI/UX dizayn","3D modellashtirish","Kompyuter tarmoqlari","SMM va Digital Marketing","No-code dasturlash"]],
+ ["Ingliz tili (CEFR)",["Beginner (A1–A2)","Individual darslar"]]
+];
+var g=document.getElementById("courseGrid"),sel=document.getElementById("c");
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+COURSES.forEach(function(c){
+  g.insertAdjacentHTML("beforeend",'<div class="card"><h3>'+esc(c[0])+'</h3><ul>'+c[1].map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+"</ul></div>");
+  var og=document.createElement("optgroup");og.label=c[0];
+  c[1].forEach(function(x){var o=document.createElement("option");o.value=c[0]+" — "+x;o.textContent=x;og.appendChild(o)});
+  sel.appendChild(og);
+});
+document.getElementById("y").textContent=new Date().getFullYear();
+(function(){
+  var L=[];
+  if(CONFIG.phone)L.push('<a class="btn" href="tel:'+esc(CONFIG.phone)+'">'+esc(CONFIG.phone)+'</a>');
+  if(CONFIG.telegram)L.push('<a class="btn" href="'+esc(CONFIG.telegram)+'" rel="noopener">Telegram</a>');
+  if(CONFIG.instagram)L.push('<a class="btn" href="'+esc(CONFIG.instagram)+'" rel="noopener">Instagram</a>');
+  if(CONFIG.address)L.push('<span class="card">📍 '+esc(CONFIG.address)+'</span>');
+  if(L.length){document.getElementById("contactLinks").innerHTML=L.join("");document.getElementById("contactBox").hidden=false}
+  else document.getElementById("contact").style.display="none";
+})();
+var f=document.getElementById("f"),msg=document.getElementById("msg"),b=document.getElementById("b");
+f.addEventListener("submit",function(e){
+  e.preventDefault();
+  function show(t,ok){msg.textContent=t;msg.className=ok?"ok":"err"}
+  var name=f.n.value.trim(),phone=f.p.value.trim();
+  if(document.getElementById("hp").value)return;
+  if(!name)return show("Ismingizni kiriting",0);
+  if(!/^\+?[\d\s()-]{7,20}$/.test(phone))return show("Telefon raqam noto'g'ri",0);
+  b.disabled=true;show("Yuborilmoqda...",1);
+  fetch(CONFIG.api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fullName:name,phone:phone,course:f.c.value,note:f.o.value.trim()||undefined})})
+  .then(function(r){if(!r.ok)throw 0;f.reset();show("Rahmat! Arizangiz qabul qilindi, tez orada siz bilan bog'lanamiz.",1)})
+  .catch(function(){show("Yuborib bo'lmadi. Birozdan so'ng qayta urinib ko'ring.",0)})
+  .finally(function(){b.disabled=false});
+});
+</script>
+</body>
+</html>

@@ -87,6 +87,27 @@ export class InstagramController {
     return this.instagramService.getAllLeads(this.access.scopeCenter(user));
   }
 
+  // Aksioma o'quv markazi veb-saytidan kelgan ariza: lid markaz CRM'iga biriktiriladi.
+  // Markaz serverda aniqlanadi (WEBSITE_CENTER_ID yoki nomi "Aksioma" bo'lgan markaz),
+  // so'rovdan centerId qabul qilinmaydi — begona markazga lid yozib bo'lmaydi.
+  @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Post('site-lead')
+  async createSiteLead(@Body() dto: CreateLeadDto) {
+    const centerId = await this.instagramService.resolveWebsiteCenterId();
+    if (!centerId) throw new BadRequestException('Markaz topilmadi');
+    await this.instagramService.createLead({
+      fullName: dto.fullName,
+      phone: dto.phone,
+      course: dto.course,
+      note: dto.note,
+      source: 'Sayt',
+      stage: 'new',
+      centerId,
+    });
+    return { ok: true };
+  }
+
   // 5. Yangi lid qo'shish: /insta ochiq sahifasidan (anonim) yoki CRM ichidan (xodim)
   @Public()
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
