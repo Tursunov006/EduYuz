@@ -254,6 +254,11 @@ export default function AttendancePage() {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-slate-800 truncate">{s.fullName}</p>
                     {s.phone && <p className="text-xs text-slate-500">{s.phone}</p>}
+                    {current === 'ABSENT' && (reasons[s.id] || '').trim() && (
+                      <p className="text-xs text-amber-700 bg-amber-50 rounded px-1.5 py-0.5 mt-1 w-max min-w-0 max-w-[300px] whitespace-pre-wrap break-words">
+                        Izoh: {(reasons[s.id] || '').trim()}
+                      </p>
+                    )}
                   </div>
                   <div className="sm:pt-1.5">
                     <span className={`inline-flex items-center h-6 px-2.5 rounded-full border text-xs font-semibold ${STATUS_META[current].active}`}>
