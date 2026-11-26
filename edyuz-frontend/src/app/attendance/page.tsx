@@ -249,20 +249,20 @@ export default function AttendancePage() {
               return (
                 <li
                   key={s.id}
-                  className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_repeat(3,0.8fr)] gap-2 sm:items-center px-5 py-3.5 border-t border-slate-200"
+                  className="grid grid-cols-1 sm:grid-cols-[1.6fr_1fr_repeat(3,0.8fr)] gap-2 sm:items-start px-5 py-3.5 border-t border-slate-200"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-slate-800 truncate">{s.fullName}</p>
                     {s.phone && <p className="text-xs text-slate-500">{s.phone}</p>}
                   </div>
-                  <div>
+                  <div className="sm:pt-1.5">
                     <span className={`inline-flex items-center h-6 px-2.5 rounded-full border text-xs font-semibold ${STATUS_META[current].active}`}>
                       {STATUS_META[current].label}
                     </span>
                   </div>
                   <div className="flex sm:contents gap-2">
                     {(['PRESENT', 'ABSENT', 'LATE'] as Status[]).map((st) => (
-                      <div key={st} className="sm:flex sm:justify-center flex-1">
+                      <div key={st} className="sm:flex sm:flex-col sm:items-center gap-1.5 flex-1">
                         <button
                           onClick={() => setMarks((m) => ({ ...m, [s.id]: st }))}
                           aria-pressed={current === st}
@@ -272,34 +272,30 @@ export default function AttendancePage() {
                         >
                           {STATUS_META[st].label}
                         </button>
+                        {st === 'ABSENT' && current === 'ABSENT' && (
+                          <input
+                            type="text"
+                            value={reasons[s.id] || ''}
+                            maxLength={200}
+                            onChange={(e) => setReasons((r) => ({ ...r, [s.id]: e.target.value }))}
+                            placeholder="Sabab…"
+                            aria-label={`${s.fullName} kelmaslik sababi`}
+                            className="hidden sm:block w-24 h-8 px-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-400"
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
                   {current === 'ABSENT' && (
-                    <div className="sm:col-span-full flex flex-wrap items-center gap-2 pt-1">
-                      <input
-                        type="text"
-                        value={reasons[s.id] || ''}
-                        maxLength={200}
-                        onChange={(e) => setReasons((r) => ({ ...r, [s.id]: e.target.value }))}
-                        placeholder="O‘qituvchi izohi: kelmaslik sababi (masalan: kasal)"
-                        aria-label={`${s.fullName} o‘qituvchi izohi`}
-                        className="h-9 w-full sm:w-80 px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-400"
-                      />
-                      <span className="w-full text-[11px] text-slate-400 -mb-0.5">
-                        Izoh saqlanganda ota-onaga Telegram botdan yuboriladi (Telegramga ulangan bo‘lsa)
-                      </span>
-                      {['Kasal', 'Oilaviy sabab', 'Safarda', 'Sababsiz'].map((q) => (
-                        <button
-                          key={q}
-                          type="button"
-                          onClick={() => setReasons((r) => ({ ...r, [s.id]: q }))}
-                          className="h-8 px-2.5 rounded-full border border-slate-200 text-xs font-medium text-slate-600 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 transition"
-                        >
-                          {q}
-                        </button>
-                      ))}
-                    </div>
+                    <input
+                      type="text"
+                      value={reasons[s.id] || ''}
+                      maxLength={200}
+                      onChange={(e) => setReasons((r) => ({ ...r, [s.id]: e.target.value }))}
+                      placeholder="Kelmaslik sababi…"
+                      aria-label={`${s.fullName} kelmaslik sababi`}
+                      className="sm:hidden h-9 w-full px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-rose-400"
+                    />
                   )}
                 </li>
               );
