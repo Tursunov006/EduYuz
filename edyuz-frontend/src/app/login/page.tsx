@@ -1,8 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
+
+type TurnstileApi = {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+  reset: (id?: string) => void;
+};
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +18,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
+  const widgetBox = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | undefined>(undefined);
 
   // Agar allaqachon tizimga kirgan bo'lsa -> to'g'ri Dashboard'ga yo'naltirish
   useEffect(() => {
@@ -19,6 +29,44 @@ export default function LoginPage() {
       router.replace('/');
     }
   }, [router]);
+
+  // Cloudflare Turnstile ("Men robot emasman"): faqat sayt kaliti sozlangan bo'lsa ishlaydi
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) return;
+    let cancelled = false;
+    const w = window as unknown as { turnstile?: TurnstileApi };
+    const mount = () => {
+      if (cancelled || !w.turnstile || !widgetBox.current || widgetId.current) return;
+      widgetId.current = w.turnstile.render(widgetBox.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (t: string) => setTurnstileToken(t),
+        'expired-callback': () => setTurnstileToken(''),
+        'error-callback': () => setTurnstileToken(''),
+      });
+    };
+    if (w.turnstile) {
+      mount();
+    } else {
+      let script = document.getElementById('cf-turnstile-script') as HTMLScriptElement | null;
+      if (!script) {
+        script = document.createElement('script');
+        script.id = 'cf-turnstile-script';
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        document.head.appendChild(script);
+      }
+      script.addEventListener('load', mount);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function resetTurnstile() {
+    setTurnstileToken('');
+    const w = window as unknown as { turnstile?: TurnstileApi };
+    if (TURNSTILE_SITE_KEY && w.turnstile) w.turnstile.reset(widgetId.current);
+  }
 
   // Telefon raqam ko'rinishidagi loginni tekshiradi va +998XXXXXXXXX shakliga keltiradi.
   // Matnli login (masalan "admin") bo'lsa — o'zgarishsiz qaytaradi.
@@ -45,6 +93,10 @@ export default function LoginPage() {
     const phoneCheck = checkPhone(login);
     // Xato matni login maydoni ostida ko'rinib turadi — serverga yuborilmaydi
     if (phoneCheck.error) return;
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError('Iltimos, "Men robot emasman" tekshiruvidan o‘ting');
+      return;
+    }
     setLoading(true);
 
     try {
@@ -65,7 +117,8 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           phone: accountLogin, 
-          password: password.trim() 
+          password: password.trim(),
+          ...(TURNSTILE_SITE_KEY ? { turnstileToken } : {}),
         }),
       });
 
@@ -81,6 +134,7 @@ export default function LoginPage() {
       window.location.href = isSuperAdminLogin ? '/superadmin' : '/';
     } catch (err: any) {
       setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
+      resetTurnstile();
     } finally {
       setLoading(false);
     }
@@ -156,9 +210,11 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {TURNSTILE_SITE_KEY && <div ref={widgetBox} className="flex justify-center min-h-[65px]" />}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (!!TURNSTILE_SITE_KEY && !turnstileToken)}
             className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center text-sm active:scale-95 cursor-pointer"
           >
             {loading ? 'Tekshirilmoqda...' : 'Tizimga kirish'}

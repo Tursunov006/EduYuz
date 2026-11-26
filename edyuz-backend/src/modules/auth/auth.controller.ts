@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { RoleType } from '@prisma/client';
 import { AuthService } from './auth.service';
+import { TurnstileService } from './turnstile.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -11,7 +13,10 @@ import { AuthUser } from '../../common/access/access.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private turnstile: TurnstileService,
+  ) {}
 
   // Avval bu endpoint ochiq edi: istalgan odam o'ziga superadmin hisob yarata olardi.
   // Endi faqat tizimga kirgan admin o'z markaziga xodim qo'sha oladi.
@@ -25,7 +30,8 @@ export class AuthController {
   @Public()
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @Post('login')
-  login(@Body() dto: LoginDto) {
+  async login(@Body() dto: LoginDto, @Req() req: Request) {
+    await this.turnstile.verify(dto.turnstileToken, req.ip);
     return this.authService.login(dto);
   }
 

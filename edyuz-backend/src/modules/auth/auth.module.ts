@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { TurnstileService } from './turnstile.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { SuperadminBootstrapService } from './superadmin-bootstrap.service';
@@ -24,7 +25,7 @@ import { resolveJwtSecret } from '../../common/jwt-secret';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, SuperadminBootstrapService],
+  providers: [AuthService, TurnstileService, JwtStrategy, SuperadminBootstrapService],
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
