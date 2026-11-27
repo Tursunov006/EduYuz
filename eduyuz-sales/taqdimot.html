@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduYuz — taqdimot</title>
+<style>
+:root{--ink:#0f172a;--muted:#64748b;--brand:#4f46e5;--soft:#eef2ff}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:6vh 8vw}
+.slide.on{display:flex}
+.slide.dark{background:linear-gradient(135deg,#312e81,#4f46e5);color:#fff}
+.slide.dark .muted{color:#c7d2fe}
+.logo{font-weight:800;font-size:clamp(2.4rem,7vw,5rem)}.logo b{color:#a5b4fc}
+h1{font-size:clamp(2rem,5.5vw,3.8rem);line-height:1.15;margin-bottom:2vh}
+h2{font-size:clamp(1.6rem,4.2vw,3rem);line-height:1.2;margin-bottom:3vh}
+.muted{color:var(--muted);font-size:clamp(1.05rem,2.2vw,1.6rem)}
+ul{list-style:none;font-size:clamp(1.1rem,2.6vw,1.9rem)}
+li{padding:1.1vh 0 1.1vh 2.2rem;position:relative}
+li:before{content:"→";position:absolute;left:0;color:var(--brand);font-weight:800}
+.dark li:before{color:#a5b4fc}
+.cols{display:grid;grid-template-columns:repeat(3,1fr);gap:2vw}
+.box{background:var(--soft);border-radius:18px;padding:3vh 2vw}
+.box h3{font-size:clamp(1.1rem,2.4vw,1.7rem);margin-bottom:1vh}
+.box .sum{font-size:clamp(1.6rem,3.6vw,2.8rem);font-weight:800;color:var(--brand);margin:1vh 0}
+.box p{color:var(--muted);font-size:clamp(.95rem,1.8vw,1.3rem)}
+.bar{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:center;padding:1.2vh 3vw;color:#94a3b8;font-size:.9rem;z-index:5}
+.bar button{background:none;border:1px solid #cbd5e1;border-radius:8px;padding:6px 14px;color:#64748b;cursor:pointer;font-size:1rem}
+@media(max-width:700px){.cols{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<section class="slide dark on">
+  <div class="logo">Edu<b>Yuz</b></div>
+  <h1 style="margin-top:3vh">O'quv markazlar uchun boshqaruv tizimi</h1>
+  <p class="muted">Davomat, to'lov va o'quvchilar hisobi bitta joyda</p>
+</section>
+
+<section class="slide">
+  <h2>Markazda kundalik og'riqlar</h2>
+  <ul>
+    <li>Davomat daftarda, to'lovlar Excelda</li>
+    <li>Kim qarzdor ekanini topish uchun ko'p vaqt ketadi</li>
+    <li>Ota-onaga har bir xabarni qo'lda yozish yoki qo'ng'iroq qilish</li>
+    <li>Instagram va Telegram'dan kelgan o'quvchilar yo'qolib ketadi</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>EduYuz buni bitta tizimga yig'adi</h2>
+  <ul>
+    <li>Davomat: kelmaslik sababi bilan, jurnal saqlanadi</li>
+    <li>To'lovlar: kim to'ladi, kim qarzdor, bir qarashda</li>
+    <li>Ota-onaga Telegram bot orqali avtomatik xabar</li>
+    <li>Yangi o'quvchilar (lidlar) bosqichma-bosqich kuzatiladi</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Yana nimalar bor</h2>
+  <ul>
+    <li>Guruhlar, jadval, ustoz va xonalar</li>
+    <li>Kassa, xarajatlar va hisobotlar</li>
+    <li>Sertifikatlar va o'quvchi portali</li>
+    <li>Har bir markazning ma'lumoti alohida va himoyalangan</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <h2>Narx: bir marta to'laysiz</h2>
+  <div class="cols">
+    <div class="box"><h3>Start</h3><p>50 tagacha o'quvchi</p><div class="sum">1 500 000</div><p>so'm</p></div>
+    <div class="box"><h3>Standard</h3><p>150 tagacha o'quvchi</p><div class="sum">3 000 000</div><p>so'm</p></div>
+    <div class="box"><h3>Pro</h3><p>Cheksiz o'quvchi, filiallar</p><div class="sum">5 000 000</div><p>so'm</p></div>
+  </div>
+  <p class="muted" style="margin-top:3vh">Oyma-oy to'lov yo'q. O'rnatish va bir yillik qo'llab-quvvatlash narxga kiradi.</p>
+</section>
+
+<section class="slide dark">
+  <h1>10 daqiqada ko'rsatib beramiz</h1>
+  <p class="muted">Markazingizni EduYuzda sinab ko'ring</p>
+  <p style="margin-top:4vh;font-size:clamp(1.3rem,3vw,2.2rem);font-weight:700" id="link"></p>
+</section>
+
+<div class="bar"><span id="cnt"></span><span><button id="prev" aria-label="Oldingi">←</button> <button id="next" aria-label="Keyingi">→</button></span></div>
+<script>
+var s=[].slice.call(document.querySelectorAll(".slide")),i=0,cnt=document.getElementById("cnt");
+document.getElementById("link").textContent=location.origin&&location.origin!=="null"?location.origin.replace(/^https?:\/\//,""):"";
+function go(n){i=Math.max(0,Math.min(s.length-1,n));s.forEach(function(e,k){e.classList.toggle("on",k===i)});cnt.textContent=(i+1)+" / "+s.length;try{history.replaceState(null,"","#"+(i+1))}catch(e){}}
+document.getElementById("next").onclick=function(){go(i+1)};
+document.getElementById("prev").onclick=function(){go(i-1)};
+document.addEventListener("keydown",function(e){if(["ArrowRight","PageDown"," ","Enter"].indexOf(e.key)>-1){e.preventDefault();go(i+1)}if(["ArrowLeft","PageUp","Backspace"].indexOf(e.key)>-1){e.preventDefault();go(i-1)}});
+var tx=0;document.addEventListener("touchstart",function(e){tx=e.touches[0].clientX});
+document.addEventListener("touchend",function(e){var d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)go(i+(d<0?1:-1))});
+go((parseInt(location.hash.slice(1),10)||1)-1);
+</script>
+</body>
+</html>
