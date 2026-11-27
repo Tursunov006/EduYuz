@@ -7,8 +7,9 @@ import axios from 'axios';
 import '@/lib/api'; // axios uchun API manzili va token sozlamalari
 import { 
   BookOpen, Plus, Calendar, Clock, User, Users, 
-  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown, Send, ZoomIn, Minus
+  Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown, Send
 } from 'lucide-react';
+import ZoomControl from '@/components/ZoomControl';
 
 interface Group {
   id: string;
@@ -102,24 +103,6 @@ export default function GroupsPage() {
   const [dayKey, setDayKey] = useState<string>(() => TODAY_KEY());
   // Dars jadvali ko'rinishi: bitta kun (xonalar bo'yicha) yoki butun hafta
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
-  // Jadval masshtabi (foiz): har bir foydalanuvchi o'zi uchun tanlaydi va brauzerda eslab qolinadi
-  const ZOOM_MIN = 50;
-  const ZOOM_MAX = 150;
-  const [zoom, setZoom] = useState<number>(() => {
-    try {
-      const v = parseInt(localStorage.getItem('scheduleZoom') || '', 10);
-      return Number.isFinite(v) ? Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, v)) : 100;
-    } catch {
-      return 100;
-    }
-  });
-  const changeZoom = (delta: number) => {
-    setZoom((z) => {
-      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z + delta));
-      try { localStorage.setItem('scheduleZoom', String(next)); } catch {}
-      return next;
-    });
-  };
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
@@ -571,29 +554,7 @@ export default function GroupsPage() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 pl-3 pr-1.5 h-[46px] bg-slate-50 border border-slate-200 rounded-xl w-fit" role="group" aria-label="Jadval masshtabi">
-              <ZoomIn size={16} className="text-slate-500" />
-              <span className="text-sm font-medium text-slate-600 hidden sm:inline">Zoom</span>
-              <button
-                type="button"
-                onClick={() => changeZoom(-10)}
-                disabled={zoom <= ZOOM_MIN}
-                aria-label="Kichraytirish"
-                className="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white flex items-center justify-center transition"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="w-11 text-center text-sm font-semibold text-slate-800 tabular-nums">{zoom}%</span>
-              <button
-                type="button"
-                onClick={() => changeZoom(10)}
-                disabled={zoom >= ZOOM_MAX}
-                aria-label="Kattalashtirish"
-                className="w-8 h-8 rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-white flex items-center justify-center transition"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
+            <ZoomControl />
             <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
               {([['day', 'Kun'], ['week', 'Hafta']] as const).map(([mode, label]) => (
                 <button
@@ -629,7 +590,7 @@ export default function GroupsPage() {
 
           {viewMode === 'day' ? (
           <div className="overflow-x-auto">
-            <div style={{ minWidth: 70 + roomColumns.length * 190, zoom: zoom / 100 }}>
+            <div style={{ minWidth: 70 + roomColumns.length * 190 }}>
               {/* Xonalar */}
               <div className="flex border-b border-slate-200 bg-slate-50">
                 <div className="w-[70px] shrink-0 px-3 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
@@ -707,7 +668,7 @@ export default function GroupsPage() {
           </div>
           ) : (
           <div className="overflow-x-auto">
-            <div style={{ minWidth: 60 + WEEK.length * 130, zoom: zoom / 100 }}>
+            <div style={{ minWidth: 60 + WEEK.length * 130 }}>
               <div className="flex border-b border-slate-200 bg-slate-50">
                 <div className="w-[60px] shrink-0 px-3 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
                 {WEEK.map((w) => (
