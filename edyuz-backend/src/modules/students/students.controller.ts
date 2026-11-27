@@ -17,12 +17,14 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { AccessService, AuthUser } from '../../common/access/access.service';
+import { TelegramService } from '../telegram/telegram.service';
 
 @Controller('students')
 export class StudentsController {
   constructor(
     private readonly studentsService: StudentsService,
     private readonly access: AccessService,
+    private readonly telegram: TelegramService,
   ) {}
 
   @Roles(RoleType.admin)
@@ -59,8 +61,12 @@ export class StudentsController {
 
   @Public()
   @Post('anketa/:id')
-  saveAnketa(@Param('id') id: string, @Query('k') key: string, @Body() dto: AnketaDto) {
-    return this.studentsService.saveAnketa(id, key, dto);
+  async saveAnketa(@Param('id') id: string, @Query('k') key: string, @Body() dto: AnketaDto) {
+    const result = await this.studentsService.saveAnketa(id, key, dto);
+    // Anketa tugagach ota-onaga Telegram botga ulanish havolasi (QR uchun) qaytariladi.
+    // Kalit to'g'ri bo'lgani uchun faqat shu o'quvchining o'z havolasi beriladi.
+    const username = await this.telegram.getBotUsername();
+    return { ...result, botLink: username ? `https://t.me/${username}?start=student_${id}` : null };
   }
 
   // Balanslarni to'lovlar tarixi bilan solishtirish (faqat admin).

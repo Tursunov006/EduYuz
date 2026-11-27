@@ -238,7 +238,7 @@ export class StudentsService {
 
   async saveAnketa(studentId: string, key: string | undefined, dto: AnketaDto) {
     this.checkAnketaKey(studentId, key);
-    const exists = await this.prisma.student.findUnique({ where: { id: studentId }, select: { id: true } });
+    const exists = await this.prisma.student.findUnique({ where: { id: studentId }, select: { id: true, parentChatId: true } });
     if (!exists) throw new NotFoundException('Havola noto‘g‘ri yoki eskirgan');
     await this.prisma.student.update({
       where: { id: studentId },
@@ -253,7 +253,8 @@ export class StudentsService {
       },
     });
     await this.backup(studentId);
-    return { success: true };
+    // linked: ota-ona Telegram botga allaqachon ulanganmi (ulanmagan bo'lsa anketa oxirida QR chiqadi)
+    return { success: true, linked: exists.parentChatId != null };
   }
 
   async findAll(centerId?: string, search?: string) {

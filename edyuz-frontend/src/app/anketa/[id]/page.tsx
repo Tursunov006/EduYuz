@@ -38,6 +38,9 @@ export default function AnketaPage({ params }: { params: Promise<{ id: string }>
   const [centerName, setCenterName] = useState('');
   const [state, setState] = useState<'loading' | 'ready' | 'invalid' | 'saving' | 'done'>('loading');
   const [error, setError] = useState('');
+  // Anketa tugagach: Telegram botga ulanish havolasi va QR kodi
+  const [bot, setBot] = useState<{ link: string | null; linked: boolean }>({ link: null, linked: false });
+  const [qr, setQr] = useState('');
 
   useEffect(() => {
     const k = new URLSearchParams(window.location.search).get('k') || '';
@@ -67,10 +70,18 @@ export default function AnketaPage({ params }: { params: Promise<{ id: string }>
     setError('');
     setState('saving');
     try {
-      await request(`/students/anketa/${id}?k=${encodeURIComponent(key)}`, {
+      const res = await request(`/students/anketa/${id}?k=${encodeURIComponent(key)}`, {
         method: 'POST',
         body: JSON.stringify({ ...form, birthDate: form.birthDate || undefined }),
       });
+      setBot({ link: res?.botLink || null, linked: !!res?.linked });
+      setQr('');
+      if (res?.botLink && !res?.linked) {
+        import('qrcode')
+          .then((Q) => Q.toDataURL(res.botLink, { margin: 1, width: 360, color: { dark: '#111827', light: '#ffffff' } }))
+          .then((url) => setQr(url))
+          .catch(() => setQr(''));
+      }
       setState('done');
     } catch (err: any) {
       setError(err.message);
@@ -104,6 +115,28 @@ export default function AnketaPage({ params }: { params: Promise<{ id: string }>
                 {centerName ? `${centerName} ma’lumotlaringizni oldi.` : 'O‘quv markazi ma’lumotlaringizni oldi.'} Kerak bo‘lsa,
                 shu havola orqali ularni keyin ham o‘zgartirishingiz mumkin.
               </p>
+              {bot.linked ? (
+                <p className="mt-5 text-sm font-semibold text-emerald-600">✅ Telegram bot allaqachon ulangan</p>
+              ) : bot.link ? (
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm font-bold text-slate-800">Telegram botga ulaning</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Davomat va to‘lov haqidagi xabarlarni Telegram orqali olish uchun QR kodni telefon kamerasi bilan skaner qiling yoki tugmani bosing.
+                  </p>
+                  {qr && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={qr} alt="Telegram botga ulanish QR kodi" className="mx-auto mt-3 w-44 h-44 rounded-xl border border-slate-200 bg-white" />
+                  )}
+                  <a
+                    href={bot.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center justify-center h-10 px-5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold transition"
+                  >
+                    Telegramda ochish
+                  </a>
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => setState('ready')}
