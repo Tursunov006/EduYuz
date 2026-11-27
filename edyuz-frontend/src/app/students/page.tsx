@@ -44,7 +44,9 @@ export default function StudentsPage() {
   const [editingStudent, setEditingStudent] = useState<any>(null);
   
   // Telegram havola uchun modal
-  const [telegramLinkModal, setTelegramLinkModal] = useState({ isOpen: false, link: '', copied: false });
+  const [telegramLinkModal, setTelegramLinkModal] = useState({ isOpen: false, link: '', copied: false, name: '' });
+  // Havola uchun QR kod (rasm sifatida)
+  const [telegramQr, setTelegramQr] = useState('');
 
   // Forma ma'lumotlari
   const [form, setForm] = useState({
@@ -96,6 +98,17 @@ export default function StudentsPage() {
       setLoading(false);
     }
   }
+
+  // Telegram havolasi ochilganda QR kod yasaladi
+  useEffect(() => {
+    if (!telegramLinkModal.isOpen || !telegramLinkModal.link) return;
+    let cancelled = false;
+    import('qrcode')
+      .then((Q) => Q.toDataURL(telegramLinkModal.link, { margin: 1, width: 360, color: { dark: '#111827', light: '#ffffff' } }))
+      .then((url) => { if (!cancelled) setTelegramQr(url); })
+      .catch(() => { if (!cancelled) setTelegramQr(''); });
+    return () => { cancelled = true; };
+  }, [telegramLinkModal.isOpen, telegramLinkModal.link]);
 
   useEffect(() => {
     fetchStudents();
@@ -509,7 +522,7 @@ export default function StudentsPage() {
                             onClick={() => {
                               const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Aksioma_1_bot';
                               const link = `https://t.me/${botUser}?start=student_${s.id}`;
-                              setTelegramLinkModal({ isOpen: true, link, copied: false });
+                              setTelegramLinkModal({ isOpen: true, link, copied: false, name: s.fullName });
                             }}
                             title="Telegram botga ulash havolasi"
                             className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition"
@@ -783,6 +796,23 @@ export default function StudentsPage() {
               Ushbu havoladan nusxa oling va ota-onaga yuboring. Ota-ona havola ustiga bosib, Telegram botda <strong className="text-slate-900">/start</strong> buyrug'ini bersa, tizimga avtomatik ulanadi.
             </p>
             
+            {telegramQr && (
+              <div className="flex flex-col items-center gap-2 pt-1">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={telegramQr} alt="Telegram botga ulanish QR kodi" className="w-44 h-44 rounded-xl border border-slate-200" />
+                {telegramLinkModal.name && (
+                  <p className="text-xs font-semibold text-slate-700">{telegramLinkModal.name}</p>
+                )}
+                <a
+                  href={telegramQr}
+                  download={`telegram-qr-${(telegramLinkModal.name || 'oquvchi').replace(/[^a-zA-Z0-9]+/g, '-')}.png`}
+                  className="text-xs font-semibold text-sky-600 hover:underline"
+                >
+                  QR rasmini yuklab olish
+                </a>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mt-4">
               <input 
                 type="text" 
@@ -808,7 +838,7 @@ export default function StudentsPage() {
 
             <div className="flex justify-end pt-4">
               <button
-                onClick={() => setTelegramLinkModal({ isOpen: false, link: '', copied: false })}
+                onClick={() => { setTelegramQr(''); setTelegramLinkModal({ isOpen: false, link: '', copied: false, name: '' }); }}
                 className="bg-slate-100 hover:bg-slate-200 text-slate-900 px-5 py-2 rounded-xl text-sm font-medium transition"
               >
                 Yopish
