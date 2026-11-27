@@ -450,9 +450,6 @@ export default function StudentsPage() {
                               <span className="font-semibold text-slate-800 truncate hover:text-indigo-600">
                                 {s.fullName}
                               </span>
-                              {kindOf(s) === 'talaba' && (
-                                <span className="inline-flex items-center h-5 px-2 rounded-md bg-violet-500/10 text-violet-600 text-[11px] font-semibold shrink-0">Talaba</span>
-                              )}
                               {Number(s.discount) > 0 && (
                                 <span title="Oylik to‘lovdan chegirma" className="inline-flex items-center h-5 px-2 rounded-md bg-emerald-500/10 text-emerald-700 text-[11px] font-semibold shrink-0">-{s.discount}%</span>
                               )}
@@ -626,9 +623,6 @@ export default function StudentsPage() {
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-sm text-slate-900"
                 />
               </div>
-              <p className="text-xs text-slate-500">
-                Turi avtomatik: guruhga qo‘shilguncha <b>o‘quvchi</b>, guruhga qo‘shilgach <b>talaba</b>.
-              </p>
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1">Otasining ismi</label>
                 <input
