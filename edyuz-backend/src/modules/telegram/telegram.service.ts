@@ -8,6 +8,7 @@ import { AiService } from '../ai/ai.service';
 export class TelegramService implements OnModuleInit {
   private readonly logger = new Logger(TelegramService.name);
   private botToken: string | null = null;
+  private botUsernameCache: string | null = null;
   private isPolling = false;
   // Foydalanuvchi holatini eslab qolish (masalan: direktorga murojaat yozayotganda)
   private userState = new Map<string, 'awaiting_feedback' | 'awaiting_lead_phone'>();
@@ -17,6 +18,26 @@ export class TelegramService implements OnModuleInit {
     private prisma: PrismaService,
     private aiService: AiService,
   ) {}
+
+  // Botning @nomi: TELEGRAM_BOT_USERNAME berilgan bo'lsa o'sha, bo'lmasa Telegramning getMe javobidan.
+  // O'quvchini botga ulash havolasi/QR kodi shu nom bilan yasaladi.
+  async getBotUsername(): Promise<string | null> {
+    const fixed = this.configService.get<string>('TELEGRAM_BOT_USERNAME')?.trim().replace(/^@/, '');
+    if (fixed) return fixed;
+    if (this.botUsernameCache) return this.botUsernameCache;
+    const token = this.botToken || this.configService.get<string>('TELEGRAM_BOT_TOKEN')?.trim() || null;
+    if (!token || token.includes('YOUR_TELEGRAM_BOT_TOKEN')) return null;
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/getMe`, { signal: AbortSignal.timeout(6000) });
+      const data = (await res.json()) as { ok?: boolean; result?: { username?: string } };
+      const name = data?.ok ? data.result?.username : undefined;
+      if (name) this.botUsernameCache = name;
+      return name || null;
+    } catch (e) {
+      this.logger.warn(`Bot nomini olib bo'lmadi: ${(e as Error)?.message}`);
+      return null;
+    }
+  }
 
   async onModuleInit() {
     // Token faqat muhit o'zgaruvchisidan olinadi. Avval kodda zaxira sifatida HAQIQIY
