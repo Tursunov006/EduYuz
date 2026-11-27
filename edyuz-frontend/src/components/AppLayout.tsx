@@ -9,12 +9,14 @@ import SubscriptionModal from '@/components/SubscriptionModal';
 import { LanguageProvider } from '@/lib/i18n/LanguageContext';
 import { ThemeProvider } from '@/lib/theme/ThemeContext';
 import { SidebarProvider } from '@/lib/context/SidebarContext';
+import { useUiZoom } from '@/lib/ui/zoom';
 
 // Axios sozlamalari (token, 401 holati, xato matnlari) bitta joyda: '@/lib/api'
 
 function InnerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const uiZoom = useUiZoom() / 100;
 
   const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
@@ -75,11 +77,17 @@ function InnerLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       {!isExcluded ? (
-        <div className="min-h-screen flex w-full bg-background text-slate-900">
+        <div
+          className="min-h-screen flex w-full bg-background text-slate-900"
+          style={{ zoom: uiZoom, minHeight: `calc(100vh / ${uiZoom})`, ['--ui-zoom' as string]: uiZoom }}
+        >
           {/* Sidebar (Desktopda yon tomonda, Telefonda yopiq drawer bo'lib turadi) */}
           <Sidebar />
 
-          <div className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative">
+          <div
+            className="flex-1 flex flex-col min-h-screen min-w-0 w-full overflow-x-hidden relative"
+            style={{ minHeight: `calc(100vh / ${uiZoom})` }}
+          >
             <Navbar />
             
             {/* Tariflar oynasi: tugma bosilganda yoki obuna to'xtatilgan (expired) bo'lsa ochiladi */}

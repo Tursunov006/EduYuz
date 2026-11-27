@@ -1,5 +1,6 @@
 'use client';
 
+import ZoomControl from '@/components/ZoomControl';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
@@ -132,6 +133,11 @@ export default function Sidebar() {
         </div>
       </nav>
 
+      {/* Masshtab (faqat kompyuterda) */}
+      <div className="hidden md:block px-5 pb-3">
+        <ZoomControl className="w-full justify-between" />
+      </div>
+
       {/* Foydalanuvchi va chiqish */}
       <div className="px-5 py-4 border-t border-slate-100 flex items-center gap-3">
         {user.centerLogo && user.role !== 'superadmin' ? (
@@ -160,7 +166,10 @@ export default function Sidebar() {
   return (
     <>
       {/* Kompyuter */}
-      <aside className="hidden md:flex w-[248px] bg-white flex-col h-screen sticky top-0 shrink-0">
+      <aside
+        className="hidden md:flex w-[248px] bg-white flex-col h-screen sticky top-0 shrink-0"
+        style={{ height: 'calc(100vh / var(--ui-zoom, 1))' }}
+      >
         <div className="px-5 pt-7 pb-3">
           <Brand />
         </div>
