@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EduYuz CRM — o'quv markazlar uchun boshqaruv tizimi</title>
+<meta name="description" content="EduYuz: davomat, to'lovlar, qarzdorlar, ota-onalarga Telegram xabar va yangi o'quvchilar hisobi bitta tizimda. Oyma-oy to'lovsiz.">
+<style>
+:root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--bg:#f8fafc;--brand:#4f46e5;--brand2:#4338ca;--soft:#eef2ff;--ok:#059669}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:62px}
+.logo{font-weight:800;font-size:1.25rem}.logo b{color:var(--brand)}
+nav a{margin-left:22px;color:var(--muted);font-size:.95rem}nav a:hover{color:var(--brand)}
+.btn{display:inline-block;background:var(--brand);color:#fff;font-weight:700;padding:12px 24px;border-radius:12px;border:0;cursor:pointer;font-size:1rem}
+.btn:hover{background:var(--brand2)}
+.btn.ghost{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+.hero{padding:84px 0 64px;text-align:center;background:linear-gradient(180deg,var(--soft),#fff)}
+.hero h1{font-size:clamp(2rem,6vw,3.5rem);line-height:1.15;margin-bottom:16px}
+.hero h1 span{color:var(--brand)}
+.hero p{color:var(--muted);max-width:640px;margin:0 auto 28px;font-size:1.12rem}
+.hero .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.pill{display:inline-block;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:.85rem;color:var(--muted);margin-bottom:18px}
+section{padding:64px 0}
+h2{font-size:clamp(1.5rem,4vw,2.2rem);margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:32px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px}
+.card h3{font-size:1.05rem;margin-bottom:6px}
+.card p{color:var(--muted);font-size:.95rem}
+.ico{width:40px;height:40px;border-radius:12px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:12px}
+.alt{background:var(--bg)}
+.price{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+.plan{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px}
+.plan.hot{border:2px solid var(--brand)}
+.plan h3{font-size:1.1rem}.plan .who{color:var(--muted);font-size:.9rem;margin-bottom:10px}
+.plan .sum{font-size:1.9rem;font-weight:800;margin:6px 0}.plan .sum small{font-size:.9rem;font-weight:500;color:var(--muted)}
+.plan ul{list-style:none;margin-top:10px}.plan li{padding:3px 0 3px 22px;position:relative;font-size:.93rem}
+.plan li:before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+.note{color:var(--muted);font-size:.9rem;margin-top:16px}
+form{max-width:520px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px}
+label{display:block;font-size:.9rem;color:var(--muted);margin:14px 0 6px}
+input,textarea{width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);font:inherit}
+input:focus,textarea:focus{outline:2px solid var(--brand)}
+form .btn{width:100%;margin-top:20px}
+#msg{margin-top:14px;font-size:.95rem;min-height:1.4em}.ok{color:var(--ok)}.err{color:#dc2626}
+.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+footer{padding:28px 0;border-top:1px solid var(--line);color:var(--muted);text-align:center;font-size:.9rem}
+.hp{position:absolute;left:-9999px}
+@media(max-width:640px){nav{display:none}.hero{padding:56px 0 44px}section{padding:46px 0}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="logo" href="#top">Edu<b>Yuz</b></a>
+  <nav><a href="#features">Imkoniyatlar</a><a href="#price">Narx</a><a href="#demo">Sinab ko'rish</a></nav>
+  <a class="btn" href="#demo" style="padding:8px 18px">Bog'lanish</a>
+</div></header>
+
+<main id="top">
+<div class="hero"><div class="wrap">
+  <span class="pill">O'quv markazlar uchun CRM</span>
+  <h1>Markazingiz hisobi <span>bitta tizimda</span></h1>
+  <p>Davomat, to'lovlar, qarzdorlar va ota-onalarga Telegram xabar. Daftar va Excel o'rniga. Oyma-oy to'lov yo'q, tizim uchun bir marta to'laysiz.</p>
+  <div class="row"><a class="btn" href="#demo">Ko'rib chiqishni xohlayman</a><a class="btn ghost" href="#features">Imkoniyatlar</a></div>
+</div></div>
+
+<section id="features"><div class="wrap">
+  <h2>Nimalar qila oladi</h2>
+  <p class="sub">Hammasi shu paytda ishlab turgan tizimdagi imkoniyatlar.</p>
+  <div class="grid">
+    <div class="card"><div class="ico">✅</div><h3>Davomat</h3><p>Ustoz guruhni ochib, kim keldi, kelmadi yoki kechikkanini belgilaydi. Kelmaslik sababi yoziladi, davomat jurnali saqlanadi.</p></div>
+    <div class="card"><div class="ico">💰</div><h3>To'lovlar va qarzdorlar</h3><p>Kim qancha to'lagani, kimning qarzi borligi va shu oy kim to'lamagani bir qarashda ko'rinadi.</p></div>
+    <div class="card"><div class="ico">📲</div><h3>Ota-onaga Telegram xabar</h3><p>Bola kelmaganda yoki dars boshlanayotganda ota-onaga Telegram bot orqali xabar boradi.</p></div>
+    <div class="card"><div class="ico">🎯</div><h3>Yangi o'quvchilar (lidlar)</h3><p>Instagram, Telegram va qo'ng'iroqdan kelgan qiziquvchilarni bosqichma-bosqich kuzatib boring, hech biri yo'qolmaydi.</p></div>
+    <div class="card"><div class="ico">👥</div><h3>Guruhlar va jadval</h3><p>Guruhlar, dars kunlari, vaqti, ustoz va xona. Guruh qanchalik to'lganini ko'rasiz.</p></div>
+    <div class="card"><div class="ico">🧾</div><h3>Kassa va hisobotlar</h3><p>Kirim va chiqim, xarajatlar va hisobotlar markaz holatini aniq ko'rsatadi.</p></div>
+    <div class="card"><div class="ico">🎓</div><h3>Sertifikatlar va o'quvchi portali</h3><p>Sertifikat berish va o'quvchi o'z ma'lumotlarini ko'radigan alohida portal.</p></div>
+    <div class="card"><div class="ico">🔒</div><h3>Ma'lumot xavfsizligi</h3><p>Har bir markazning ma'lumoti alohida, boshqa markaz ko'ra olmaydi. Shaxsiy ma'lumotlar shifrlangan holda saqlanadi.</p></div>
+  </div>
+</div></section>
+
+<section id="price" class="alt"><div class="wrap">
+  <h2>Narx: bir marta to'laysiz</h2>
+  <p class="sub">Oyma-oy to'lov yo'q. O'quvchilar soniga qarab reja tanlang.</p>
+  <div class="price">
+    <div class="plan"><h3>Start</h3><div class="who">50 tagacha o'quvchi</div><div class="sum">1 500 000 <small>so'm</small></div><ul><li>Hamma imkoniyatlar</li><li>O'rnatish va sozlash</li><li>O'quvchilarni kiritishda yordam</li></ul></div>
+    <div class="plan hot"><h3>Standard</h3><div class="who">150 tagacha o'quvchi</div><div class="sum">3 000 000 <small>so'm</small></div><ul><li>Hamma imkoniyatlar</li><li>O'rnatish va sozlash</li><li>O'quvchilarni kiritishda yordam</li></ul></div>
+    <div class="plan"><h3>Pro</h3><div class="who">Cheksiz o'quvchi, bir nechta filial</div><div class="sum">5 000 000 <small>so'm</small></div><ul><li>Hamma imkoniyatlar</li><li>O'rnatish va sozlash</li><li>O'quvchilarni kiritishda yordam</li></ul></div>
+  </div>
+  <p class="note">Narxga bir yillik qo'llab-quvvatlash (yangilanish va xatolarni tuzatish) kiradi. SMS va Click kabi xizmatlar uchun to'lovlar markazning o'z hisobidan.</p>
+</div></section>
+
+<section id="demo"><div class="wrap">
+  <h2>Ko'rib chiqishni xohlaysizmi?</h2>
+  <p class="sub">Ma'lumotlaringizni qoldiring, siz bilan bog'lanib, 10 daqiqada ko'rsatib beramiz.</p>
+  <form id="f" novalidate>
+    <label for="n">Ismingiz</label><input id="n" maxlength="100" required autocomplete="name">
+    <label for="c">Markaz nomi</label><input id="c" maxlength="100" autocomplete="organization">
+    <label for="p">Telefon raqamingiz</label><input id="p" type="tel" placeholder="+998 90 123 45 67" maxlength="20" required autocomplete="tel">
+    <input class="hp" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <button class="btn" id="b" type="submit">Yuborish</button>
+    <div id="msg" role="status"></div>
+  </form>
+  <div class="contact" id="contactLinks"></div>
+</div></section>
+</main>
+<footer><div class="wrap">© <span id="y"></span> EduYuz</div></footer>
+
+<script>
+// Bo'sh qoldirilgan aloqa maydonlari ko'rsatilmaydi.
+var CONFIG={
+  api:"https://eduyuz-api.vercel.app/api/v1/instagram/site-lead",
+  phone:"", telegram:"", instagram:""
+};
+function esc(s){var d=document.createElement("div");d.textContent=s;return d.innerHTML}
+document.getElementById("y").textContent=new Date().getFullYear();
+(function(){var L=[];
+  if(CONFIG.phone)L.push('<a class="btn ghost" href="tel:'+esc(CONFIG.phone)+'">'+esc(CONFIG.phone)+'</a>');
+  if(CONFIG.telegram)L.push('<a class="btn ghost" href="'+esc(CONFIG.telegram)+'" rel="noopener">Telegram</a>');
+  if(CONFIG.instagram)L.push('<a class="btn ghost" href="'+esc(CONFIG.instagram)+'" rel="noopener">Instagram</a>');
+  document.getElementById("contactLinks").innerHTML=L.join("");
+})();
+var f=document.getElementById("f"),msg=document.getElementById("msg"),b=document.getElementById("b");
+f.addEventListener("submit",function(e){
+  e.preventDefault();
+  function show(t,ok){msg.textContent=t;msg.className=ok?"ok":"err"}
+  var name=f.n.value.trim(),phone=f.p.value.trim(),center=f.c.value.trim();
+  if(document.getElementById("hp").value)return;
+  if(!name)return show("Ismingizni kiriting",0);
+  if(!/^\+?[\d\s()-]{7,20}$/.test(phone))return show("Telefon raqam noto'g'ri",0);
+  b.disabled=true;show("Yuborilmoqda...",1);
+  fetch(CONFIG.api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({fullName:name,phone:phone,course:"EduYuz CRM — sinab ko'rish",note:center?("Markaz: "+center):undefined})})
+  .then(function(r){if(!r.ok)throw 0;f.reset();show("Rahmat! Arizangiz qabul qilindi, tez orada bog'lanamiz.",1)})
+  .catch(function(){show("Yuborib bo'lmadi. Birozdan so'ng qayta urinib ko'ring.",0)})
+  .finally(function(){b.disabled=false});
+});
+</script>
+</body>
+</html>
