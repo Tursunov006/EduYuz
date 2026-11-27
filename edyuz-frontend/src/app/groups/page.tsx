@@ -100,6 +100,8 @@ export default function GroupsPage() {
   const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
   // Dars jadvali: tanlangan hafta kuni
   const [dayKey, setDayKey] = useState<string>(() => TODAY_KEY());
+  // Dars jadvali ko'rinishi: bitta kun (xonalar bo'yicha) yoki butun hafta
+  const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
 
   // Yangi guruh formasi
   const [formData, setFormData] = useState({
@@ -446,6 +448,13 @@ export default function GroupsPage() {
     return items;
   };
 
+  // Butun hafta ko'rinishi: kunlar ustun, soatlar qator
+  const weekGroups = filteredGroups.filter((g) => parseDays(g.days).length > 0);
+  const weekStartHour = Math.min(8, ...weekGroups.map((g) => Math.floor(toMinutes(g.startTime) / 60)));
+  const weekEndHour = Math.min(24, Math.max(20, ...weekGroups.map((g) => Math.ceil(toMinutes(g.endTime) / 60))));
+  const weekHours = Array.from({ length: weekEndHour - weekStartHour }, (_, i) => weekStartHour + i);
+  const weekHeight = weekHours.length * HOUR_H;
+
   const openModalForSlot = (start: string, end: string, days: string, room = '') => {
     setEditingGroupId(null);
     setFormData(() => ({
@@ -539,11 +548,27 @@ export default function GroupsPage() {
             <div>
               <h2 className="text-lg font-bold text-slate-900">Haftalik dars jadvali</h2>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Xonalar bo‘yicha. Bo‘sh joyni bosib, shu vaqtga yangi guruh qo‘shing
-                <span className="text-slate-400"> · {scheduledCount} ta guruh</span>
+                {viewMode === 'day' ? 'Xonalar bo‘yicha' : 'Butun hafta bir ko‘rinishda'}. Bo‘sh joyni bosib, shu vaqtga yangi guruh qo‘shing
+                <span className="text-slate-400"> · {viewMode === 'day' ? scheduledCount : weekGroups.length} ta guruh</span>
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
+            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
+              {([['day', 'Kun'], ['week', 'Hafta']] as const).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setViewMode(mode)}
+                  aria-pressed={viewMode === mode}
+                  className={`h-9 px-3 rounded-lg text-sm font-semibold transition ${
+                    viewMode === mode ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <div className={`${viewMode === 'day' ? 'flex' : 'hidden'} flex-wrap items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit`}>
               {WEEK.map((w) => (
                 <button
                   key={w.key}
@@ -558,8 +583,10 @@ export default function GroupsPage() {
                 </button>
               ))}
             </div>
+            </div>
           </div>
 
+          {viewMode === 'day' ? (
           <div className="overflow-x-auto">
             <div style={{ minWidth: 70 + roomColumns.length * 190 }}>
               {/* Xonalar */}
@@ -637,6 +664,84 @@ export default function GroupsPage() {
               </div>
             </div>
           </div>
+          ) : (
+          <div className="overflow-x-auto">
+            <div style={{ minWidth: 60 + WEEK.length * 130 }}>
+              <div className="flex border-b border-slate-200 bg-slate-50">
+                <div className="w-[60px] shrink-0 px-3 py-3 text-xs font-semibold text-slate-500">Vaqt</div>
+                {WEEK.map((w) => (
+                  <div
+                    key={w.key}
+                    className={`flex-1 min-w-[130px] px-3 py-3 border-l border-slate-200 text-sm font-semibold truncate ${
+                      w.key === TODAY_KEY() ? 'text-indigo-600 bg-indigo-50' : 'text-slate-900'
+                    }`}
+                  >
+                    {w.full}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex">
+                <div className="w-[60px] shrink-0 relative" style={{ height: weekHeight }}>
+                  {weekHours.map((h, i) => (
+                    <div
+                      key={h}
+                      className="absolute left-0 right-0 px-3 text-xs font-medium text-slate-500 tabular-nums"
+                      style={{ top: i * HOUR_H + 6 }}
+                    >
+                      {fmtHour(h)}
+                    </div>
+                  ))}
+                </div>
+
+                {WEEK.map((w) => {
+                  const items = layoutRoom(weekGroups.filter((g) => parseDays(g.days).includes(w.key)));
+                  return (
+                    <div
+                      key={w.key}
+                      className={`flex-1 min-w-[130px] relative border-l border-slate-200 ${w.key === TODAY_KEY() ? 'bg-indigo-50/30' : ''}`}
+                      style={{ height: weekHeight }}
+                    >
+                      {weekHours.map((h, i) => (
+                        <button
+                          key={h}
+                          type="button"
+                          onClick={() => openModalForSlot(fmtHour(h), fmtHour(Math.min(h + 2, 23)), w.key)}
+                          title={`${w.full}, ${fmtHour(h)} ga guruh qo‘shish`}
+                          className="group absolute left-0 right-0 border-t border-slate-100 hover:bg-indigo-50 transition flex items-start justify-end"
+                          style={{ top: i * HOUR_H, height: HOUR_H }}
+                        >
+                          <Plus size={14} className="m-1.5 text-indigo-400 opacity-0 group-hover:opacity-100 transition" />
+                        </button>
+                      ))}
+
+                      {items.map(({ g, s: sMin, e: eMin, lane, lanes }) => (
+                        <Link
+                          key={g.id}
+                          href={`/groups/${g.id}`}
+                          className={`absolute rounded-lg px-2 py-1 text-white overflow-hidden shadow-sm hover:brightness-110 transition ${colorOf(g)}`}
+                          style={{
+                            top: ((sMin - weekStartHour * 60) / 60) * HOUR_H + 2,
+                            height: Math.max(((eMin - sMin) / 60) * HOUR_H - 4, 34),
+                            left: `calc(${(lane / lanes) * 100}% + 3px)`,
+                            width: `calc(${100 / lanes}% - 6px)`,
+                          }}
+                          title={`${g.name} · ${g.teacher?.fullName || ''} · ${g.startTime}–${g.endTime}${g.room ? ' · ' + g.room : ''}`}
+                        >
+                          <p className="text-[12px] font-bold leading-tight truncate">{g.name}</p>
+                          <p className="text-[10.5px] opacity-90 leading-tight tabular-nums">{g.startTime}–{g.endTime}</p>
+                          {(g.room || '').trim() && (
+                            <p className="text-[10.5px] opacity-90 leading-tight truncate">{g.room}</p>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          )}
         </div>
       ) : filteredGroups.length === 0 ? (
         <div className="p-16 text-center bg-white border border-slate-200 rounded-2xl space-y-3">
