@@ -38,7 +38,7 @@ export async function createApp(): Promise<NestExpressApplication> {
     .map((o) => o.trim())
     .filter(Boolean);
   // CORS_ORIGINS berilmasa: faqat o'z saytlarimiz, localhost va Vercel/Netlify preview manzillari ruxsat etiladi ('*' emas).
-  const defaultOrigin = /^https:\/\/(www\.)?eduyuz\.uz$|^http:\/\/localhost(:\d+)?$|^https:\/\/[a-z0-9-]+\.(vercel|netlify)\.app$/;
+  const defaultOrigin = /^https:\/\/(www\.)?eduyuz\.uz$|^http:\/\/localhost(:\d+)?$|^https:\/\/[a-z0-9-]+\.(vercel|netlify)\.app$|^https?:\/\/u130\.dighub\.uz$/;
   app.enableCors({
     origin: (origin, cb) => {
       // origin yo'q: brauzerdan tashqari so'rovlar (server-server, webhook, curl)
