@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Headers, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Headers, HttpCode, Post, UnauthorizedException } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { RoleType } from '@prisma/client';
@@ -30,6 +30,12 @@ export class TelegramController {
     }
     await this.telegramService.handleWebhookUpdate(update);
     return { ok: true };
+  }
+
+  // Botning @nomi (faqat tizimga kirgan xodimlar uchun): o'quvchini botga ulash havolasi va QR kodi uchun
+  @Get('bot-info')
+  async botInfo() {
+    return { username: await this.telegramService.getBotUsername() };
   }
 
   @Roles(RoleType.admin)

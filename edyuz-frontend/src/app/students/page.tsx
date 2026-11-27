@@ -45,6 +45,8 @@ export default function StudentsPage() {
   
   // Telegram havola uchun modal
   const [telegramLinkModal, setTelegramLinkModal] = useState({ isOpen: false, link: '', copied: false, name: '' });
+  // Botning haqiqiy @nomi serverdan olinadi (havola va QR shu bilan yasaladi)
+  const [botUsername, setBotUsername] = useState('');
   // Havola uchun QR kod (rasm sifatida)
   const [telegramQr, setTelegramQr] = useState('');
 
@@ -98,6 +100,14 @@ export default function StudentsPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch('/telegram/bot-info')
+      .then((d: { username?: string | null }) => { if (!cancelled && d?.username) setBotUsername(d.username); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
 
   // Telegram havolasi ochilganda QR kod yasaladi
   useEffect(() => {
@@ -520,7 +530,7 @@ export default function StudentsPage() {
                           </Link>
                           <button
                             onClick={() => {
-                              const botUser = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Aksioma_1_bot';
+                              const botUser = botUsername || process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || 'Aksioma_1_bot';
                               const link = `https://t.me/${botUser}?start=student_${s.id}`;
                               setTelegramLinkModal({ isOpen: true, link, copied: false, name: s.fullName });
                             }}
