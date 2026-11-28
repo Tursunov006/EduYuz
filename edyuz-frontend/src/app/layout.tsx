@@ -4,6 +4,8 @@ import './globals.css';
 import AppLayout from '@/components/AppLayout';
 import EscCloser from '@/components/EscCloser';
 import BackendWarmup from '@/components/BackendWarmup';
+import MaintenanceScreen from '@/components/MaintenanceScreen';
+import { MAINTENANCE } from '@/lib/maintenance';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,11 +51,17 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-slate-900 font-sans" suppressHydrationWarning>
-        <EscCloser />
-        <BackendWarmup />
-        <AppLayout>
-          {children}
-        </AppLayout>
+        {MAINTENANCE.on ? (
+          <MaintenanceScreen />
+        ) : (
+          <>
+            <EscCloser />
+            <BackendWarmup />
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </>
+        )}
       </body>
     </html>
   );
