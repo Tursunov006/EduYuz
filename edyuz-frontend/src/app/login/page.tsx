@@ -250,18 +250,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-slate-50 to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex items-center justify-center p-4">
-      {/* Orqa fondagi yumshoq harakatlanuvchi ranglar */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-        <div className="login-blob absolute -top-24 -left-20 w-[420px] h-[420px] rounded-full bg-indigo-400/35 blur-3xl" />
-        <div className="login-blob login-blob-2 absolute top-1/3 -right-24 w-[380px] h-[380px] rounded-full bg-sky-300/40 blur-3xl" />
-        <div className="login-blob login-blob-3 absolute -bottom-28 left-1/4 w-[400px] h-[400px] rounded-full bg-violet-300/35 blur-3xl" />
-      </div>
-
-      <div className="login-card relative bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl border border-white/70 dark:border-white/10 rounded-3xl p-6 sm:p-8 w-full max-w-md space-y-6 shadow-[0_24px_70px_-24px_rgba(79,70,229,0.45)]">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 w-full max-w-md space-y-6 shadow-sm">
         <div className="text-center space-y-4">
           <div className="flex justify-center">
-            <div className="bg-white/90 rounded-2xl px-5 py-3 shadow-sm inline-flex items-center justify-center border border-white/80 hover:scale-[1.03] transition-transform duration-300">
+            <div className="bg-white rounded-2xl px-5 py-3 shadow-sm inline-flex items-center justify-center border border-slate-200 hover:scale-[1.02] transition-transform">
               <img
                 src="/logo-full.png"
                 alt="EduYuz CRM Platform"
@@ -298,21 +291,21 @@ export default function LoginPage() {
               </p>
             </div>
             <OtpInput value={resetCode} onChange={(v) => { setResetCode(v); setError(''); }} disabled={loading} autoFocus />
-            <div className="relative group">
-              <Lock className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-3 text-slate-500" size={18} />
               <input
                 type="password"
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
-                className="w-full bg-white/80 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 transition focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 placeholder="Yangi parol (kamida 6 belgi)"
               />
             </div>
             <button
               type="submit"
               disabled={loading || resetCode.length !== 6 || newPassword.length < 6}
-              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center text-sm active:scale-95 cursor-pointer"
             >
               {loading ? 'Saqlanmoqda...' : 'Parolni yangilash'}
             </button>
@@ -340,7 +333,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || otpCode.length !== 6}
-              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center text-sm active:scale-95 cursor-pointer"
             >
               {loading ? 'Tekshirilmoqda...' : 'Tasdiqlash'}
             </button>
@@ -360,14 +353,14 @@ export default function LoginPage() {
           {/* Login maydoni */}
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1.5">Login</label>
-            <div className="relative group">
-              <User className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+            <div className="relative">
+              <User className="absolute left-3.5 top-3 text-slate-500" size={18} />
               <input
                 required
                 type="text"
                 value={login}
                 onChange={(e) => { setLogin(e.target.value); setError(''); }}
-                className="w-full bg-white/80 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 transition focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 placeholder="Login yoki telefon raqamingiz"
               />
             </div>
@@ -380,14 +373,14 @@ export default function LoginPage() {
           {mode === 'login' && (
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1.5">Parol</label>
-            <div className="relative group">
-              <Lock className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+            <div className="relative">
+              <Lock className="absolute left-3.5 top-3 text-slate-500" size={18} />
               <input
                 required
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/80 border border-slate-200 rounded-xl pl-10 pr-11 py-2.5 text-sm text-slate-900 transition focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-11 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 placeholder="Parolni kiriting"
               />
               <button
@@ -423,7 +416,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading || (!!TURNSTILE_SITE_KEY && !turnstileToken)}
-            className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 hover:-translate-y-0.5 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center text-sm active:scale-95 cursor-pointer"
           >
             {loading ? 'Tekshirilmoqda...' : mode === 'forgot' ? 'Tiklash kodini yuborish' : 'Tizimga kirish'}
           </button>

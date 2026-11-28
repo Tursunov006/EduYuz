@@ -10,7 +10,6 @@ import {
   Search, ArrowRight, X, GraduationCap, DollarSign, Pencil, Archive, Trash2, ChevronDown, Send
 } from 'lucide-react';
 import ZoomControl from '@/components/ZoomControl';
-import GlassTabs from '@/components/GlassTabs';
 
 interface Group {
   id: string;
@@ -503,15 +502,30 @@ export default function GroupsPage() {
 
       {/* 2. Ichki Tablar (Guruhlar vs Dars Jadvali Shaxmatkasi) va Qidiruv */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <GlassTabs
-          ariaLabel="Guruhlar bo'limlari"
-          value={activeTab}
-          onChange={setActiveTab}
-          tabs={[
-            { id: 'cards', label: `Barcha Guruhlar (${filteredGroups.length})`, icon: <BookOpen size={16} /> },
-            { id: 'timetable', label: 'Dars jadvali', icon: <Calendar size={16} /> },
-          ]}
-        />
+        <div className="flex items-center gap-2 p-1.5 bg-white border border-slate-200 rounded-2xl w-fit">
+          <button
+            onClick={() => setActiveTab('cards')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'cards'
+                ? 'text-white shadow-sm bg-indigo-600'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <BookOpen size={16} />
+            <span>Barcha Guruhlar ({filteredGroups.length})</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('timetable')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+              activeTab === 'timetable'
+                ? 'text-white shadow-sm bg-indigo-600'
+                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+            }`}
+          >
+            <Calendar size={16} />
+            <span>Dars jadvali</span>
+          </button>
+        </div>
 
         <div className="relative flex-1 max-w-md">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -541,16 +555,21 @@ export default function GroupsPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
             <ZoomControl />
-            <GlassTabs
-              size="sm"
-              ariaLabel="Jadval ko'rinishi"
-              value={viewMode}
-              onChange={setViewMode}
-              tabs={[
-                { id: 'day', label: 'Kun' },
-                { id: 'week', label: 'Hafta' },
-              ]}
-            />
+            <div className="flex items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit">
+              {([['day', 'Kun'], ['week', 'Hafta']] as const).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setViewMode(mode)}
+                  aria-pressed={viewMode === mode}
+                  className={`h-9 px-3 rounded-lg text-sm font-semibold transition ${
+                    viewMode === mode ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-white'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <div className={`${viewMode === 'day' ? 'flex' : 'hidden'} flex-wrap items-center gap-1 p-1 bg-slate-50 border border-slate-200 rounded-xl w-fit`}>
               {WEEK.map((w) => (
                 <button
