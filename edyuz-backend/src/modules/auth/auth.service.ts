@@ -13,6 +13,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TwoFactorService } from './two-factor.service';
 import { TelegramService } from '../telegram/telegram.service';
 import { makeStaffLinkToken } from './staff-link.util';
+import { randomUUID } from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
@@ -221,6 +222,33 @@ export class AuthService {
     });
     if (r.count === 0) throw new NotFoundException('Xodim topilmadi');
     return { enabled: false };
+  }
+
+  // --- Parolni Telegram bot orqali tiklash ---
+  // Telefon raqam ro'yxatdan o'tgan-o'tmaganini bildirmaslik uchun javob har doim bir xil
+  async forgotPassword(phone: string) {
+    const generic = { message: 'Agar raqam Telegram botga ulangan bo\'lsa, tiklash kodi yuborildi' };
+    const user = await this.prisma.user.findUnique({
+      where: { phone },
+      select: { id: true, isActive: true, telegramChatId: true },
+    });
+    if (user && user.isActive && user.telegramChatId) {
+      try {
+        const challengeId = await this.twoFactor.issue(user.id, user.telegramChatId, 'reset');
+        return { ...generic, challengeId };
+      } catch {
+        // yuborib bo'lmadi yoki juda tez so'raldi: tashqariga farq bildirilmaydi
+      }
+    }
+    return { ...generic, challengeId: randomUUID() };
+  }
+
+  async resetPassword(challengeId: string, code: string, newPassword: string) {
+    const userId = await this.twoFactor.verify(challengeId, code, 'reset');
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    const r = await this.prisma.user.updateMany({ where: { id: userId, isActive: true }, data: { passwordHash } });
+    if (r.count === 0) throw new UnauthorizedException('Kod noto\'g\'ri yoki muddati tugagan');
+    return { message: 'Parol yangilandi. Yangi parol bilan kiring' };
   }
 
   private generateToken(userId: string, phone: string, role: string, centerId: string) {
