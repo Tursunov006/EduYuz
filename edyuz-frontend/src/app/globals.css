@@ -87,3 +87,20 @@ input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* Login sahifasi: shisha (glassmorphism) uslubi va yumshoq animatsiyalar */
+@keyframes login-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(24px, -28px, 0) scale(1.08); }
+}
+@keyframes login-rise {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-blob { animation: login-float 14s ease-in-out infinite; }
+.login-blob-2 { animation-duration: 18s; animation-delay: -6s; }
+.login-blob-3 { animation-duration: 22s; animation-delay: -11s; }
+.login-card { animation: login-rise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .login-blob, .login-card { animation: none; }
+}
