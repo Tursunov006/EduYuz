@@ -2,6 +2,6 @@
 // Server (API) va Telegram bot ishlashda qoladi, ma'lumotlarga tegilmaydi.
 // Qaytarish uchun: `on` ni false qilib, qayta deploy qiling.
 export const MAINTENANCE = {
-  on: true,
+  on: false,
   until: '22:00', // Toshkent vaqti
 };
