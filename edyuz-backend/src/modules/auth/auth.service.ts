@@ -248,6 +248,16 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(newPassword, 10);
     const r = await this.prisma.user.updateMany({ where: { id: userId, isActive: true }, data: { passwordHash } });
     if (r.count === 0) throw new UnauthorizedException('Kod noto\'g\'ri yoki muddati tugagan');
+    // Egasi biladigan bo'lishi uchun: parol o'zgargani haqida Telegramga xabar (yuborilmasa ham parol yangilangan bo'lib qoladi)
+    const owner = await this.prisma.user.findUnique({ where: { id: userId }, select: { telegramChatId: true } });
+    if (owner?.telegramChatId) {
+      await this.telegram
+        .sendMessage(
+          owner.telegramChatId,
+          '🔑 <b>EduYuz: parolingiz o\'zgartirildi.</b>\n\nAgar buni siz qilmagan bo\'lsangiz, darhol administratorga xabar bering va parolni qayta almashtiring.',
+        )
+        .catch(() => {});
+    }
     return { message: 'Parol yangilandi. Yangi parol bilan kiring' };
   }
 

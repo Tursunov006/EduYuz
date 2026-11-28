@@ -6,7 +6,7 @@ function make(user: any, issueImpl?: () => Promise<string>) {
   const users = user ? [{ ...user }] : [];
   const prisma: any = {
     user: {
-      findUnique: jest.fn(async ({ where }: any) => users.find((u) => u.phone === where.phone) || null),
+      findUnique: jest.fn(async ({ where }: any) => users.find((u) => (where.phone ? u.phone === where.phone : u.id === where.id)) || null),
       updateMany: jest.fn(async ({ where, data }: any) => {
         const u = users.find((x) => x.id === where.id && (where.isActive === undefined || x.isActive === where.isActive));
         if (u) Object.assign(u, data);
@@ -21,8 +21,9 @@ function make(user: any, issueImpl?: () => Promise<string>) {
       return user?.id;
     }),
   };
-  const svc = new AuthService(prisma, {} as any, twoFactor, {} as any);
-  return { svc, users, twoFactor };
+  const telegram: any = { sendMessage: jest.fn(async () => true) };
+  const svc = new AuthService(prisma, {} as any, twoFactor, telegram);
+  return { svc, users, twoFactor, telegram };
 }
 
 const linked = { id: 'u1', phone: '+998900000001', isActive: true, telegramChatId: BigInt(7), passwordHash: 'x' };
@@ -55,6 +56,21 @@ describe('Parolni Telegram orqali tiklash', () => {
 
   it('to\'g\'ri kod bilan parol yangilanadi', async () => {
     const { svc, users } = make(linked);
+    await svc.resetPassword('chal-1', '123456', 'yangiParol1');
+    expect(await bcrypt.compare('yangiParol1', users[0].passwordHash)).toBe(true);
+  });
+
+  it('parol o\'zgargach egasiga Telegramda ogohlantirish yuboriladi', async () => {
+    const { svc, telegram } = make(linked);
+    await svc.resetPassword('chal-1', '123456', 'yangiParol1');
+    expect(telegram.sendMessage).toHaveBeenCalledTimes(1);
+    expect(telegram.sendMessage.mock.calls[0][0]).toBe(BigInt(7));
+    expect(String(telegram.sendMessage.mock.calls[0][1])).toContain('parolingiz o\'zgartirildi');
+  });
+
+  it('ogohlantirish yuborilmasa ham parol yangilanadi', async () => {
+    const { svc, users, telegram } = make(linked);
+    telegram.sendMessage.mockRejectedValueOnce(new Error('tg down'));
     await svc.resetPassword('chal-1', '123456', 'yangiParol1');
     expect(await bcrypt.compare('yangiParol1', users[0].passwordHash)).toBe(true);
   });
