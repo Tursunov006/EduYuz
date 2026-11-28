@@ -8,7 +8,7 @@ const CODE_TTL_MS = 5 * 60 * 1000;
 const RESEND_GAP_MS = 30 * 1000;
 const MAX_ATTEMPTS = 5;
 
-export type ChallengePurpose = 'login' | 'enable';
+export type ChallengePurpose = 'login' | 'enable' | 'reset';
 
 // Bir martalik kod (OTP): 6 xonali, 5 daqiqa amal qiladi, 5 marta urinish mumkin, Telegram orqali yuboriladi.
 @Injectable()
@@ -39,10 +39,12 @@ export class TwoFactorService {
     });
     await this.prisma.loginChallenge.update({ where: { id: row.id }, data: { codeHash: this.hash(row.id, code) } });
 
-    const text =
-      purpose === 'login'
-        ? `🔐 <b>EduYuz kirish kodi:</b> <code>${code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang. Agar siz kirmayotgan bo'lsangiz, parolingizni almashtiring.`
-        : `🔐 <b>EduYuz: 2 bosqichli kirishni yoqish kodi:</b> <code>${code}</code>\n\nKod 5 daqiqa amal qiladi.`;
+    const texts: Record<ChallengePurpose, string> = {
+      login: `🔐 <b>EduYuz kirish kodi:</b> <code>${code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang. Agar siz kirmayotgan bo'lsangiz, parolingizni almashtiring.`,
+      enable: `🔐 <b>EduYuz: 2 bosqichli kirishni yoqish kodi:</b> <code>${code}</code>\n\nKod 5 daqiqa amal qiladi.`,
+      reset: `🔑 <b>EduYuz: parolni tiklash kodi:</b> <code>${code}</code>\n\nKod 5 daqiqa amal qiladi. Uni hech kimga bermang. Agar parolni tiklashni siz so'ramagan bo'lsangiz, bu xabarni e'tiborsiz qoldiring.`,
+    };
+    const text = texts[purpose];
     const sent = await this.telegram.sendMessage(chatId, text);
     if (!sent) {
       await this.prisma.loginChallenge.delete({ where: { id: row.id } }).catch(() => {});

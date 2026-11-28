@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowLeft, KeyRound } from 'lucide-react';
 import OtpInput from '@/components/OtpInput';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
@@ -23,6 +23,12 @@ export default function LoginPage() {
   // 2 bosqichli kirish: parol to'g'ri bo'lsa kod Telegramga yuboriladi va shu qadam chiqadi
   const [otp, setOtp] = useState<{ challengeId: string; redirect: string } | null>(null);
   const [otpCode, setOtpCode] = useState('');
+  // Parolni unutdim: telefon raqam -> Telegramga kelgan kod + yangi parol
+  const [mode, setMode] = useState<'login' | 'forgot'>('login');
+  const [reset, setReset] = useState<{ challengeId: string } | null>(null);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [notice, setNotice] = useState('');
   const widgetBox = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | undefined>(undefined);
 
@@ -150,6 +156,73 @@ export default function LoginPage() {
     }
   }
 
+  // Parolni unutgan xodim: Telegram botga tiklash kodi yuboriladi
+  async function handleForgot(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    setError('');
+    setNotice('');
+    const phoneCheck = checkPhone(login);
+    if (!phoneCheck.phone) {
+      setError(phoneCheck.error || 'Telefon raqamingizni kiriting (+998 bilan)');
+      return;
+    }
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError('Iltimos, "Men robot emasman" tekshiruvidan o‘ting');
+      return;
+    }
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
+      const res = await fetch(`${apiUrl}/auth/password/forgot`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phoneCheck.phone, ...(TURNSTILE_SITE_KEY ? { turnstileToken } : {}) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'So‘rov yuborilmadi, qayta urinib ko‘ring');
+      setResetCode('');
+      setNewPassword('');
+      setReset({ challengeId: data.challengeId });
+    } catch (err: any) {
+      setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
+    } finally {
+      resetTurnstile();
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!reset || resetCode.length !== 6) return;
+    if (newPassword.length < 6) {
+      setError('Yangi parol kamida 6 belgidan iborat bo‘lishi kerak');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
+      const res = await fetch(`${apiUrl}/auth/password/reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeId: reset.challengeId, code: resetCode, newPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(Array.isArray(data.message) ? data.message[0] : data.message || 'Kod noto‘g‘ri yoki muddati tugagan');
+      setReset(null);
+      setMode('login');
+      setPassword('');
+      setNewPassword('');
+      setResetCode('');
+      setNotice('Parol yangilandi. Yangi parol bilan kiring.');
+    } catch (err: any) {
+      setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
+      setResetCode('');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   // 2-bosqich: Telegramga kelgan kodni tasdiqlash
   async function handleVerifyCode(e?: React.FormEvent) {
     if (e) e.preventDefault();
@@ -208,7 +281,52 @@ export default function LoginPage() {
           </div>
         )}
 
-        {otp ? (
+        {notice && (
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-medium text-center">
+            {notice}
+          </div>
+        )}
+
+        {reset && (
+          <form onSubmit={handleResetPassword} className="space-y-5">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <KeyRound size={22} />
+              </div>
+              <p className="text-sm text-slate-600">
+                Agar raqam Telegram botga ulangan bo‘lsa, <strong className="text-slate-900">tiklash kodi</strong> yuborildi. Kodni va yangi parolni kiriting.
+              </p>
+            </div>
+            <OtpInput value={resetCode} onChange={(v) => { setResetCode(v); setError(''); }} disabled={loading} autoFocus />
+            <div className="relative group">
+              <Lock className="absolute left-3.5 top-3 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={18} />
+              <input
+                type="password"
+                autoComplete="new-password"
+                value={newPassword}
+                onChange={(e) => { setNewPassword(e.target.value); setError(''); }}
+                className="w-full bg-white/80 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 transition focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15"
+                placeholder="Yangi parol (kamida 6 belgi)"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={loading || resetCode.length !== 6 || newPassword.length < 6}
+              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
+            >
+              {loading ? 'Saqlanmoqda...' : 'Parolni yangilash'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setReset(null); setResetCode(''); setNewPassword(''); setError(''); }}
+              className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition"
+            >
+              <ArrowLeft size={14} /> Orqaga
+            </button>
+          </form>
+        )}
+
+        {otp && !reset && (
           <form onSubmit={handleVerifyCode} className="space-y-5">
             <div className="text-center space-y-2">
               <div className="mx-auto w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
@@ -234,8 +352,11 @@ export default function LoginPage() {
               <ArrowLeft size={14} /> Orqaga
             </button>
           </form>
-        ) : (
-        <form onSubmit={handleLogin} className="space-y-4">
+        )}
+
+        {/* Forma har doim o'rnatilgan turadi (Turnstile vidjeti yo'qolmasligi uchun), boshqa qadamlarda yashiriladi */}
+        <div className={otp || reset ? 'hidden' : ''}>
+        <form onSubmit={mode === 'forgot' ? handleForgot : handleLogin} className="space-y-4">
           {/* Login maydoni */}
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1.5">Login</label>
@@ -256,6 +377,7 @@ export default function LoginPage() {
           </div>
 
           {/* Parol maydoni */}
+          {mode === 'login' && (
           <div>
             <label className="block text-xs font-medium text-slate-600 mb-1.5">Parol</label>
             <div className="relative group">
@@ -278,7 +400,23 @@ export default function LoginPage() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            <div className="mt-2 text-right">
+              <button
+                type="button"
+                onClick={() => { setMode('forgot'); setError(''); setNotice(''); }}
+                className="text-xs font-medium text-indigo-600 hover:text-indigo-500 transition"
+              >
+                Parolni unutdingizmi?
+              </button>
+            </div>
           </div>
+          )}
+
+          {mode === 'forgot' && (
+            <p className="text-xs text-slate-500 -mt-1">
+              Telefon raqamingizni kiriting. Telegram botga ulangan bo‘lsangiz, parolni tiklash kodi shu bot orqali yuboriladi.
+            </p>
+          )}
 
           {TURNSTILE_SITE_KEY && <div ref={widgetBox} className="flex justify-center min-h-[65px]" />}
 
@@ -287,10 +425,19 @@ export default function LoginPage() {
             disabled={loading || (!!TURNSTILE_SITE_KEY && !turnstileToken)}
             className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 hover:shadow-indigo-600/40 hover:-translate-y-0.5 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
           >
-            {loading ? 'Tekshirilmoqda...' : 'Tizimga kirish'}
+            {loading ? 'Tekshirilmoqda...' : mode === 'forgot' ? 'Tiklash kodini yuborish' : 'Tizimga kirish'}
           </button>
+          {mode === 'forgot' && (
+            <button
+              type="button"
+              onClick={() => { setMode('login'); setError(''); }}
+              className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition"
+            >
+              <ArrowLeft size={14} /> Kirishga qaytish
+            </button>
+          )}
         </form>
-        )}
+        </div>
       </div>
     </div>
   );

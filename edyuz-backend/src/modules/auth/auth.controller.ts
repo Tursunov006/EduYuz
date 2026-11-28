@@ -7,6 +7,7 @@ import { TurnstileService } from './turnstile.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { DisableTwoFactorDto, VerifyCodeDto } from './dto/two-factor.dto';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/password-reset.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -42,6 +43,22 @@ export class AuthController {
   @Post('login/verify')
   loginVerify(@Body() dto: VerifyCodeDto) {
     return this.authService.verifyLogin(dto.challengeId, dto.code);
+  }
+
+  // Parolni unutgan xodim: Telegram botga tiklash kodi yuboriladi
+  @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Post('password/forgot')
+  async forgotPassword(@Body() dto: ForgotPasswordDto, @Req() req: Request) {
+    await this.turnstile.verify(dto.turnstileToken, req.ip);
+    return this.authService.forgotPassword(dto.phone);
+  }
+
+  @Public()
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
+  @Post('password/reset')
+  resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.challengeId, dto.code, dto.newPassword);
   }
 
   // --- Xodimning o'z 2 bosqichli kirish sozlamalari ---
