@@ -2,54 +2,46 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-// Kun / tun / shisha rejimi. Tanlov brauzerda saqlanadi va <html> ga klasslar qo'yiladi:
-// tun = "dark", shisha = "dark glass" (qorong'i asosda shaffof kartalar).
+// Kun / tun rejimi. Tanlov brauzerda saqlanadi va <html> ga "dark" klassi qo'yiladi.
 // Sahifa ochilishida miltillamasligi uchun boshlang'ich klassni layout.tsx dagi skript qo'yadi.
-export type Theme = 'light' | 'dark' | 'glass';
-const THEMES: Theme[] = ['light', 'dark', 'glass'];
+export type Theme = 'light' | 'dark';
 export const THEME_KEY = 'eduyuz_theme';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-  setTheme: (t: Theme) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {}, setTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {} });
 
 function apply(theme: Theme) {
-  const cl = document.documentElement.classList;
-  cl.toggle('dark', theme !== 'light');
-  cl.toggle('glass', theme === 'glass');
+  document.documentElement.classList.toggle('dark', theme === 'dark');
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('light');
 
   useEffect(() => {
     let saved: Theme = 'light';
     try {
-      const v = localStorage.getItem(THEME_KEY) as Theme | null;
-      if (v && THEMES.includes(v)) saved = v;
+      if (localStorage.getItem(THEME_KEY) === 'dark') saved = 'dark';
     } catch {}
-    setThemeState(saved);
+    setTheme(saved);
     apply(saved);
   }, []);
 
-  const setTheme = useCallback((next: Theme) => {
-    apply(next);
-    setThemeState(next);
-    try {
-      localStorage.setItem(THEME_KEY, next);
-    } catch {}
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === 'dark' ? 'light' : 'dark';
+      apply(next);
+      try {
+        localStorage.setItem(THEME_KEY, next);
+      } catch {}
+      return next;
+    });
   }, []);
 
-  // Kun -> tun -> shisha -> kun
-  const toggleTheme = useCallback(() => {
-    setTheme(THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length]);
-  }, [theme, setTheme]);
-
-  return <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

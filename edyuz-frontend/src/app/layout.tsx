@@ -46,7 +46,7 @@ export default function RootLayout({
         {/* Tungi rejimni sahifa chizilishidan oldin qo'yish (miltillamasligi uchun) */}
         <script
           dangerouslySetInnerHTML={{
-            __html: "try{var t=localStorage.getItem('eduyuz_theme');if(t==='dark'||t==='glass')document.documentElement.classList.add('dark');if(t==='glass')document.documentElement.classList.add('glass')}catch(e){}",
+            __html: "try{if(localStorage.getItem('eduyuz_theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}",
           }}
         />
       </head>
