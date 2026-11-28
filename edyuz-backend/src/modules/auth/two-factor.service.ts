@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { createHash, randomInt, timingSafeEqual } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { TelegramService } from '../telegram/telegram.service';
+import { StaffBotService } from '../telegram/staff-bot.service';
 import { resolveJwtSecret } from '../../common/jwt-secret';
 
 const CODE_TTL_MS = 5 * 60 * 1000;
@@ -17,7 +17,7 @@ export class TwoFactorService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly telegram: TelegramService,
+    private readonly telegram: StaffBotService,
   ) {}
 
   private hash(challengeId: string, code: string): string {
