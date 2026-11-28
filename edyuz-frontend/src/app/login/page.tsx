@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Lock, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, Eye, EyeOff, ShieldCheck, ArrowLeft } from 'lucide-react';
+import OtpInput from '@/components/OtpInput';
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '';
 
@@ -19,6 +20,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
+  // 2 bosqichli kirish: parol to'g'ri bo'lsa kod Telegramga yuboriladi va shu qadam chiqadi
+  const [otp, setOtp] = useState<{ challengeId: string; redirect: string } | null>(null);
+  const [otpCode, setOtpCode] = useState('');
   const widgetBox = useRef<HTMLDivElement>(null);
   const widgetId = useRef<string | undefined>(undefined);
 
@@ -127,14 +131,46 @@ export default function LoginPage() {
         throw new Error(data.message || data.error || 'Login yoki parol noto‘g‘ri');
       }
 
+      const redirect = isSuperAdminLogin ? '/superadmin' : '/';
+      if (data.twoFactorRequired && data.challengeId) {
+        setOtpCode('');
+        setOtp({ challengeId: data.challengeId, redirect });
+        return;
+      }
       localStorage.setItem('token', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
       
       // Agar "superadmin" yoki "dasturchi" deb kirilgan bo'lsa -> Dasturchi Paneliga (/superadmin), aks holda Boshqaruv Paneliga (/)
-      window.location.href = isSuperAdminLogin ? '/superadmin' : '/';
+      window.location.href = redirect;
     } catch (err: any) {
       setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
       resetTurnstile();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 2-bosqich: Telegramga kelgan kodni tasdiqlash
+  async function handleVerifyCode(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    if (!otp || otpCode.length !== 6) return;
+    setError('');
+    setLoading(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://eduyuz-api.vercel.app/api/v1';
+      const res = await fetch(`${apiUrl}/auth/login/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ challengeId: otp.challengeId, code: otpCode }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Kod noto‘g‘ri yoki muddati tugagan');
+      localStorage.setItem('token', data.accessToken);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      window.location.href = otp.redirect;
+    } catch (err: any) {
+      setError(err.message || 'Serverga ulanishda xatolik yuz berdi');
+      setOtpCode('');
     } finally {
       setLoading(false);
     }
@@ -172,6 +208,33 @@ export default function LoginPage() {
           </div>
         )}
 
+        {otp ? (
+          <form onSubmit={handleVerifyCode} className="space-y-5">
+            <div className="text-center space-y-2">
+              <div className="mx-auto w-12 h-12 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                <ShieldCheck size={22} />
+              </div>
+              <p className="text-sm text-slate-600">
+                Tasdiqlash kodi <strong className="text-slate-900">Telegram botga</strong> yuborildi. 6 xonali kodni kiriting.
+              </p>
+            </div>
+            <OtpInput value={otpCode} onChange={(v) => { setOtpCode(v); setError(''); }} disabled={loading} autoFocus />
+            <button
+              type="submit"
+              disabled={loading || otpCode.length !== 6}
+              className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center text-sm active:scale-95 cursor-pointer"
+            >
+              {loading ? 'Tekshirilmoqda...' : 'Tasdiqlash'}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOtp(null); setOtpCode(''); setError(''); resetTurnstile(); }}
+              className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 transition"
+            >
+              <ArrowLeft size={14} /> Orqaga
+            </button>
+          </form>
+        ) : (
         <form onSubmit={handleLogin} className="space-y-4">
           {/* Login maydoni */}
           <div>
@@ -227,6 +290,7 @@ export default function LoginPage() {
             {loading ? 'Tekshirilmoqda...' : 'Tizimga kirish'}
           </button>
         </form>
+        )}
       </div>
     </div>
   );
