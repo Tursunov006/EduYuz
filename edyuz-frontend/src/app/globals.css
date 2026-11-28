@@ -64,6 +64,126 @@ html.dark .hover\:text-indigo-600:hover {
   color: #a5b4fc;
 }
 
+/* SHISHA rejimi (html.dark.glass): qorong'i asosda teal-ko'k gradient fon, shaffof xiralashgan kartalar.
+   Tun rejimidagi ranglar ustiga qo'yiladi, shuning uchun faqat farqlari yoziladi. */
+html.glass {
+  --background: #04141c;
+  --surface: rgb(255 255 255 / 0.06);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-blur: blur(18px) saturate(150%);
+
+  --color-slate-50: rgb(255 255 255 / 0.05);
+  --color-slate-100: rgb(255 255 255 / 0.08);
+  --color-slate-200: rgb(255 255 255 / 0.13);
+  --color-slate-300: rgb(255 255 255 / 0.2);
+}
+html.glass body {
+  background-color: #04141c;
+  background-image:
+    radial-gradient(900px 600px at 8% 0%, rgb(20 184 166 / 0.32), transparent 60%),
+    radial-gradient(800px 600px at 100% 12%, rgb(37 99 235 / 0.30), transparent 60%),
+    radial-gradient(900px 700px at 55% 105%, rgb(6 182 212 / 0.22), transparent 60%),
+    linear-gradient(160deg, #052230 0%, #06293a 45%, #08334a 100%);
+  background-attachment: fixed;
+}
+/* Sahifaning asosiy foni shaffof bo'lsin, gradient ko'rinib tursin */
+html.glass .bg-background,
+html.glass .bg-slate-50 {
+  background-color: transparent;
+}
+/* Kartalar, panellar, oynalar: shaffof + xiralashgan */
+html.glass .bg-white,
+html.glass [class*="bg-white/"] {
+  background-color: var(--surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-border);
+  box-shadow: 0 8px 30px -12px rgb(0 0 0 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+html.glass aside.bg-white {
+  background-color: rgb(4 22 32 / 0.55);
+  border-right: 1px solid var(--glass-border);
+  border-radius: 0;
+  box-shadow: none;
+}
+html.glass .shadow-sm,
+html.glass .shadow,
+html.glass .shadow-md,
+html.glass .shadow-lg,
+html.glass .shadow-xl {
+  --tw-shadow-color: rgb(0 0 0 / 0.5);
+}
+html.glass .hover\:bg-white:hover {
+  background-color: rgb(255 255 255 / 0.1);
+}
+/* Maydonlar */
+html.glass input:where(:not([type="checkbox"], [type="radio"], .bg-transparent)),
+html.glass select,
+html.glass textarea {
+  background-color: rgb(255 255 255 / 0.06);
+  border-color: var(--glass-border);
+  color: #f1f5f9;
+}
+html.glass input::placeholder,
+html.glass textarea::placeholder {
+  color: rgb(203 213 225 / 0.5);
+}
+html.glass input:focus,
+html.glass select:focus,
+html.glass textarea:focus {
+  border-color: rgb(45 212 191 / 0.7);
+  box-shadow: 0 0 0 3px rgb(45 212 191 / 0.18);
+}
+/* Asosiy rang: indigo o'rniga yorqin teal-ko'k aksent */
+html.glass .bg-indigo-600 {
+  background-image: linear-gradient(135deg, #0ea5a4, #2563eb);
+  background-color: #0ea5a4;
+}
+html.glass .bg-indigo-600:hover,
+html.glass .hover\:bg-indigo-700:hover {
+  background-image: linear-gradient(135deg, #14b8a6, #3b82f6);
+}
+html.glass .text-indigo-600,
+html.glass .text-indigo-700 {
+  color: #5eead4;
+}
+html.glass .hover\:text-indigo-600:hover {
+  color: #5eead4;
+}
+html.glass .bg-indigo-50 {
+  background-color: rgb(45 212 191 / 0.14);
+}
+/* To'q rangli yozuvlar (belgi/yorliqlar) qorong'i fonda ham o'qilsin */
+html.glass .text-amber-600,
+html.glass .text-amber-700,
+html.glass .text-orange-600,
+html.glass .text-orange-700 {
+  color: #fbbf24;
+}
+html.glass .text-purple-600,
+html.glass .text-purple-700,
+html.glass .text-violet-600,
+html.glass .text-violet-700 {
+  color: #c4b5fd;
+}
+html.glass .text-blue-600,
+html.glass .text-blue-700,
+html.glass .text-sky-600,
+html.glass .text-sky-700 {
+  color: #7dd3fc;
+}
+html.glass .text-emerald-600,
+html.glass .text-emerald-700,
+html.glass .text-green-600,
+html.glass .text-green-700 {
+  color: #34d399;
+}
+/* Skrol chizig'i */
+html.glass ::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.2);
+  border-radius: 8px;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
