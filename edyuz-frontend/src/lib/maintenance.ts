@@ -3,5 +3,5 @@
 // Qaytarish uchun: `on` ni false qilib, qayta deploy qiling.
 export const MAINTENANCE = {
   on: true,
-  until: '11:50', // Toshkent vaqti
+  until: '22:00', // Toshkent vaqti
 };
