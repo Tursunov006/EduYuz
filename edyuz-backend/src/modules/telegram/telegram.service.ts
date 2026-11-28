@@ -3,6 +3,7 @@ import { createHash, timingSafeEqual } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiService } from '../ai/ai.service';
+import { parseStaffLinkToken } from '../auth/staff-link.util';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -549,6 +550,23 @@ Iltimos, o'quv markazi kassasiga yoki Click/Payme orqali to'lovni amalga oshiris
         chatId,
         `✅ <b>Murojaatingiz to‘g‘ridan-to‘g‘ri Markaz Rahbariyatiga yetkazildi!</b>\n\n📝 <i>"${text}"</i>\n\nE’tiboringiz va fikringiz uchun rahmat. Ma’muriyatimiz tez orada sizga javob qaytaradi! 🙏`,
         quickReplyKeyboard,
+      );
+      return;
+    }
+
+    // 2.5. /start staff_<token>: xodimni (2 bosqichli kirish uchun) Telegramga ulash
+    if (text.startsWith('/start staff_')) {
+      const staffId = parseStaffLinkToken(text.replace('/start staff_', ''));
+      if (!staffId) {
+        await this.sendMessage(chatId, `⚠️ Havola eskirgan yoki noto'g'ri. EduYuzda «Xavfsizlik» bo'limidan yangi havola oling.`);
+        return;
+      }
+      const upd = await this.prisma.user.updateMany({ where: { id: staffId, isActive: true }, data: { telegramChatId: BigInt(chatId) } });
+      await this.sendMessage(
+        chatId,
+        upd.count > 0
+          ? `✅ <b>Xodim hisobingiz Telegramga ulandi.</b>\nEndi EduYuzda «Xavfsizlik» bo'limida 2 bosqichli kirishni yoqishingiz mumkin.`
+          : `⚠️ Xodim topilmadi.`,
       );
       return;
     }

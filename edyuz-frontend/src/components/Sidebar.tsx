@@ -1,11 +1,12 @@
 'use client';
 
 import ZoomControl from '@/components/ZoomControl';
+import SecurityModal from '@/components/SecurityModal';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Archive, LogOut, X } from 'lucide-react';
+import { Archive, LogOut, ShieldCheck, X } from 'lucide-react';
 import { useSidebar } from '@/lib/context/SidebarContext';
 
 // Figma: "EduYuz Dashboard v2" — yon menyu
@@ -47,6 +48,7 @@ function Brand() {
 export default function Sidebar() {
   const pathname = usePathname();
   const { isOpen, close } = useSidebar();
+  const [securityOpen, setSecurityOpen] = useState(false);
   const [user, setUser] = useState<{ fullName?: string; role?: string; centerName?: string; centerLogo?: string | null }>({});
 
   useEffect(() => {
@@ -152,6 +154,14 @@ export default function Sidebar() {
           <p className="text-xs text-slate-500">{ROLE_LABELS[user.role || ''] || 'Boshqaruvchi'}</p>
         </div>
         <button
+          onClick={() => setSecurityOpen(true)}
+          title="Xavfsizlik (2 bosqichli kirish)"
+          aria-label="Xavfsizlik"
+          className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition"
+        >
+          <ShieldCheck size={18} />
+        </button>
+        <button
           onClick={logout}
           title="Chiqish"
           aria-label="Chiqish"
@@ -165,6 +175,7 @@ export default function Sidebar() {
 
   return (
     <>
+      <SecurityModal open={securityOpen} onClose={() => setSecurityOpen(false)} />
       {/* Kompyuter */}
       <aside
         className="hidden md:flex w-[248px] bg-white flex-col h-screen sticky top-0 shrink-0"
