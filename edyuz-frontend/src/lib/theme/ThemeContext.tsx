@@ -2,46 +2,54 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
-// Kun / tun rejimi. Tanlov brauzerda saqlanadi va <html> ga "dark" klassi qo'yiladi.
+// Kun / tun / shisha rejimi. Tanlov brauzerda saqlanadi va <html> ga klasslar qo'yiladi:
+// tun = "dark", shisha = "dark glass" (qorong'i asosda shaffof kartalar).
 // Sahifa ochilishida miltillamasligi uchun boshlang'ich klassni layout.tsx dagi skript qo'yadi.
-export type Theme = 'light' | 'dark';
+export type Theme = 'light' | 'dark' | 'glass';
+const THEMES: Theme[] = ['light', 'dark', 'glass'];
 export const THEME_KEY = 'eduyuz_theme';
 
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  setTheme: (t: Theme) => void;
 }
 
-const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {} });
+const ThemeContext = createContext<ThemeContextType>({ theme: 'light', toggleTheme: () => {}, setTheme: () => {} });
 
 function apply(theme: Theme) {
-  document.documentElement.classList.toggle('dark', theme === 'dark');
+  const cl = document.documentElement.classList;
+  cl.toggle('dark', theme !== 'light');
+  cl.toggle('glass', theme === 'glass');
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
     let saved: Theme = 'light';
     try {
-      if (localStorage.getItem(THEME_KEY) === 'dark') saved = 'dark';
+      const v = localStorage.getItem(THEME_KEY) as Theme | null;
+      if (v && THEMES.includes(v)) saved = v;
     } catch {}
-    setTheme(saved);
+    setThemeState(saved);
     apply(saved);
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next: Theme = prev === 'dark' ? 'light' : 'dark';
-      apply(next);
-      try {
-        localStorage.setItem(THEME_KEY, next);
-      } catch {}
-      return next;
-    });
+  const setTheme = useCallback((next: Theme) => {
+    apply(next);
+    setThemeState(next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {}
   }, []);
 
-  return <ThemeContext.Provider value={{ theme, toggleTheme }}>{children}</ThemeContext.Provider>;
+  // Kun -> tun -> shisha -> kun
+  const toggleTheme = useCallback(() => {
+    setTheme(THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length]);
+  }, [theme, setTheme]);
+
+  return <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

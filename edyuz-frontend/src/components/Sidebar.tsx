@@ -2,6 +2,7 @@
 
 import ZoomControl from '@/components/ZoomControl';
 import SecurityModal from '@/components/SecurityModal';
+import ThemeToggle from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api';
 import Link from 'next/link';
@@ -135,9 +136,12 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* Masshtab (faqat kompyuterda) */}
-      <div className="hidden md:block px-5 pb-3">
-        <ZoomControl className="w-full justify-between" />
+      {/* Masshtab (faqat kompyuterda) va mavzu (kun / tun / shisha) */}
+      <div className="px-5 pb-3 flex items-center gap-2">
+        <div className="hidden md:block flex-1 min-w-0">
+          <ZoomControl className="w-full justify-between" />
+        </div>
+        <ThemeToggle className="ml-auto" />
       </div>
 
       {/* Foydalanuvchi va chiqish */}
