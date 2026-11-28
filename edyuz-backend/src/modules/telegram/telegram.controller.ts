@@ -3,6 +3,7 @@ import { SkipThrottle } from '@nestjs/throttler';
 import { Public } from '../../common/decorators/public.decorator';
 import { RoleType } from '@prisma/client';
 import { TelegramService } from './telegram.service';
+import { StaffBotService } from './staff-bot.service';
 import { Roles } from '../../common/decorators/roles.decorator';
 
 // Avval ikkala endpoint ham login'siz ochiq edi: istalgan odam bot tokenini o'z botiga
@@ -10,7 +11,10 @@ import { Roles } from '../../common/decorators/roles.decorator';
 // bot nomidan istalgan chatga xabar yuborishi mumkin edi.
 @Controller('telegram')
 export class TelegramController {
-  constructor(private readonly telegramService: TelegramService) {}
+  constructor(
+    private readonly telegramService: TelegramService,
+    private readonly staffBot: StaffBotService,
+  ) {}
 
   // Telegram shu manzilga yangi xabarlarni yuboradi (webhook).
   // Faqat Telegram biladigan maxfiy kalit (X-Telegram-Bot-Api-Secret-Token) bilan qabul qilinadi.
@@ -29,6 +33,17 @@ export class TelegramController {
       throw new UnauthorizedException();
     }
     await this.telegramService.handleWebhookUpdate(update);
+    return { ok: true };
+  }
+
+  // Xodimlar boti webhook'i (alohida bot, o'z maxfiy kaliti bilan)
+  @Public()
+  @SkipThrottle()
+  @HttpCode(200)
+  @Post('staff-webhook')
+  async staffWebhook(@Headers('x-telegram-bot-api-secret-token') secret: string, @Body() update: any) {
+    if (!this.staffBot.isValidWebhookSecret(secret)) throw new UnauthorizedException();
+    await this.staffBot.handleWebhookUpdate(update);
     return { ok: true };
   }
 

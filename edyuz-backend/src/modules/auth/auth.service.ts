@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { TwoFactorService } from './two-factor.service';
-import { TelegramService } from '../telegram/telegram.service';
+import { StaffBotService } from '../telegram/staff-bot.service';
 import { makeStaffLinkToken } from './staff-link.util';
 import { randomUUID } from 'crypto';
 import { LoginDto } from './dto/login.dto';
@@ -26,7 +26,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private twoFactor: TwoFactorService,
-    private telegram: TelegramService,
+    private telegram: StaffBotService,
   ) {}
 
   async register(dto: RegisterDto, actor: AuthUser) {
