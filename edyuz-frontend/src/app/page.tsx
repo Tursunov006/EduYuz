@@ -7,6 +7,9 @@ import { api, apiFetch } from '@/lib/api';
 import ThemeToggle from '@/components/ThemeToggle';
 import AnketaLinkButton from '@/components/AnketaLinkButton';
 import PlatformNewsFeed from '@/components/PlatformNewsFeed';
+import CountUp from '@/components/glass/CountUp';
+import DonutChart from '@/components/glass/DonutChart';
+import { useTheme } from '@/lib/theme/ThemeContext';
 
 // Figma: "EduYuz Dashboard v2"
 const MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
@@ -34,7 +37,7 @@ const minutes = (t: string) => {
 };
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`bg-white border border-slate-200 rounded-2xl ${className}`}>{children}</div>;
+  return <div className={`glass-card bg-white border border-slate-200 rounded-2xl ${className}`}>{children}</div>;
 }
 function Pill({ children, tone }: { children: React.ReactNode; tone: 'indigo' | 'green' | 'violet' | 'rose' }) {
   const tones = {
@@ -55,6 +58,7 @@ function Empty({ title, hint }: { title: string; hint: string }) {
 }
 
 export default function DashboardPage() {
+  const glass = useTheme().theme === 'glass';
   const [students, setStudents] = useState<any[]>([]);
   const [groups, setGroups] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -130,6 +134,30 @@ export default function DashboardPage() {
       .sort((a, b) => a.start - b.start);
   }, [groups, now]);
 
+  // Shisha mavzusidagi qo'shimcha diagrammalar (faqat haqiqiy ma'lumot): joriy oy tushumi usullar bo'yicha va guruhlar to'ldirilishi
+  const methodSlices = useMemo(() => {
+    const colors = ['#2dd4bf', '#3b82f6', '#a78bfa', '#fbbf24', '#fb7185'];
+    const sums: Record<string, number> = {};
+    income.forEach((p) => {
+      const d = new Date(p.paidAt);
+      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) {
+        const k = METHOD_LABELS[p.paymentMethod] || String(p.paymentMethod || 'Boshqa');
+        sums[k] = (sums[k] || 0) + Number(p.amount);
+      }
+    });
+    return Object.entries(sums)
+      .sort((a, b) => b[1] - a[1])
+      .map(([label, value], i) => ({ label, value, color: colors[i % colors.length] }));
+  }, [income, now]);
+  const groupFill = useMemo(
+    () =>
+      [...groups]
+        .map((g) => ({ id: g.id, name: g.name, count: g._count?.students || 0 }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5),
+    [groups],
+  );
+
   function editTarget() {
     const v = prompt('Oylik kassa rejasini kiriting (so‘mda):', target ? String(target) : '');
     if (v === null) return;
@@ -158,7 +186,7 @@ export default function DashboardPage() {
   const progress = target > 0 ? Math.round((month.cur / target) * 100) : null;
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto">
+    <div className="glass-rise space-y-6 max-w-[1400px] mx-auto">
       <PlatformNewsFeed />
       {/* Sarlavha */}
       <div className="flex items-center justify-between gap-4">
@@ -184,7 +212,7 @@ export default function DashboardPage() {
           <Card className="h-full px-5 py-[18px] space-y-1.5 hover:border-indigo-300 transition">
             <p className="text-[13px] font-medium text-slate-500">Oylik kassa rejasi</p>
             <p className="flex items-baseline gap-1.5">
-              <span className="text-[30px] font-bold text-slate-900 leading-tight">{fmt(target)}</span>
+              <span className="text-[30px] font-bold text-slate-900 leading-tight"><CountUp value={target} animate={glass} format={fmt} /></span>
               <span className="text-[13px] text-slate-500">so‘m</span>
             </p>
             {target > 0 ? <Pill tone="indigo">Reja belgilangan</Pill> : <Pill tone="indigo">Rejani belgilash</Pill>}
@@ -194,7 +222,7 @@ export default function DashboardPage() {
         <Card className="px-5 py-[18px] space-y-1.5">
           <p className="text-[13px] font-medium text-slate-500">Joriy oy tushumi</p>
           <p className="flex items-baseline gap-1.5">
-            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : fmt(month.cur)}</span>
+            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : <CountUp value={month.cur} animate={glass} format={fmt} />}</span>
             <span className="text-[13px] text-slate-500">so‘m</span>
           </p>
           {month.cur === 0 ? (
@@ -211,7 +239,7 @@ export default function DashboardPage() {
         <Card className="px-5 py-[18px] space-y-1.5">
           <p className="text-[13px] font-medium text-slate-500">Faol o‘quvchilar</p>
           <p className="flex items-baseline gap-1.5">
-            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : activeStudents.length}</span>
+            <span className="text-[30px] font-bold text-slate-900 leading-tight">{loading ? '…' : <CountUp value={activeStudents.length} animate={glass} format={fmt} />}</span>
             <span className="text-[13px] text-slate-500">nafar</span>
           </p>
           {studentsInGroups > 0 ? (
@@ -233,14 +261,14 @@ export default function DashboardPage() {
             <span className="inline-flex items-center h-[26px] px-2.5 rounded-full bg-indigo-50 text-xs font-medium text-indigo-600">Tushum</span>
           </div>
           <div className="mt-4 h-[220px] flex items-end gap-3.5">
-            {week.map((d) => {
+            {week.map((d, i) => {
               const h = weekMax > 0 ? Math.max(6, Math.round((d.value / weekMax) * 170)) : 6;
               return (
                 <div key={d.key} className="flex-1 flex flex-col items-center justify-end gap-2 h-full">
                   {d.value > 0 && <span className="text-[11px] font-medium text-slate-500">{fmt(d.value / 1000)} ming</span>}
                   <div
-                    className={`w-full rounded ${d.value > 0 && d.value === weekMax ? 'bg-indigo-600' : 'bg-indigo-200'}`}
-                    style={{ height: h }}
+                    className={`glass-bar w-full rounded ${d.value > 0 && d.value === weekMax ? 'bg-indigo-600' : 'bg-indigo-200'}`}
+                    style={{ height: h, animationDelay: `${i * 70}ms` }}
                     title={`${fmt(d.value)} so‘m`}
                   />
                   <span className="text-xs text-slate-500">{d.label}</span>
@@ -276,6 +304,49 @@ export default function DashboardPage() {
           </div>
         </Card>
       </div>
+
+      {/* Shisha mavzusi: tushum usullari (donut) va guruhlar to'ldirilishi */}
+      {glass && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Card className="px-6 py-[22px]">
+            <h2 className="text-base font-semibold text-slate-900">Tushum usullari bo‘yicha</h2>
+            <p className="text-xs text-slate-500 mt-0.5 mb-4">Joriy oy, to‘lov turiga ko‘ra</p>
+            {methodSlices.length === 0 ? (
+              <p className="text-sm text-slate-500 py-8 text-center">Bu oy hali to‘lov qabul qilinmagan</p>
+            ) : (
+              <DonutChart
+                slices={methodSlices}
+                centerTop={fmt(methodSlices.reduce((s, x) => s + x.value, 0) / 1000) + ' ming'}
+                centerBottom="jami tushum"
+              />
+            )}
+          </Card>
+          <Card className="px-6 py-[22px]">
+            <h2 className="text-base font-semibold text-slate-900">Guruhlar to‘ldirilishi</h2>
+            <p className="text-xs text-slate-500 mt-0.5 mb-4">Eng ko‘p o‘quvchili guruhlar (sig‘im 15 nafar)</p>
+            {groupFill.length === 0 ? (
+              <p className="text-sm text-slate-500 py-8 text-center">Hali guruh yo‘q</p>
+            ) : (
+              <ul className="space-y-3.5">
+                {groupFill.map((g, i) => {
+                  const pct = Math.min(100, Math.round((g.count / 15) * 100));
+                  return (
+                    <li key={g.id}>
+                      <div className="flex items-center justify-between text-sm mb-1.5">
+                        <span className="text-slate-700 truncate pr-3">{g.name}</span>
+                        <span className="text-slate-500 shrink-0">{g.count}/15</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="glass-fill h-full rounded-full bg-indigo-600" style={{ width: `${Math.max(pct, 3)}%`, animationDelay: `${i * 90}ms` }} />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Card>
+        </div>
+      )}
 
       {/* Bugungi darslar, qarzdorlar, so'nggi to'lovlar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

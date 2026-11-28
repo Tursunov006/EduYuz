@@ -178,6 +178,72 @@ html.glass .text-green-600,
 html.glass .text-green-700 {
   color: #34d399;
 }
+/* Harakat: bloklar ketma-ket pastdan yumshoq chiqadi, kartalar ustiga olib borilganda ko'tariladi,
+   ustunlar va to'lish chiziqlari o'sib chiqadi (foydalanuvchi "harakatni kamaytirish" ni tanlagan bo'lsa o'chadi). */
+@keyframes glass-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes glass-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes glass-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+html.glass .glass-rise > * {
+  animation: glass-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+html.glass .glass-rise > *:nth-child(2) { animation-delay: 70ms; }
+html.glass .glass-rise > *:nth-child(3) { animation-delay: 140ms; }
+html.glass .glass-rise > *:nth-child(4) { animation-delay: 210ms; }
+html.glass .glass-rise > *:nth-child(5) { animation-delay: 280ms; }
+html.glass .glass-rise > *:nth-child(6) { animation-delay: 350ms; }
+html.glass .glass-rise > *:nth-child(7) { animation-delay: 420ms; }
+html.glass .glass-bar {
+  transform-origin: bottom;
+  animation: glass-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  background-image: linear-gradient(180deg, #2dd4bf, #2563eb);
+}
+html.glass .glass-fill {
+  transform-origin: left;
+  animation: glass-fill 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  background-image: linear-gradient(90deg, #14b8a6, #3b82f6);
+}
+html.glass .glass-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+html.glass .glass-card:hover {
+  transform: translateY(-4px);
+  border-color: rgb(94 234 212 / 0.35);
+  box-shadow: 0 18px 40px -16px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(94 234 212 / 0.15), inset 0 1px 0 rgb(255 255 255 / 0.1);
+}
+@media (prefers-reduced-motion: reduce) {
+  html.glass .glass-rise > *,
+  html.glass .glass-bar,
+  html.glass .glass-fill {
+    animation: none;
+  }
+  html.glass .glass-card:hover {
+    transform: none;
+  }
+}
+
 /* Skrol chizig'i */
 html.glass ::-webkit-scrollbar-thumb {
   background: rgb(255 255 255 / 0.2);
